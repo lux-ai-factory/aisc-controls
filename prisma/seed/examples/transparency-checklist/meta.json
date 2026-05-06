@@ -1,0 +1,12 @@
+{
+  "title": "Transparency_Checklist",
+  "sourceName": "AESIA",
+  "controlTopic": "Transparency",
+  "description": "Source: https://aesia.digital.gob.es/en/guides",
+  "countryIds": [
+    "ES"
+  ],
+  "regulationIds": [
+    "ai-act"
+  ]
+}

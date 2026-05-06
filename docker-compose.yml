@@ -1,0 +1,37 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: vera-controls-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: vera
+      POSTGRES_PASSWORD: vera
+      POSTGRES_DB: vera
+    ports:
+      # Host port 5444 (non-default) so we don't fight any other Postgres a
+      # contributor might already run on 5432. The container side stays 5432.
+      - "5444:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vera -d vera"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  # Bundled LLMFactory — only needed for ingest. Browse-only users can leave
+  # this stopped. Start it explicitly with `npm run llm:up` (or
+  # `docker compose --profile llm up -d`).
+  llm_factory:
+    build: ./services/llm_factory
+    container_name: vera-controls-llm-factory
+    restart: unless-stopped
+    environment:
+      API_KEY_ANTHROPIC: ${API_KEY_ANTHROPIC:-}
+      API_KEY_MISTRAL: ${API_KEY_MISTRAL:-}
+    ports:
+      - "5001:5001"
+    profiles: ["llm"]
+
+volumes:
+  postgres-data:

@@ -1,0 +1,12 @@
+{
+  "title": "Data Governance_Checklist",
+  "sourceName": "AESIA",
+  "controlTopic": "Data Governance",
+  "description": "Source: https://aesia.digital.gob.es/en/guides",
+  "countryIds": [
+    "ES"
+  ],
+  "regulationIds": [
+    "ai-act"
+  ]
+}

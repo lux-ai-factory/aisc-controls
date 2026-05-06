@@ -1,0 +1,47 @@
+{
+  "name": "vera-controls",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "predev": "node scripts/setup-once.mjs",
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "setup": "rm -f node_modules/.cache/vera-controls/setup-done && node scripts/setup-once.mjs",
+    "db:up": "docker compose up -d db",
+    "db:down": "docker compose down",
+    "llm:up": "docker compose --profile llm up -d llm_factory",
+    "llm:down": "docker compose stop llm_factory",
+    "db:reset": "prisma migrate reset --force",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "db:studio": "prisma studio",
+    "db:seed": "prisma db seed",
+    "examples:export": "tsx prisma/seed/export.ts"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.22.0",
+    "exceljs": "^4.4.0",
+    "mammoth": "^1.8.0",
+    "next": "^15.5.15",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.9.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "prisma": "^5.22.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.6.3"
+  },
+  "overrides": {
+    "postcss": "^8.5.10"
+  }
+}

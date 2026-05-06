@@ -1,0 +1,140 @@
+[
+  {
+    "id": "ai-act",
+    "name": "AI Act",
+    "reference": "Regulation (EU) 2024/1689",
+    "kind": "regulation"
+  },
+  {
+    "id": "gdpr",
+    "name": "General Data Protection Regulation (GDPR)",
+    "reference": "Regulation (EU) 2016/679",
+    "kind": "regulation"
+  },
+  {
+    "id": "dora",
+    "name": "Digital Operational Resilience Act (DORA)",
+    "reference": "Regulation (EU) 2022/2554",
+    "kind": "regulation"
+  },
+  {
+    "id": "nis2",
+    "name": "NIS 2 Directive",
+    "reference": "Directive (EU) 2022/2555",
+    "kind": "directive"
+  },
+  {
+    "id": "cra",
+    "name": "Cyber Resilience Act",
+    "reference": "Regulation (EU) 2024/2847",
+    "kind": "regulation"
+  },
+  {
+    "id": "data-act",
+    "name": "Data Act",
+    "reference": "Regulation (EU) 2023/2854",
+    "kind": "regulation"
+  },
+  {
+    "id": "data-governance-act",
+    "name": "Data Governance Act",
+    "reference": "Regulation (EU) 2022/868",
+    "kind": "regulation"
+  },
+  {
+    "id": "dsa",
+    "name": "Digital Services Act",
+    "reference": "Regulation (EU) 2022/2065",
+    "kind": "regulation"
+  },
+  {
+    "id": "dma",
+    "name": "Digital Markets Act",
+    "reference": "Regulation (EU) 2022/1925",
+    "kind": "regulation"
+  },
+  {
+    "id": "eidas",
+    "name": "eIDAS Regulation",
+    "reference": "Regulation (EU) 910/2014",
+    "kind": "regulation"
+  },
+  {
+    "id": "eprivacy",
+    "name": "ePrivacy Directive",
+    "reference": "Directive 2002/58/EC",
+    "kind": "directive"
+  },
+  {
+    "id": "open-data-directive",
+    "name": "Open Data Directive",
+    "reference": "Directive (EU) 2019/1024",
+    "kind": "directive"
+  },
+  {
+    "id": "product-liability",
+    "name": "Product Liability Directive (revised)",
+    "reference": "Directive (EU) 2024/2853",
+    "kind": "directive"
+  },
+  {
+    "id": "iso-iec-42001",
+    "name": "ISO/IEC 42001 — AI Management Systems",
+    "reference": "ISO/IEC 42001:2023",
+    "kind": "standard"
+  },
+  {
+    "id": "iso-iec-23894",
+    "name": "ISO/IEC 23894 — AI Risk Management",
+    "reference": "ISO/IEC 23894:2023",
+    "kind": "standard"
+  },
+  {
+    "id": "iso-iec-5338",
+    "name": "ISO/IEC 5338 — AI System Lifecycle Processes",
+    "reference": "ISO/IEC 5338:2023",
+    "kind": "standard"
+  },
+  {
+    "id": "iso-iec-5259",
+    "name": "ISO/IEC 5259 — Data Quality for Analytics & ML",
+    "reference": "ISO/IEC 5259 series",
+    "kind": "standard"
+  },
+  {
+    "id": "iso-iec-27001",
+    "name": "ISO/IEC 27001 — Information Security Management",
+    "reference": "ISO/IEC 27001:2022",
+    "kind": "standard"
+  },
+  {
+    "id": "iso-iec-27002",
+    "name": "ISO/IEC 27002 — Information Security Controls",
+    "reference": "ISO/IEC 27002:2022",
+    "kind": "standard"
+  },
+  {
+    "id": "iso-iec-27701",
+    "name": "ISO/IEC 27701 — Privacy Information Management",
+    "reference": "ISO/IEC 27701:2019",
+    "kind": "standard"
+  },
+  {
+    "id": "iso-iec-25012",
+    "name": "ISO/IEC 25012 — Data Quality Model",
+    "reference": "ISO/IEC 25012:2008",
+    "kind": "standard"
+  },
+  {
+    "id": "cen-cenelec-jtc21",
+    "name": "CEN-CENELEC JTC 21 — AI Standards",
+    "reference": "CEN/CLC/JTC 21",
+    "kind": "standard"
+  },
+  {
+    "id": "etsi-en-303-645",
+    "name": "ETSI EN 303 645 — Cybersecurity for IoT",
+    "reference": "ETSI EN 303 645",
+    "kind": "standard"
+  }
+]

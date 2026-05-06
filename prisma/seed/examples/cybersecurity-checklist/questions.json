@@ -1,0 +1,129 @@
+{
+  "questions": [
+    {
+      "text": "Have cybersecurity risks been globally assessed based on current and emerging threats?",
+      "article": "Article 15.1",
+      "category": "Appropiate levels of cybersecurity and consistency (MG01)"
+    },
+    {
+      "text": "Are there procedures in place to maintain consistency of security configurations over time?",
+      "article": "Article 15.1",
+      "category": "Appropiate levels of cybersecurity and consistency (MG01)"
+    },
+    {
+      "text": "Does the system design incorporate mechanisms to detect and respond to unauthorized or anomalous uses?",
+      "article": "Article 15.5",
+      "category": "Systems resistant to alterations of use (MG02)"
+    },
+    {
+      "text": "Are integrity controls in place to prevent undue modification of system configuration or behavior?",
+      "article": "Article 15.5",
+      "category": "Systems resistant to alterations of use (MG02)"
+    },
+    {
+      "text": "Have protocols and technical measures been established to detect, report and remedy anomalies or inconsistencies in the dataset?",
+      "article": "Article 15.5",
+      "category": "Prevent and control dataset manipulation (MG03)"
+    },
+    {
+      "text": "Have the sources of data collection been mapped, what security controls are in place and who is responsible for monitoring this integrity?",
+      "article": "Article 15.5",
+      "category": "Prevent and control dataset manipulation (MG03)"
+    },
+    {
+      "text": "Have the risks of adversarial attacks been identified and assessed at each stage of the system's development?",
+      "article": "Article 15.5",
+      "category": "Protection against adversarial attacks (MG04)"
+    },
+    {
+      "text": "Does the system incorporate specific detection and mitigation techniques to neutralize potential adversarial attacks in production?",
+      "article": "Article 15.5",
+      "category": "Protection against adversarial attacks (MG04)"
+    },
+    {
+      "text": "Are adversarial attack exercises conducted on a regular basis to validate resilience to such attacks?",
+      "article": "Article 15.5",
+      "category": "Protection against adversarial attacks (MG04)"
+    },
+    {
+      "text": "Has it been assessed whether the intelligent system itself may have specific cybersecurity risks?",
+      "article": "Article 15.5",
+      "category": "Protection against system defects (MG05)"
+    },
+    {
+      "text": "Have obfuscation, encryption, or component separation techniques been adopted to make it difficult to extract or copy the model?",
+      "article": "Article 15.5",
+      "category": "Protection against inversion attacks and/or model theft (MG06)"
+    },
+    {
+      "text": "Are robust access controls and authentication in place to prevent unauthorized access to the model?",
+      "article": "Article 15.5",
+      "category": "Protection against inversion attacks and/or model theft (MG06)"
+    },
+    {
+      "text": "Have response protocols been established for specific incidents of theft or manipulation of the model?",
+      "article": "Article 15.5",
+      "category": "Protection against inversion attacks and/or model theft (MG06)"
+    },
+    {
+      "text": "Are there session monitoring and control systems in place to avoid reverse engineering the model through requests?",
+      "article": "Article 15.5",
+      "category": "Protection against inversion attacks and/or model theft (MG06)"
+    },
+    {
+      "text": "Does the system incorporate mechanisms that allow detecting attempts to evade data entry or manipulation, such as detection of data outside the domain?",
+      "article": "Article 15.5",
+      "category": "Protection against evasion attacks (MG07)"
+    },
+    {
+      "text": "Have pre-processing or similar techniques been implemented to prevent these types of attacks from occurring?",
+      "article": "Article 15.5",
+      "category": "Protection against evasion attacks (MG07)"
+    },
+    {
+      "text": "Have specific controls been developed and documented to prevent jailbreaking, such as a firewall for requests to systems?",
+      "article": "Article 15.5",
+      "category": "Protection against jailbreak attacks (MG08)"
+    },
+    {
+      "text": "Does the system have verification mechanisms that block attempts to bypass the restrictions or return the content of the system prompt?",
+      "article": "Article 15.5",
+      "category": "Protection against jailbreak attacks (MG08)"
+    },
+    {
+      "text": "Has the effectiveness of these measures been tested through drills or red team exercises?",
+      "article": "Article 15.5",
+      "category": "Protection against jailbreak attacks (MG08)"
+    },
+    {
+      "text": "Have vulnerabilities related to the possibility of inferring data participation in the training set been assessed?",
+      "article": "Article 15.5",
+      "category": "Protection against membership inference attacks (MG09)"
+    },
+    {
+      "text": "Have privacy protection techniques, such as the use of differential privacy, been implemented to minimize these risks?",
+      "article": "Article 15.5",
+      "category": "Protection against membership inference attacks (MG09)"
+    },
+    {
+      "text": "Have all the functions or tools that the intelligent system activates that could be useful to an attacker been mapped? Example: Python3 console, process management, online searches, etc.",
+      "article": "Article 15.5",
+      "category": "Protection against side-channel attack (MG10)"
+    },
+    {
+      "text": "Does the system depend on libraries not controlled by the development team?",
+      "article": "Article 15.5",
+      "category": "Protection against side-channel attack (MG10)"
+    },
+    {
+      "text": "In the work of human supervision or post-market surveillance, can the intelligent system be affected by some type of action related to social engineering?",
+      "article": "Article 15.5",
+      "category": "Protection against social engineering attacks (MG11)"
+    },
+    {
+      "text": "How will secure and reliable communication between customers and those responsible for surveillance be ensured?",
+      "article": "Article 15.5",
+      "category": "Protection against social engineering attacks (MG11)"
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "questions": [
+    {
+      "text": "Does the system have documentation that explains in detail its category according to those defined in the AI Act?",
+      "article": "Article 73",
+      "category": "Knowledge of AI system categorization (MG01)"
+    },
+    {
+      "text": "Do the management systems (quality, risk or human supervision) of the smart system have training procedures to ensure that those responsible for the system are aware of the EU's fundamental rights?",
+      "article": "Article 73",
+      "category": "Knowledge of fundamental rights (MG02)"
+    },
+    {
+      "text": "Do the management systems (quality, risk and/or human supervision) of the intelligent system have procedures that allow the notification of serious incidents to be managed?",
+      "article": "Article 73",
+      "category": "Frame the notification of major incidents in management systems (MG03)"
+    },
+    {
+      "text": "Does the information associated with the system include contact information for your corresponding MSA?",
+      "article": "Article 73",
+      "category": "Contact the Market Surveillance Authority (MG04)"
+    },
+    {
+      "text": "Has the Provider provided the Deployer with a contact channel to report major incidents in this case?",
+      "article": "Article 73",
+      "category": "Contact the provider (MG05)"
+    }
+  ]
+}

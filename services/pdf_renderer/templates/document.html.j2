@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>{{ data.title or "Document" }}</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<header class="cover">
+  <div class="eyebrow">Luxembourg AI Factory</div>
+  <h1>{{ data.title or "Document" }}</h1>
+  {% if data.subtitle %}<p class="subtitle">{{ data.subtitle }}</p>{% endif %}
+</header>
+
+<section>
+  {% if data.body %}
+    <p>{{ data.body }}</p>
+  {% else %}
+    <p class="muted">
+      Replace this template with your own. The Python service receives an
+      arbitrary JSON payload as <code>data</code> — render whatever fields you need.
+    </p>
+  {% endif %}
+</section>
+
+<footer>
+  <p class="muted">Generated with FastAPI · Jinja · WeasyPrint.</p>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,12 @@
+{
+  "title": "Accuracy_Checklist",
+  "sourceName": "AESIA",
+  "controlTopic": "Accuracy",
+  "description": "Source: https://aesia.digital.gob.es/en/guides",
+  "countryIds": [
+    "ES"
+  ],
+  "regulationIds": [
+    "ai-act"
+  ]
+}

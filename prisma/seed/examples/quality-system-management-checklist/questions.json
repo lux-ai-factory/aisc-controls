@@ -1,0 +1,194 @@
+{
+  "questions": [
+    {
+      "text": "Has a quality management system been established and implemented to ensure compliance with the AI Regulation?",
+      "article": "Article 17.1",
+      "category": "Implement a QMS (MG01)"
+    },
+    {
+      "text": "Does the QMS collect policies, procedures and instructions in a systematic and orderly manner?",
+      "article": "Article 17.1",
+      "category": "Implement a QMS (MG01)"
+    },
+    {
+      "text": "Has a strategy for compliance been established?",
+      "article": "Article 17.1.a",
+      "category": "Establish a compliance strategy (MG02)"
+    },
+    {
+      "text": "Has a strategy been established for compliance with high-risk AI system modification management procedures?",
+      "article": "Article 17.1.a",
+      "category": "Establish a compliance strategy (MG02)"
+    },
+    {
+      "text": "Has a strategy been established for compliance with conformity assessment procedures?",
+      "article": "Article 17.1.a",
+      "category": "Strategy for compliance with the conformity assessment procedure (MG03)"
+    },
+    {
+      "text": "Are the measures specified in Article 15 complied with in terms of accuracy, robustness and cybersecurity when establishing design, development and validation procedures?",
+      "article": "Article 15",
+      "category": "Article 15. Accuracy, robustness and cybersecurity (MG04)"
+    },
+    {
+      "text": "Does the design of the AI system arise, not only from the technical and functional requirements of the system itself, but also from the risk mitigation mechanisms identified in the risk management plan?",
+      "article": "Article 17.1.b",
+      "category": "Establish design procedures (MG05)"
+    },
+    {
+      "text": "Is the relationship between risks and design considered?",
+      "article": "Article 17.1.b",
+      "category": "Establish design procedures (MG05)"
+    },
+    {
+      "text": "Are systematic procedures proposed for the three aspects related to the technical requirements related to cybersecurity, accuracy and robustness, within the framework of the development process of the AI system?",
+      "article": "Article 17.1.c",
+      "category": "Establish the development procedures (MG06)"
+    },
+    {
+      "text": "Are the specifications established in the design tracked, traced, and complied with?",
+      "article": "Article 17.1.c",
+      "category": "Establish the development procedures (MG06)"
+    },
+    {
+      "text": "Have the examination, testing, and validation measures that apply to AI systems been specified?",
+      "article": "Article 17.1.d",
+      "category": "Establish validation procedures (MG07)"
+    },
+    {
+      "text": "Are the technical specifications to be applied recorded?",
+      "article": "Article 17.1.e",
+      "category": "Record the standards or technical specifications applied (MG08)"
+    },
+    {
+      "text": "Are the rules to be applied recorded?",
+      "article": "Article 17.1.e",
+      "category": "Record the standards or technical specifications applied (MG08)"
+    },
+    {
+      "text": "Where the relevant harmonised standards are not fully implemented or do not cover all requirements, are the means to be used to ensure compliance with the requirements recorded?",
+      "article": "Article 17.1.e",
+      "category": "Record the standards or technical specifications applied (MG08)"
+    },
+    {
+      "text": "Are training, validation and testing datasets subject to governance and data management practices in accordance with Article 9 of the Regulation?",
+      "article": "Article 10",
+      "category": "Article 10 (MG09)"
+    },
+    {
+      "text": "Has a risk management system been established in accordance with Article 9 of the Regulation?",
+      "article": "Article 9",
+      "category": "Article 9 (MG10)"
+    },
+    {
+      "text": "Does the risk management system pay special attention to mitigating risks that may affect people's health, safety and fundamental rights?",
+      "article": "Article 9",
+      "category": "Article 9 (MG10)"
+    },
+    {
+      "text": "Has a post-market surveillance system for high-risk AI systems been defined in accordance with Article 72 of the Regulation?",
+      "article": "Article 72",
+      "category": "Article 72 (MG11)"
+    },
+    {
+      "text": "Has the chain of responsibility for the notification of the incident been established, which includes the figure of the DPO, as well as other figures of relevance at the compliance level that are applicable?",
+      "article": "Article 73",
+      "category": "Article 73 (MG12)"
+    },
+    {
+      "text": "Has an incident recording mechanism been established, as well as a mechanism for generating and preserving evidence?",
+      "article": "Article 73",
+      "category": "Article 73 (MG12)"
+    },
+    {
+      "text": "Has the incident resolution chain been defined, including those responsible for the application?",
+      "article": "Article 73",
+      "category": "Article 73 (MG12)"
+    },
+    {
+      "text": "In the case of the provider, and the incident affects multiple AI system deployment managers, has the chain of responsibility for communication, channel and format been defined, in which clear instructions should be provided to the deployment manager on how to proceed for that particular incident and whether they should, in any case, those responsible for the deployment in turn notify the authorities, natural persons affected by the incident in their own systems?",
+      "article": "Article 73",
+      "category": "Article 73 (MG12)"
+    },
+    {
+      "text": "Has a procedure been established to monitor the changes that are reflected in the update of the documentation?",
+      "article": "Article 17.1.j",
+      "category": "Establish a document management procedure (MG13)"
+    },
+    {
+      "text": "Has a chain of responsibility been generated in order to update the documentation according to the changes?",
+      "article": "Article 17.1.j",
+      "category": "Establish a document management procedure (MG13)"
+    },
+    {
+      "text": "Does the documentation of changes to the system maintain the level of completeness of the rest of the technical documentation?",
+      "article": "Article 17.1.j",
+      "category": "Establish a document management procedure (MG13)"
+    },
+    {
+      "text": "Has a document management system been established, defined and sized to guarantee its conservation and changes?",
+      "article": "Article 17.1.j",
+      "category": "Establish a document management procedure (MG13)"
+    },
+    {
+      "text": "Has the communication channel(s) that will be used for each of the communications arising from the different obligations been indicated and described?",
+      "article": "Article 17.1.k",
+      "category": "Establish the communication procedure with ANCs (MG14)"
+    },
+    {
+      "text": "Has the format or formats in which the documents that are required will be provided have been contemplated?",
+      "article": "Article 17.1.k",
+      "category": "Establish the communication procedure with ANCs (MG14)"
+    },
+    {
+      "text": "Has the person or persons responsible for managing the different communications been appointed?",
+      "article": "Article 17.1.k",
+      "category": "Establish the communication procedure with ANCs (MG14)"
+    },
+    {
+      "text": "Have the tools that allow access to data, records, source code and other actions arising from the obligations of the Regulation been implemented and described?",
+      "article": "Article 17.1.k",
+      "category": "Establish the communication procedure with ANCs (MG14)"
+    },
+    {
+      "text": "Have the necessary people been identified and provided for the effective implementation of the QMS and for the operation and control of its processes?",
+      "article": "Article 17.1.l",
+      "category": "Perform an analysis of available resources (MG15)"
+    },
+    {
+      "text": "Has the infrastructure necessary for the operation of processes and achieving system compliance been determined, provided, and maintained?",
+      "article": "Article 17.1.l",
+      "category": "Perform an analysis of available resources (MG15)"
+    },
+    {
+      "text": "Has the necessary environment been determined, provided and maintained for the operation of the processes and achieving the conformity of the system?",
+      "article": "Article 17.1.l",
+      "category": "Perform an analysis of available resources (MG15)"
+    },
+    {
+      "text": "Have the necessary resources been established and provided to ensure the validity and reliability of the results when monitoring or measurement is carried out to verify conformity?",
+      "article": "Article 17.1.l",
+      "category": "Perform an analysis of available resources (MG15)"
+    },
+    {
+      "text": "Do you have the necessary knowledge for process operation and compliance, as well as acquiring or accessing the necessary additional knowledge?",
+      "article": "Article 17.1.l",
+      "category": "Perform an analysis of available resources (MG15)"
+    },
+    {
+      "text": "Have the responsibilities and authorizations been established around the different elements that make up the quality management system?",
+      "article": "Article 17.1.m",
+      "category": "Establish and document the responsibilities of the personnel involved in the processes (MG16)"
+    },
+    {
+      "text": "Have responsibilities been assigned to all the personnel involved and has it been reflected and documented in the list of jobs or equivalent?",
+      "article": "Article 17.1.m",
+      "category": "Establish and document the responsibilities of the personnel involved in the processes (MG16)"
+    },
+    {
+      "text": "Are the assigned responsibilities properly documented and reflected in the QMS?",
+      "article": "Article 17.1.m",
+      "category": "Establish and document the responsibilities of the personnel involved in the processes (MG16)"
+    }
+  ]
+}

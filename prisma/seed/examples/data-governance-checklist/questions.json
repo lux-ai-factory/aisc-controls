@@ -1,0 +1,194 @@
+{
+  "questions": [
+    {
+      "text": "Has all the information necessary for the development and use of the AI system been identified?",
+      "article": null,
+      "category": "MG01 - Identifying the Necessary Information"
+    },
+    {
+      "text": "Has the necessary information been documented?",
+      "article": null,
+      "category": "MG01 - Identifying the Necessary Information"
+    },
+    {
+      "text": "Have the sources of the data used been identified?",
+      "article": null,
+      "category": "MG02 - Establishing the Data Collection Process"
+    },
+    {
+      "text": "Has a data collection process been established?",
+      "article": null,
+      "category": "MG02 - Establishing the Data Collection Process"
+    },
+    {
+      "text": "Have the dimensions of data quality to be evaluated been defined?",
+      "article": null,
+      "category": "MG03 - Determine the quality dimensions to be evaluated"
+    },
+    {
+      "text": "Have specific quality controls been defined for each dimension identified?",
+      "article": null,
+      "category": "MG04 - Define the quality controls to implement for each dimension"
+    },
+    {
+      "text": "Have the defined quality controls been implemented?",
+      "article": null,
+      "category": "MG05 - Implement defined quality controls"
+    },
+    {
+      "text": "Have the results of the quality controls implemented been verified?",
+      "article": null,
+      "category": "MG05 - Implement defined quality controls"
+    },
+    {
+      "text": "Have the results of quality controls been reported?",
+      "article": null,
+      "category": "MG06 - Report the results of quality controls"
+    },
+    {
+      "text": "Have the deviations detected in the quality controls been documented?",
+      "article": null,
+      "category": "MG06 - Report the results of quality controls"
+    },
+    {
+      "text": "Have improvement plans been developed based on quality results?",
+      "article": null,
+      "category": "MG07 - Develop data quality improvement measures"
+    },
+    {
+      "text": "Have the improvement measures implemented been documented?",
+      "article": null,
+      "category": "MG07 - Develop data quality improvement measures"
+    },
+    {
+      "text": "Has the data been transformed to suit the needs of the AI system?",
+      "article": null,
+      "category": "MG08 - Data transformation"
+    },
+    {
+      "text": "Has data from different sources been added?",
+      "article": null,
+      "category": "MG09 - Data Aggregation"
+    },
+    {
+      "text": "Have the data aggregation processes carried out been documented?",
+      "article": null,
+      "category": "MG09 - Data Aggregation"
+    },
+    {
+      "text": "Is the data properly sampled?",
+      "article": null,
+      "category": "MG10 - Sampling the data"
+    },
+    {
+      "text": "After the initial data collection process and subsequent processing, have you identified additional data needs or data characteristics?",
+      "article": null,
+      "category": "MG11 - Creating and selecting features"
+    },
+    {
+      "text": "Have you considered increasing or reducing the dimensionality of the dataset to create features or discarding those that are redundant?",
+      "article": null,
+      "category": "MG11 - Creating and selecting features"
+    },
+    {
+      "text": "Has the data been enriched and expanded?",
+      "article": null,
+      "category": "MG12 - Data Enrichment"
+    },
+    {
+      "text": "Have identification labels been assigned to the data collected?",
+      "article": null,
+      "category": "MG13 - Data labeling"
+    },
+    {
+      "text": "Have automatic data labeling tools been used? Has the process been overseen by some kind of human surveillance?",
+      "article": null,
+      "category": "MG13 - Data labeling"
+    },
+    {
+      "text": "Has the potential bias of the data collected been analysed and assessed?",
+      "article": null,
+      "category": "MG14 - Analysis of the main sources of bias in the data"
+    },
+    {
+      "text": "Has bias been identified in the data?",
+      "article": null,
+      "category": "MG15 - Assessing bias in data"
+    },
+    {
+      "text": "If yes, has an analysis and evaluation been done to determine the need for treatment measures?",
+      "article": null,
+      "category": "MG15 - Assessing bias in data"
+    },
+    {
+      "text": "Have measures been implemented to address the biases identified and assessed?",
+      "article": null,
+      "category": "MG16 - Addressing bias in data"
+    },
+    {
+      "text": "If in the last phase of the data life cycle, the data will be transferred, has a report been generated with all the details of the data transfer process addressed?",
+      "article": null,
+      "category": "MG17 - Data transfer"
+    },
+    {
+      "text": "Has it been verified that there is no user or actor involved in the development of the AI system that still requires access to the data for a specific reason or purpose?",
+      "article": null,
+      "category": "MG18 - Full or partial deletion of data"
+    },
+    {
+      "text": "Has it been verified that the data deletion process to be carried out does not violate any legal, contractual or data retention obligations?",
+      "article": null,
+      "category": "MG18 - Full or partial deletion of data"
+    },
+    {
+      "text": "Has it been verified that the data will be deleted from all locations where it may be stored?",
+      "article": null,
+      "category": "MG18 - Full or partial deletion of data"
+    },
+    {
+      "text": "Has it been evaluated whether there is any possibility of restoring the data, partial or total, from the AI system trained on this data?",
+      "article": null,
+      "category": "MG18 - Full or partial deletion of data"
+    },
+    {
+      "text": "Has the data been checked for any cultural, social or historical significance?",
+      "article": null,
+      "category": "MG18 - Full or partial deletion of data"
+    },
+    {
+      "text": "Has a report been generated with all the details of the data deletion process?",
+      "article": null,
+      "category": "MG18 - Full or partial deletion of data"
+    },
+    {
+      "text": "Have you been informed about the security and privacy protection measures in terms of anonymization that have been implemented?",
+      "article": null,
+      "category": "MG19 - Data anonymization"
+    },
+    {
+      "text": "Have you been informed about the security and privacy protection measures in terms of pseudonymization that have been implemented?",
+      "article": null,
+      "category": "MG20 - Data pseudonymization"
+    },
+    {
+      "text": "Have you been informed about the possible presence of personal data or special categories of personal data?",
+      "article": null,
+      "category": "MG21 - Guarantee measures derived from the regulations on the protection of personal data"
+    },
+    {
+      "text": "Have you been informed about possible misuses and reasonably foreseeable uses of the data provided?",
+      "article": null,
+      "category": "MG21 - Guarantee measures derived from the regulations on the protection of personal data"
+    },
+    {
+      "text": "Have additional details of the data and metadata necessary to facilitate the understanding of the data and its appropriate use for the development of the AI system been documented?",
+      "article": null,
+      "category": "MG21 - Guarantee measures derived from the regulations on the protection of personal data"
+    },
+    {
+      "text": "Is special personal data processed at any stage of the AI system's lifecycle?",
+      "article": null,
+      "category": "MG21 - Guarantee measures derived from the regulations on the protection of personal data"
+    }
+  ]
+}

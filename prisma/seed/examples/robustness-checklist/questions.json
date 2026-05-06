@@ -1,0 +1,84 @@
+{
+  "questions": [
+    {
+      "text": "Has adequate training of the personnel involved in the development and implementation been ensured in key aspects of the robustness of the AI system?",
+      "article": "Article 15",
+      "category": "Guideline Measures - MG01: Gain basic knowledge of robustness"
+    },
+    {
+      "text": "Have the properties and metrics of the system's robustness been established and the requirements that must be met according to the intended purpose and the risk analysis carried out, with evidence?",
+      "article": "Article 15",
+      "category": "Guideline Measures - MG02: Set clear objectives for robustness, define associated metrics"
+    },
+    {
+      "text": "During the design of the system, have the characteristics recognized for the robustness measurement been identified and their separability (possibility of being measured separately) identified?",
+      "article": "Article 15",
+      "category": "Guideline Measures - MG03: Identify critical system features"
+    },
+    {
+      "text": "Do the different environments through which the system evolves in its life cycle (development, integration, pre-production and production) have equivalent characteristics according to the defined robustness objectives?",
+      "article": "Article 15",
+      "category": "Guideline Measures - MG04: Standardization of validation and production environments"
+    },
+    {
+      "text": "Has the verification and validation of the chosen metrics been carried out in hardware environments that exactly replicate the final capabilities to which the AI system will have access?",
+      "article": "Article 15",
+      "category": "Guideline Measures - MG05: Validation in hardware environments that replicate the final capabilities of the system"
+    },
+    {
+      "text": "Have several robustness metrics related to the performance (FLOPS, efficiency, FLOPY, Latency, etc.) of the system been defined in the hardware established for its operation?",
+      "article": "Article 15",
+      "category": "Guideline Measures - MG06: Measurement of performance and computational complexity"
+    },
+    {
+      "text": "Is there a plan of experiments to demonstrate the robustness of the system based on at least one of the following methods: statistical, formal, empirical, or practical tests?",
+      "article": "Article 15",
+      "category": "Guideline Measures - MG07: Design experiments to assess robustness"
+    },
+    {
+      "text": "Is there evidence of such experiments conducted, their analysis and interpretation, and their impact on the robustness parameters of the AI system?",
+      "article": "Article 15",
+      "category": "Guideline Measures - MG08: Conduct experiments with real data, analyze and interpret its results"
+    },
+    {
+      "text": "Have procedures and technical measures been defined to monitor robustness, such as system interfaces showing the selected robustness metrics in an aggregated manner and in histories and transaction records?",
+      "article": "Article 15",
+      "category": "Guideline Measures - MG09: Implement capabilities to observe, monitor, and report degradation"
+    },
+    {
+      "text": "Are there warning mechanisms when the robustness of the system is not within the established parameters?",
+      "article": "Article 15",
+      "category": "Guideline Measures - MG10: Configure alert techniques and safe failure protocols"
+    },
+    {
+      "text": "Have specific committees or teams been established to proactively assess inconsistencies or potential failures in the robustness of the system?",
+      "article": "Article 15",
+      "category": "Guideline Measures - MG11: Establish evaluation committees to anticipate inconsistencies or failures"
+    },
+    {
+      "text": "Are there automatic mechanisms designed and implemented to ensure system recovery in the event of a failure?",
+      "article": "Article 15",
+      "category": "Guideline Measures - MG12: Implement automatic mechanisms for disaster recovery"
+    },
+    {
+      "text": "Have specific tools or procedures been implemented to ensure geographic redundancy, proper versioning management, and system scalability?",
+      "article": "Article 15",
+      "category": "Guideline Measures - MG13: Implement tools to ensure geo-redundancy, versioning, and scalability"
+    },
+    {
+      "text": "Is it monitored for systems that continue to learn all the established metrics (also related to accuracy and cybersecurity) and that allow us to know if the system is still within the design parameters?",
+      "article": "Article 15",
+      "category": "Guideline Measures - MG14: For systems that are still learning: Ensure that the robustness, accuracy, and performance of the system is not degraded"
+    },
+    {
+      "text": "Have monitoring and control plans been established, with their action measures for the degradation of the model based on model deviation, concept drift, data drift, etc.?",
+      "article": "Article 15",
+      "category": "Guideline Measures - MG15: For systems that are still learning: Adopt mitigation strategies that minimize deviation from the model and prevent the accumulation of bias"
+    },
+    {
+      "text": "Are interactions, interoperability, and feedback received during the system lifecycle formally recorded, especially in systems that continue to learn, to ensure traceability and improve robustness?",
+      "article": "Article 15",
+      "category": "Guideline Measures - MG16: For systems that are still learning: Formally record instances of interaction and interoperability with other systems or humans, along with feedback received"
+    }
+  ]
+}

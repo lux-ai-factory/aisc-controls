@@ -1,0 +1,374 @@
+{
+  "questions": [
+    {
+      "text": "Source of the Dataset and Data Repository",
+      "article": null,
+      "category": "Data Source Information"
+    },
+    {
+      "text": "Data Owners",
+      "article": null,
+      "category": "Data Source Information"
+    },
+    {
+      "text": "Contact details",
+      "article": null,
+      "category": "Data Source Information"
+    },
+    {
+      "text": "Affiliated Institutions",
+      "article": null,
+      "category": "Data Source Information"
+    },
+    {
+      "text": "Accessible to (who can access the dataset?)",
+      "article": null,
+      "category": "Data Source Information"
+    },
+    {
+      "text": "Data sharing agreements",
+      "article": null,
+      "category": "Data Source Information"
+    },
+    {
+      "text": "Privacy compliance",
+      "article": null,
+      "category": "Data Source Information"
+    },
+    {
+      "text": "Purpose of data collection",
+      "article": null,
+      "category": "Purpose of data collection"
+    },
+    {
+      "text": "Suitable use cases",
+      "article": null,
+      "category": "Purpose of data collection"
+    },
+    {
+      "text": "Unsuitable use cases",
+      "article": null,
+      "category": "Purpose of data collection"
+    },
+    {
+      "text": "Volume",
+      "article": null,
+      "category": "Dataset Characteristics"
+    },
+    {
+      "text": "Velocity",
+      "article": null,
+      "category": "Dataset Characteristics"
+    },
+    {
+      "text": "Variety",
+      "article": null,
+      "category": "Dataset Characteristics"
+    },
+    {
+      "text": "Data Sample Size",
+      "article": null,
+      "category": "Dataset Characteristics"
+    },
+    {
+      "text": "List of data features",
+      "article": null,
+      "category": "Dataset Characteristics"
+    },
+    {
+      "text": "Unavailable parts of data set/ Missing data",
+      "article": null,
+      "category": "Dataset Characteristics"
+    },
+    {
+      "text": "Transformation of raw data",
+      "article": null,
+      "category": "Dataset Characteristics"
+    },
+    {
+      "text": "Data form (structured, unstructured, etc)",
+      "article": null,
+      "category": "Data Type"
+    },
+    {
+      "text": "Data type (audio, video, text, etc)",
+      "article": null,
+      "category": "Data Type"
+    },
+    {
+      "text": "Special Categories under GDPR",
+      "article": null,
+      "category": "Data Type"
+    },
+    {
+      "text": "Gaps / Errors",
+      "article": null,
+      "category": "Gaps / Errors"
+    },
+    {
+      "text": "Inconsistencies",
+      "article": null,
+      "category": "Gaps / Errors"
+    },
+    {
+      "text": "Duplicate entries",
+      "article": null,
+      "category": "Gaps / Errors"
+    },
+    {
+      "text": "Outliers and anomalies",
+      "article": null,
+      "category": "Gaps / Errors"
+    },
+    {
+      "text": "Version consistency",
+      "article": null,
+      "category": "Gaps / Errors"
+    },
+    {
+      "text": "Measurement consistency",
+      "article": null,
+      "category": "Gaps / Errors"
+    },
+    {
+      "text": "Data format consistency",
+      "article": null,
+      "category": "Gaps / Errors"
+    },
+    {
+      "text": "Missing values",
+      "article": null,
+      "category": "Gaps / Errors"
+    },
+    {
+      "text": "Data Collection Date",
+      "article": null,
+      "category": "Data Collection"
+    },
+    {
+      "text": "Data collection methods",
+      "article": null,
+      "category": "Data Collection"
+    },
+    {
+      "text": "Sampling Methods",
+      "article": null,
+      "category": "Data Collection"
+    },
+    {
+      "text": "Sampling Bias",
+      "article": null,
+      "category": "Data Collection"
+    },
+    {
+      "text": "Inclusion criteria",
+      "article": null,
+      "category": "Data Collection"
+    },
+    {
+      "text": "Exclusion criteria",
+      "article": null,
+      "category": "Data Collection"
+    },
+    {
+      "text": "Demographic Representation",
+      "article": null,
+      "category": "Sufficiently Representative"
+    },
+    {
+      "text": "Minimum sample size for representation",
+      "article": null,
+      "category": "Sufficiently Representative"
+    },
+    {
+      "text": "Dataset sufficiently large?",
+      "article": null,
+      "category": "Sufficiently Representative"
+    },
+    {
+      "text": "Samples from minority groups",
+      "article": null,
+      "category": "Sufficiently Representative"
+    },
+    {
+      "text": "Temporal Changes",
+      "article": null,
+      "category": "Sufficiently Representative"
+    },
+    {
+      "text": "Evolving trends",
+      "article": null,
+      "category": "Sufficiently Representative"
+    },
+    {
+      "text": "Techniques used",
+      "article": null,
+      "category": "Data Processing"
+    },
+    {
+      "text": "Data Labelling",
+      "article": null,
+      "category": "Data Processing"
+    },
+    {
+      "text": "Appropriateness of processing techniques",
+      "article": null,
+      "category": "Data Processing"
+    },
+    {
+      "text": "Data processing tools",
+      "article": null,
+      "category": "Data Processing"
+    },
+    {
+      "text": "Data processing aligned with stated purpose?",
+      "article": null,
+      "category": "Data Processing"
+    },
+    {
+      "text": "Inconsistencies in data processing",
+      "article": null,
+      "category": "Data Processing"
+    },
+    {
+      "text": "Measures of central tendency",
+      "article": null,
+      "category": "Statistical Properties"
+    },
+    {
+      "text": "Variability around central tendency",
+      "article": null,
+      "category": "Statistical Properties"
+    },
+    {
+      "text": "Outliers",
+      "article": null,
+      "category": "Statistical Properties"
+    },
+    {
+      "text": "Differences in statistical properties",
+      "article": null,
+      "category": "Statistical Properties"
+    },
+    {
+      "text": "Assumptions Represented",
+      "article": null,
+      "category": "Relevance"
+    },
+    {
+      "text": "Assumptions: fair, reasonable & appropriate?",
+      "article": null,
+      "category": "Relevance"
+    },
+    {
+      "text": "Rationale Behind Assumptions",
+      "article": null,
+      "category": "Relevance"
+    },
+    {
+      "text": "Assumptions about vulnerable groups",
+      "article": null,
+      "category": "Relevance"
+    },
+    {
+      "text": "Full scope of scenarios",
+      "article": null,
+      "category": "Relevance"
+    },
+    {
+      "text": "Meaningful insights",
+      "article": null,
+      "category": "Relevance"
+    },
+    {
+      "text": "Outliers considered",
+      "article": null,
+      "category": "Relevance"
+    },
+    {
+      "text": "Data disproportionately affects certain groups?",
+      "article": null,
+      "category": "Data Fairness"
+    },
+    {
+      "text": "Protections against discrimination & bias",
+      "article": null,
+      "category": "Data Fairness"
+    },
+    {
+      "text": "Guiding ethical principles",
+      "article": null,
+      "category": "Data Fairness"
+    },
+    {
+      "text": "Inappropriate data elements",
+      "article": null,
+      "category": "Data Fairness"
+    },
+    {
+      "text": "Steps to rectify inappropriate data elements",
+      "article": null,
+      "category": "Data Fairness"
+    },
+    {
+      "text": "Fairness of dataset",
+      "article": null,
+      "category": "Data Fairness"
+    },
+    {
+      "text": "Steps to rectify unfairness of dataset",
+      "article": null,
+      "category": "Data Fairness"
+    },
+    {
+      "text": "Data type (Personal data must be non-reversibly anonymized)",
+      "article": null,
+      "category": "Data Features Dictionary - Information per data feature"
+    },
+    {
+      "text": "Scale (value?)",
+      "article": null,
+      "category": "Data Features Dictionary - Information per data feature"
+    },
+    {
+      "text": "Volume",
+      "article": null,
+      "category": "Data Features Dictionary - Information per data feature"
+    },
+    {
+      "text": "Statistical property",
+      "article": null,
+      "category": "Data Features Dictionary - Information per data feature"
+    },
+    {
+      "text": "Geographic elements",
+      "article": null,
+      "category": "Data Features Dictionary - Information per data feature"
+    },
+    {
+      "text": "Proxy for prohibited grounds for discrimination",
+      "article": null,
+      "category": "Data Features Dictionary - Information per data feature"
+    },
+    {
+      "text": "Relevance for intended purpose (include justification)",
+      "article": null,
+      "category": "Data Features Dictionary - Assessment of data feature"
+    },
+    {
+      "text": "Errors / gaps",
+      "article": null,
+      "category": "Data Features Dictionary - Assessment of data feature"
+    },
+    {
+      "text": "Complete",
+      "article": null,
+      "category": "Data Features Dictionary - Assessment of data feature"
+    },
+    {
+      "text": "Reasonable and fair assumptions",
+      "article": null,
+      "category": "Data Features Dictionary - Assessment of data feature"
+    }
+  ]
+}

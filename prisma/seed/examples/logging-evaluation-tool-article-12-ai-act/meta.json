@@ -1,0 +1,12 @@
+{
+  "title": "Logging Evaluation Tool - Article 12 AI Act",
+  "sourceName": "EUSAiR",
+  "controlTopic": "Logging",
+  "description": "EUSAiR — European AI Sandbox compliance evaluation tools.",
+  "countryIds": [
+    "EU"
+  ],
+  "regulationIds": [
+    "ai-act"
+  ]
+}
