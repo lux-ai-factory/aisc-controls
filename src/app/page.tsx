@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { countries, regulations } from "@/data";
+import { formatDate } from "@/lib/formatDate";
 
 export default async function HomePage() {
   const [questionnaireCount, questionCount, submissionCount, recent, recentSubmissions] =
@@ -39,8 +40,6 @@ export default async function HomePage() {
     regulations.find((r) => r.id === id)?.reference ??
     regulations.find((r) => r.id === id)?.name ??
     id;
-  const fmtDate = (d: Date) =>
-    d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
 
   return (
     <main className="home">
@@ -147,7 +146,7 @@ export default async function HomePage() {
                     <span className="recent-title">{q.title}</span>
                     <span className="recent-meta">
                       {q.controlTopic} · {q._count.questions} question
-                      {q._count.questions === 1 ? "" : "s"} · {fmtDate(q.createdAt)}
+                      {q._count.questions === 1 ? "" : "s"} · {formatDate(q.createdAt)}
                     </span>
                     <span className="recent-tags">
                       {q.countryIds.slice(0, 3).map((id) => (
@@ -187,7 +186,7 @@ export default async function HomePage() {
                   <Link href={`/submissions/${s.id}`} className="recent-item">
                     <span className="recent-title">{s.label}</span>
                     <span className="recent-meta">
-                      {s.questionnaire.title} · updated {fmtDate(s.updatedAt)}
+                      {s.questionnaire.title} · updated {formatDate(s.updatedAt)}
                     </span>
                   </Link>
                 </li>

@@ -3,6 +3,8 @@
 // null if there's nothing to show. Used on the library cards and on the fill /
 // detail pages so the formatting stays consistent.
 
+import { formatDate } from "@/lib/formatDate";
+
 type Props = {
   citation?: string | null;
   url?: string | null;
@@ -25,7 +27,7 @@ export default function SourceCitation({
     );
   }
   if (sourceUpdatedAt) {
-    parts.push(`Last updated ${sourceUpdatedAt.toISOString().slice(0, 10)}`);
+    parts.push(`Last updated ${formatDate(sourceUpdatedAt)}`);
   }
 
   if (parts.length === 0) return null;

@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { formatDate } from "@/lib/formatDate";
 
 export default async function SubmissionsPage() {
   const rows = await prisma.submission.findMany({
@@ -48,8 +49,7 @@ export default async function SubmissionsPage() {
                   {r.questionnaire.source.name} · {r.questionnaire.controlTopic}
                 </p>
                 <p className="meta">
-                  {r._count.answers} answers · saved{" "}
-                  {r.createdAt.toISOString().slice(0, 10)}
+                  {r._count.answers} answers · saved {formatDate(r.createdAt)}
                 </p>
               </div>
               <div className="library-card-actions">

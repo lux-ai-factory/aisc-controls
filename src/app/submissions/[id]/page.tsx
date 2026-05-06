@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { formatDateTime } from "@/lib/formatDate";
 
 export default async function SubmissionDetailPage({
   params,
@@ -32,9 +33,7 @@ export default async function SubmissionDetailPage({
           <strong>{sub.questionnaire.title}</strong> ·{" "}
           {sub.questionnaire.source.name}
         </p>
-        <p className="meta">
-          Saved {sub.createdAt.toISOString().slice(0, 16).replace("T", " ")} UTC
-        </p>
+        <p className="meta">Saved {formatDateTime(sub.createdAt)}</p>
       </header>
 
       <div className="library-toolbar">
