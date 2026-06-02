@@ -152,8 +152,8 @@ To add your own bundled example, create the checklist upstream, then run:
 npm run examples:export <checklistId> [folder-slug]
 ```
 
-Drop the original source doc into the generated folder if you want it bundled
-too, then commit. New clones will get it on first run.
+This writes `meta.json` + `questions.json` into the folder; commit it and new
+clones get the checklist on first run.
 
 ## Project layout
 
@@ -190,10 +190,9 @@ aisc-controls/
 │     ├─ formatDate.ts        # dd/mm/yyyy user-facing date formatting
 │     ├─ slugify.ts
 │     └─ prisma.ts
-├─ test/
-│  ├─ unit/                   # pure-logic unit tests (no DB)
-│  └─ integration/            # server-action tests (needs DATABASE_URL)
-└─ style/                     # original LAIF design assets
+└─ test/
+   ├─ unit/                   # pure-logic unit tests (no DB)
+   └─ integration/            # server-action tests (needs DATABASE_URL)
 ```
 
 ## Testing

@@ -31,7 +31,7 @@ env = Environment(
     lstrip_blocks=True,
 )
 
-app = FastAPI(title="LAIF PDF Renderer", version="0.1.0")
+app = FastAPI(title="AISC Controls PDF Renderer", version="0.1.0")
 
 
 @app.get("/health")

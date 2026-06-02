@@ -12,7 +12,6 @@ prisma/seed/examples/
   aepd-rgpd-controls/
     meta.json
     questions.json
-    AEPD-RGPD-controls.docx     # optional: the original source doc
 ```
 
 `meta.json`:
@@ -46,9 +45,8 @@ Run the export helper after you've added a checklist in the app:
 npx tsx prisma/seed/export.ts <checklistId> [folderSlug]
 ```
 
-It writes `meta.json` + `questions.json` into a new folder here. Drop the
-original source doc next to them if you want it bundled too, then commit the
-folder.
+It writes `meta.json` + `questions.json` into a new folder here; commit the
+folder and the checklist seeds on the next fresh clone.
 
 ## Re-seeding
 

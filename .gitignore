@@ -1,21 +1,18 @@
+# Dependencies & build output
 node_modules/
 .next/
 out/
 build/
+tsconfig.tsbuildinfo
+
+# Local environment
 .env
 .env.local
 .env*.local
+
+# Logs, OS, editor & tooling
 *.log
 .DS_Store
 .vscode/
 .idea/
 .claude/
-prisma/migrations/dev.db*
-postgres-data/
-
-# TypeScript incremental build cache
-tsconfig.tsbuildinfo
-
-# Original source documents — the seeded data lives in prisma/seed/examples/
-Checklists and examples(1)/
-EUSAIR_Compliance/
