@@ -23,6 +23,12 @@ RUN npx prisma generate && npm run build
 FROM node:20-bookworm-slim AS runner
 WORKDIR /app
 ENV NODE_ENV=production
+# `next start` re-evaluates next.config.ts at runtime, which derives basePath from
+# NEXT_BASE_PATH. Build ARG/ENV don't cross stages, so re-declare it here; without
+# this the baked /controls prefix is dropped and the app serves at root
+# (Caddy's /controls* route then 404s). next.config.ts is copied below.
+ARG NEXT_BASE_PATH=""
+ENV NEXT_BASE_PATH=$NEXT_BASE_PATH
 # OpenSSL is required by the Prisma query engine at runtime.
 RUN apt-get update && apt-get install -y --no-install-recommends openssl \
     && rm -rf /var/lib/apt/lists/*
