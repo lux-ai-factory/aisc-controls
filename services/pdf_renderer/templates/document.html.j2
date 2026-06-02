@@ -2,30 +2,81 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>{{ data.title or "Document" }}</title>
+  <title>{{ data.title or "Checklist report" }}</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
 
 <header class="cover">
-  <div class="eyebrow">Luxembourg AI Factory</div>
-  <h1>{{ data.title or "Document" }}</h1>
-  {% if data.subtitle %}<p class="subtitle">{{ data.subtitle }}</p>{% endif %}
+  <div class="eyebrow">
+    {{ data.sourceName }}{% if data.controlTopic %} · {{ data.controlTopic }}{% endif %}
+  </div>
+  <h1>{{ data.title }}</h1>
+  <p class="subtitle">
+    {{ data.checklistTitle }} · v{{ data.version }} · {{ data.status }}
+  </p>
 </header>
 
-<section>
-  {% if data.body %}
-    <p>{{ data.body }}</p>
-  {% else %}
-    <p class="muted">
-      Replace this template with your own. The Python service receives an
-      arbitrary JSON payload as <code>data</code> — render whatever fields you need.
-    </p>
-  {% endif %}
+<section class="summary">
+  <table class="summary-layout">
+    <tr>
+      <td class="readiness-cell">
+        <div class="readiness-value">
+          {% if data.readiness is not none %}{{ data.readiness }}%{% else %}—{% endif %}
+        </div>
+        <div class="readiness-caption">Readiness</div>
+      </td>
+      <td class="meta-cell">
+        <table class="summary-meta">
+          <tr><th>Controls scored</th><td>{{ data.scoredCount }} of {{ data.totalQuestions }}</td></tr>
+          <tr><th>Status</th><td>{{ data.status }} (version {{ data.version }})</td></tr>
+          <tr><th>Created</th><td>{{ data.createdAt }}</td></tr>
+          {% if data.closedAt %}<tr><th>Closed</th><td>{{ data.closedAt }}</td></tr>{% endif %}
+          {% if data.countries %}<tr><th>Countries</th><td>{{ data.countries | join(", ") }}</td></tr>{% endif %}
+          {% if data.regulations %}<tr><th>Regulations</th><td>{{ data.regulations | join(", ") }}</td></tr>{% endif %}
+        </table>
+      </td>
+    </tr>
+  </table>
+</section>
+
+<section class="legend">
+  <h2>Readiness scale</h2>
+  <ul class="legend-list">
+    {% for s in data.scoreScale %}
+      <li><span class="score-badge score-{{ s.value }}">{{ s.value }}</span>{{ s.label }}</li>
+    {% endfor %}
+  </ul>
+</section>
+
+<section class="answers">
+  <h2>Answers</h2>
+  {% set ns = namespace(n=0) %}
+  {% for group in data.groups %}
+    {% if group.category %}<h3 class="cat">{{ group.category }}</h3>{% endif %}
+    {% for item in group['entries'] %}
+      {% set ns.n = ns.n + 1 %}
+      <div class="answer-block">
+        <div class="q-head">
+          <span class="q-order">{{ ns.n }}</span>
+          {% if item.article %}<span class="tag">{{ item.article }}</span>{% endif %}
+          {% if item.score is not none %}
+            <span class="score-badge score-{{ item.score }}">{{ item.score }}/5 · {{ item.scoreLabel }}</span>
+          {% endif %}
+        </div>
+        <p class="q-text">{{ item.text }}</p>
+        {% if item.answer %}
+          <p class="answer-text">{{ item.answer }}</p>
+        {% else %}
+          <p class="answer-text muted">— not answered —</p>
+        {% endif %}
+      </div>
+    {% endfor %}
+  {% endfor %}
 </section>
 
 <footer>
-  <p class="muted">Generated with FastAPI · Jinja · WeasyPrint.</p>
+  <p class="muted">{{ data.title }} · Generated {{ data.generatedAt }} · AISC Controls</p>
 </footer>
 
 </body>

@@ -77,3 +77,146 @@ code {
   font-family: "Courier New", monospace;
   font-size: 9pt;
 }
+
+/* ---------- Checklist report ---------- */
+
+/* Table-based layout (not flexbox): WeasyPrint renders CSS tables reliably,
+   whereas its flexbox support can collapse columns onto each other. */
+.summary {
+  background: #f4f5f9;
+  border-radius: 6pt;
+  padding: 14pt 16pt;
+  margin-bottom: 6pt;
+}
+
+.summary-layout {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.readiness-cell {
+  width: 110pt;
+  vertical-align: middle;
+  text-align: center;
+  border-right: 1px solid #d8dde8;
+  padding-right: 14pt;
+}
+
+.meta-cell {
+  vertical-align: middle;
+  padding-left: 16pt;
+}
+
+.readiness-value {
+  font-size: 30pt;
+  font-weight: 800;
+  color: #000fdf;
+  line-height: 1;
+}
+
+.readiness-caption {
+  font-size: 8.5pt;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #565656;
+  margin-top: 4pt;
+}
+
+.summary-meta {
+  border-collapse: collapse;
+  font-size: 10pt;
+}
+
+.summary-meta th {
+  text-align: left;
+  font-weight: 700;
+  color: #565656;
+  padding: 2pt 14pt 2pt 0;
+  white-space: nowrap;
+  vertical-align: top;
+}
+
+.summary-meta td { padding: 2pt 0; }
+
+.legend-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 9.5pt;
+}
+
+.legend-list li {
+  display: inline-block;
+  margin: 0 16pt 6pt 0;
+  white-space: nowrap;
+}
+
+.legend-list .score-badge {
+  margin-right: 5pt;
+}
+
+.cat {
+  font-size: 11pt;
+  color: #1a1a1a;
+  border-bottom: none;
+  margin: 16pt 0 6pt;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.answer-block {
+  border-left: 3px solid #d8dde8;
+  padding: 4pt 0 4pt 12pt;
+  margin: 0 0 10pt;
+  /* keep a question + its answer together across page breaks */
+  page-break-inside: avoid;
+}
+
+.q-head {
+  margin-bottom: 3pt;
+}
+
+.q-head > * {
+  vertical-align: middle;
+  margin-right: 6pt;
+}
+
+.q-order {
+  display: inline-block;
+  width: 16pt;
+  height: 16pt;
+  line-height: 16pt;
+  text-align: center;
+  background: #000fdf;
+  color: #fff;
+  border-radius: 50%;
+  font-size: 8.5pt;
+  font-weight: 700;
+}
+
+.tag {
+  font-size: 8.5pt;
+  font-weight: 700;
+  color: #565656;
+  background: #eef0f6;
+  border-radius: 3pt;
+  padding: 1pt 5pt;
+}
+
+.q-text { margin: 0 0 3pt; font-weight: 600; }
+
+.answer-text { margin: 0; }
+
+.score-badge {
+  display: inline-block;
+  font-size: 8.5pt;
+  font-weight: 700;
+  border-radius: 3pt;
+  padding: 1pt 6pt;
+}
+
+.score-1 { background: #fde2e2; color: #b42318; }
+.score-2 { background: #fdecd3; color: #b54708; }
+.score-3 { background: #fbf3c4; color: #8a6d0b; }
+.score-4 { background: #e0f0e4; color: #15803d; }
+.score-5 { background: #c8ead6; color: #027a48; }

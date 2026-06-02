@@ -1,8 +1,8 @@
-// Export an ingested Questionnaire (with its questions) into prisma/seed/examples/<slug>/
+// Export a Checklist (with its questions) into prisma/seed/examples/<slug>/
 // so it gets committed and replayed by `prisma db seed` after clone.
 //
 // Usage:
-//   npx tsx prisma/seed/export.ts <questionnaireId> [folderSlug]
+//   npx tsx prisma/seed/export.ts <checklistId> [folderSlug]
 
 import { PrismaClient } from "@prisma/client";
 import { mkdir, writeFile } from "node:fs/promises";
@@ -14,11 +14,11 @@ const prisma = new PrismaClient();
 async function main() {
   const [id, folderArg] = process.argv.slice(2);
   if (!id) {
-    console.error("Usage: npx tsx prisma/seed/export.ts <questionnaireId> [folderSlug]");
+    console.error("Usage: npx tsx prisma/seed/export.ts <checklistId> [folderSlug]");
     process.exit(1);
   }
 
-  const q = await prisma.questionnaire.findUnique({
+  const q = await prisma.checklist.findUnique({
     where: { id },
     include: {
       questions: { orderBy: { order: "asc" } },
@@ -26,7 +26,7 @@ async function main() {
     },
   });
   if (!q) {
-    console.error(`No questionnaire with id ${id}`);
+    console.error(`No checklist with id ${id}`);
     process.exit(1);
   }
 

@@ -68,7 +68,7 @@ function parseDateOrNull(input: string | null | undefined): Date | null {
 }
 
 async function main() {
-  // 1. Sources registry — upsert citations and slugs ahead of any questionnaires.
+  // 1. Sources registry — upsert citations and slugs ahead of any checklists.
   if (existsSync(SOURCES_FILE)) {
     const sources = JSON.parse(await readFile(SOURCES_FILE, "utf8")) as SourceEntry[];
     for (const s of sources) await upsertSourceFromEntry(s);
@@ -96,7 +96,7 @@ async function main() {
     const meta = JSON.parse(await readFile(metaPath, "utf8")) as Meta;
     const qf = JSON.parse(await readFile(questionsPath, "utf8")) as QuestionsFile;
 
-    const existing = await prisma.questionnaire.findFirst({
+    const existing = await prisma.checklist.findFirst({
       where: { title: meta.title },
       select: { id: true },
     });
@@ -117,7 +117,7 @@ async function main() {
     const sourceId = await getOrCreateSourceId(meta.sourceName);
     const sourceUpdatedAt = parseDateOrNull(meta.sourceUpdatedAt);
 
-    const created = await prisma.questionnaire.create({
+    const created = await prisma.checklist.create({
       data: {
         title: meta.title,
         sourceId,

@@ -1,0 +1,70 @@
+# aisc platform fragment for apps/controls.
+#
+# Merge it with the platform infra (which provides the shared Postgres `postgres`
+# on the `backend` network):
+#   docker compose --env-file env.development \
+#     -f docker-compose-infra.development.yml \
+#     -f apps/controls/docker-compose.development.yml up -d controls-web
+#
+# Platform-side prereqs:
+#   - A `controls` database must exist in the shared Postgres (Prisma applies the
+#     schema but does not create the database). e.g. once infra is up:
+#       docker exec postgres createdb -U aisc-postgres-user controls
+#   - A Caddy route to controls-web:3000 (see the platform Caddyfile).
+#
+# Differences from the standalone docker-compose.yml: no bundled `db`, no
+# top-level `name:`, migrations run as a one-shot init service, and services
+# join the platform's `backend`/`frontend` networks.
+#
+# Build contexts are written relative to the PLATFORM PROJECT ROOT (the dir of
+# the first -f file), matching the platform's own `build: apps/<name>/`
+# convention — so this assumes the submodule is mounted at apps/controls.
+
+services:
+  # PDF report renderer sidecar. Internal-only; reached as http://controls-pdf:8005.
+  controls-pdf:
+    build: apps/controls/services/pdf_renderer
+    # Explicit name (like the platform's other services) so it never collides
+    # with the standalone stack's auto-named aisc-controls-pdf-1 container.
+    container_name: controls-pdf
+    restart: unless-stopped
+    networks: [backend]
+
+  # One-shot: apply migrations + seed the bundled checklists, then exit. The infra
+  # Postgres has no healthcheck, so retry migrate until it accepts connections.
+  # Seeding is idempotent (skips checklists already present).
+  controls-migrate:
+    build: apps/controls
+    container_name: controls-migrate
+    command: >
+      sh -c "until npx prisma migrate deploy; do echo '[controls] waiting for postgres…'; sleep 2; done && npx prisma db seed"
+    env_file: apps/controls/env.development
+    depends_on: [postgres] # shared infra Postgres (docker-compose-infra.*.yml)
+    restart: "no"
+    networks: [backend]
+
+  controls-web:
+    build:
+      context: apps/controls
+      args:
+        # Set CONTROLS_BASE_PATH=/controls for path-prefix routing behind Caddy.
+        NEXT_BASE_PATH: ${CONTROLS_BASE_PATH:-}
+    container_name: controls-web
+    env_file: apps/controls/env.development
+    depends_on:
+      controls-migrate:
+        condition: service_completed_successfully
+      controls-pdf:
+        condition: service_started
+    ports:
+      # Optional direct access; behind Caddy you can drop this. Defaults to 3100
+      # to avoid clashing with the platform webapp.
+      - "${CONTROLS_WEB_PORT:-3100}:3000"
+    restart: unless-stopped
+    networks: [backend, frontend]
+
+# Declared here too so the fragment is valid; merged with the infra file's
+# networks of the same name (one shared project network each).
+networks:
+  backend:
+  frontend:

@@ -1,37 +1,47 @@
+# Project name drives container/volume namespacing (aisc-controls-db-1, etc.)
+# regardless of the directory name.
+name: aisc-controls
+
 services:
   db:
     image: postgres:16-alpine
-    container_name: vera-controls-db
+    # No container_name: let Compose namespace it per-project (aisc-controls-db-1)
+    # so this stack never collides with another project's container, and stays
+    # fully standalone.
     restart: unless-stopped
     environment:
-      POSTGRES_USER: vera
-      POSTGRES_PASSWORD: vera
-      POSTGRES_DB: vera
+      POSTGRES_USER: aisc
+      POSTGRES_PASSWORD: aisc
+      POSTGRES_DB: aisc
     ports:
       # Host port 5444 (non-default) so we don't fight any other Postgres a
       # contributor might already run on 5432. The container side stays 5432.
       - "5444:5432"
     volumes:
+      # Named volume → answered checklists and every other row survive
+      # `docker compose down`, container recreation, and reboots. Only
+      # `docker compose down -v` (or `npm run db:reset`) wipes it.
       - postgres-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U vera -d vera"]
+      test: ["CMD-SHELL", "pg_isready -U aisc -d aisc"]
       interval: 3s
       timeout: 3s
       retries: 20
 
-  # Bundled LLMFactory — only needed for ingest. Browse-only users can leave
-  # this stopped. Start it explicitly with `npm run llm:up` (or
-  # `docker compose --profile llm up -d`).
-  llm_factory:
-    build: ./services/llm_factory
-    container_name: vera-controls-llm-factory
+  # Bundled PDF report renderer. Powers the submission "Download report (PDF)"
+  # action: the Next.js app POSTs report JSON to /render/pdf on host port 8005.
+  # The app does not depend on it — if it is down, only report downloads fail.
+  pdf:
+    build: ./services/pdf_renderer
     restart: unless-stopped
-    environment:
-      API_KEY_ANTHROPIC: ${API_KEY_ANTHROPIC:-}
-      API_KEY_MISTRAL: ${API_KEY_MISTRAL:-}
     ports:
-      - "5001:5001"
-    profiles: ["llm"]
+      # Host 8005 → container 8005. Matches the PDF_RENDERER_URL default.
+      - "8005:8005"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8005/health')"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
 
 volumes:
   postgres-data:

@@ -3,9 +3,14 @@ import SiteHeader from "@/components/SiteHeader";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Vera Controls",
-  description: "Compliance questionnaires — ingest, curate, compile.",
+  title: "AISC Controls",
+  description: "Compliance checklists — curate, answer, track.",
 };
+
+// Every page reads from the database per-request, so render dynamically. This
+// also keeps `next build` (used for the platform Docker image) from trying to
+// prerender — and hit the DB — at build time.
+export const dynamic = "force-dynamic";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

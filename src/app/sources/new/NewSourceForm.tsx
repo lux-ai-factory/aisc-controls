@@ -33,7 +33,7 @@ export default function NewSourceForm() {
           <span className="qf-help">
             Some authorities require a formal citation when re-using their
             documents. Stored on the source and shown next to every
-            questionnaire from this source.
+            checklist from this source.
           </span>
         </div>
         <div className="field">

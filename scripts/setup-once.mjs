@@ -1,7 +1,10 @@
-// First-run setup: makes a working DB available, applies migrations, and seeds
-// the bundled examples. Re-runs are gated by a marker file so `npm run dev`
-// only pays the cost once. Everything is idempotent — deleting the marker is
-// always safe.
+// Startup setup: makes a working DB available, applies migrations, and seeds
+// the bundled examples. Bringing Postgres up runs on EVERY `npm run dev` so a
+// stopped container heals and the persistent volume (with your answered
+// checklists) is reconnected. Migrations + seeding are gated by a marker file
+// so we only pay that cost once. Everything is idempotent — deleting the
+// marker, or re-seeding, is always safe (the seed skips checklists already in
+// the DB and never touches submissions).
 
 import {
   existsSync,
@@ -13,10 +16,16 @@ import {
 import { spawnSync } from "node:child_process";
 import path from "node:path";
 
-const MARKER_DIR = path.resolve("node_modules/.cache/vera-controls");
+const MARKER_DIR = path.resolve("node_modules/.cache/aisc-controls");
 const MARKER = path.join(MARKER_DIR, "setup-done");
 
-if (existsSync(MARKER)) process.exit(0);
+// Platform mode: running as an aisc submodule against shared infra. The platform
+// owns Postgres and applies migrations via its own init service (controls-migrate),
+// so this standalone bootstrap must not start a second DB or re-seed.
+if (process.env.AISC_PLATFORM === "1") {
+  console.log("[setup] AISC_PLATFORM=1 — skipping standalone infra bootstrap.");
+  process.exit(0);
+}
 
 // 1. ensure .env exists (copy from template on first run)
 const envFile = path.resolve(".env");
@@ -45,7 +54,7 @@ if (!process.env.DATABASE_URL) {
 // idempotent: a no-op when the container is already running and healthy.
 const composeFile = path.resolve("docker-compose.yml");
 const usesBundledDb = (process.env.DATABASE_URL ?? "").startsWith(
-  "postgresql://vera:vera@localhost:5444/vera",
+  "postgresql://aisc:aisc@localhost:5444/aisc",
 );
 if (usesBundledDb && existsSync(composeFile) && hasCommand("docker")) {
   console.log("[setup] ensuring Postgres is up (docker compose up -d db)…");
@@ -61,7 +70,23 @@ if (usesBundledDb && existsSync(composeFile) && hasCommand("docker")) {
   process.exit(1);
 }
 
-// 4. migrate + seed
+// 3b. Best-effort: bring up the bundled PDF report renderer. The core app does
+// not depend on it, so a slow first-time image build or a start failure here
+// only disables the "Download report (PDF)" action — it must never block
+// `npm run dev`. Hence runLoose (warn, don't exit) rather than runStrict.
+if (existsSync(composeFile) && hasCommand("docker")) {
+  console.log("[setup] ensuring PDF renderer is up (docker compose up -d pdf)…");
+  runLoose("docker", ["compose", "up", "-d", "pdf"]);
+}
+
+// 4. migrate + seed — gated by the marker so it only runs the first time.
+// The DB is already up (step 3 above) on every run, so re-runs just reconnect
+// to the persistent volume and keep every answered checklist intact.
+if (existsSync(MARKER)) {
+  console.log("[setup] already initialised — DB is up, skipping migrate/seed.");
+  process.exit(0);
+}
+
 console.log("[setup] applying migrations…");
 runStrict("npx", ["prisma", "migrate", "deploy"]);
 
@@ -87,6 +112,17 @@ function runStrict(cmd, args) {
   }
 }
 
+// Like runStrict, but a failure only warns and lets setup continue — for
+// optional, non-blocking steps (e.g. the PDF renderer container).
+function runLoose(cmd, args) {
+  const r = spawnSync(cmd, args, { stdio: "inherit", shell: false });
+  if (r.status !== 0) {
+    console.warn(
+      `[setup] \`${cmd} ${args.join(" ")}\` failed — continuing without it.`,
+    );
+  }
+}
+
 function sleepMs(ms) {
   Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
 }
@@ -97,7 +133,7 @@ function waitForDbHealthy(timeoutMs) {
   while (Date.now() - start < timeoutMs) {
     const r = spawnSync(
       "docker",
-      ["compose", "exec", "-T", "db", "pg_isready", "-U", "vera", "-d", "vera"],
+      ["compose", "exec", "-T", "db", "pg_isready", "-U", "aisc", "-d", "aisc"],
       { stdio: "ignore" },
     );
     if (r.status === 0) {

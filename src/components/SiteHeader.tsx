@@ -7,9 +7,8 @@ export default function SiteHeader() {
           <img src="/laif-logo.svg" alt="Luxembourg AI Factory" />
         </a>
         <nav>
-          <a href="/questionnaires">Library</a>
-          <a href="/sources">Sources</a>
-          <a href="/submissions">Compiled forms</a>
+          <a href="/checklists">Library</a>
+          <a href="/submissions">Answered checklists</a>
         </nav>
       </div>
     </header>

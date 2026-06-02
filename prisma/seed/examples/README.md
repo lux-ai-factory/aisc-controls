@@ -1,4 +1,4 @@
-# Bundled questionnaire examples
+# Bundled checklist examples
 
 Anything in this folder is committed to git and replayed by `prisma db seed` so a
 fresh clone has data to look at without uploading anything by hand.
@@ -38,12 +38,12 @@ prisma/seed/examples/
 }
 ```
 
-## Adding an example you ingested through the UI
+## Adding an example you created in the UI
 
-Run the export helper after you've ingested a questionnaire in the app:
+Run the export helper after you've added a checklist in the app:
 
 ```bash
-npx tsx prisma/seed/export.ts <questionnaireId> [folderSlug]
+npx tsx prisma/seed/export.ts <checklistId> [folderSlug]
 ```
 
 It writes `meta.json` + `questions.json` into a new folder here. Drop the
@@ -53,5 +53,5 @@ folder.
 ## Re-seeding
 
 The seed is idempotent — it skips entries whose title already exists for the
-system user. To force a re-seed of one entry, delete that questionnaire in the
+system user. To force a re-seed of one entry, delete that checklist in the
 DB first.

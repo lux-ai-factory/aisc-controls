@@ -9,6 +9,7 @@ build/
 .DS_Store
 .vscode/
 .idea/
+.claude/
 prisma/migrations/dev.db*
 postgres-data/
 
@@ -18,9 +19,3 @@ tsconfig.tsbuildinfo
 # Original source documents — the seeded data lives in prisma/seed/examples/
 Checklists and examples(1)/
 EUSAIR_Compliance/
-
-# Bundled LLMFactory: ignore venv + caches if anyone runs the service locally
-services/llm_factory/llmminenv/
-services/llm_factory/__pycache__/
-services/llm_factory/**/__pycache__/
-services/llm_factory/.env
