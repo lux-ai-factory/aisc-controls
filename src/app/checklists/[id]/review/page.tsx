@@ -27,8 +27,7 @@ export default async function ReviewPage({
       <header className="page-header">
         <h1>Edit checklist</h1>
         <p>
-          {q.questions.length} questions
-          {q.originalFile ? ` from ${q.originalFile}` : ""}.
+          {q.questions.length} questions.
         </p>
       </header>
       <ReviewForm

@@ -19,7 +19,7 @@ prisma/seed/examples/
 ```json
 {
   "title": "AEPD — RGPD operational controls",
-  "sourceName": "AEPD-RGPD-controls.docx",
+  "sourceName": "AEPD",
   "controlTopic": "Data protection",
   "description": "Spanish DPA reference checklist for RGPD operational controls.",
   "countryIds": ["ES"],

@@ -33,8 +33,6 @@ model Checklist {
   regulationIds   String[]     @default([])
   controlTopic    String
   description     String?
-  originalFile    String?
-  originalSize    Int?
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
   questions       Question[]

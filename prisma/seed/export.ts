@@ -61,11 +61,6 @@ async function main() {
 
   console.log(`Exported to ${outDir}`);
   console.log(`  ${q.questions.length} questions`);
-  if (q.originalFile) {
-    console.log(
-      `  Source file referenced: ${q.originalFile} — drop the actual file into ${outDir} if you want to bundle it.`,
-    );
-  }
 }
 
 main()

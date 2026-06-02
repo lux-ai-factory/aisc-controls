@@ -24,8 +24,6 @@ CREATE TABLE "Checklist" (
     "regulationIds" TEXT[] DEFAULT ARRAY[]::TEXT[],
     "controlTopic" TEXT NOT NULL,
     "description" TEXT,
-    "originalFile" TEXT,
-    "originalSize" INTEGER,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 

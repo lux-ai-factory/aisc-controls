@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { existsSync } from "node:fs";
-import { readFile, readdir, stat } from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 import { slugify } from "../src/lib/slugify";
 
@@ -105,15 +105,6 @@ async function main() {
       continue;
     }
 
-    const files = await readdir(dir);
-    const sourceFile = files.find((f) => f !== "meta.json" && f !== "questions.json");
-    let originalFile: string | null = null;
-    let originalSize: number | null = null;
-    if (sourceFile) {
-      originalFile = sourceFile;
-      originalSize = (await stat(path.join(dir, sourceFile))).size;
-    }
-
     const sourceId = await getOrCreateSourceId(meta.sourceName);
     const sourceUpdatedAt = parseDateOrNull(meta.sourceUpdatedAt);
 
@@ -126,8 +117,6 @@ async function main() {
         description: meta.description ?? null,
         countryIds: meta.countryIds,
         regulationIds: meta.regulationIds,
-        originalFile,
-        originalSize,
         questions: {
           create: qf.questions.map((q, idx) => ({
             order: idx + 1,
