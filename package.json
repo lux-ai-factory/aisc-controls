@@ -20,7 +20,6 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
     "setup": "rm -f node_modules/.cache/aisc-controls/setup-done && node scripts/setup-once.mjs",
     "db:up": "docker compose up -d db",
     "db:down": "docker compose down",
