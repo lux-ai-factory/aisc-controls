@@ -78,6 +78,11 @@ export default async function SubmissionDetailPage({
 }) {
   const { id } = await params;
 
+  // Raw <a href> links are not rewritten by Next's basePath — prefix
+  // explicitly (same pattern as SiteHeader) so the report download works
+  // when the app is served under a subpath (e.g. /controls behind Caddy).
+  const basePath = process.env.NEXT_BASE_PATH || "";
+
   const sub = await prisma.submission.findUnique({
     where: { id },
     include: {
@@ -148,7 +153,7 @@ export default async function SubmissionDetailPage({
         <Link className="btn ghost" href="/submissions">
           ← Back to answered checklists
         </Link>
-        <a className="btn" href={`/submissions/${sub.id}/report`}>
+        <a className="btn" href={`${basePath}/submissions/${sub.id}/report`}>
           Download report (PDF)
         </a>
         {isArchived && (
