@@ -214,4 +214,5 @@ npm run test:watch
 
 ## License
 
-Licensed under the [Apache License 2.0](./LICENSE).
+This project is licensed under the [Apache License 2.0](LICENSE).  
+© 2024–2026 University of Luxembourg and Luxembourg Institute of Science and Technology.
