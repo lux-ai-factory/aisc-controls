@@ -25,6 +25,9 @@ model Source {
 
 model Checklist {
   id              String       @id @default(cuid())
+  // Stable slug of the source catalogue control. Null for hand-made checklists.
+  // Unique so installing from the catalogue is idempotent and "installed?" is one lookup.
+  catalogueId     String?      @unique
   title           String
   sourceId        String
   source          Source       @relation(fields: [sourceId], references: [id], onDelete: Restrict)
