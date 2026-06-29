@@ -3,12 +3,10 @@
 import Keycloak from "keycloak-js";
 
 // Exported so it's unit-testable without initializing Keycloak.
-// `||` (not `??`) so an EMPTY string also falls back — a Docker `ENV X=""` bakes "" into the build,
-// and "" should still use the dev default rather than break the client.
 export const keycloakConfig = {
-  url: process.env.NEXT_PUBLIC_KEYCLOAK_URL || "http://localhost:8081",
-  realm: process.env.NEXT_PUBLIC_KEYCLOAK_REALM || "aisc",
-  clientId: process.env.NEXT_PUBLIC_KEYCLOAK_CLIENT_ID || "controls",
+  url: process.env.NEXT_PUBLIC_KEYCLOAK_URL ?? "http://localhost:8081",
+  realm: process.env.NEXT_PUBLIC_KEYCLOAK_REALM ?? "aisc",
+  clientId: process.env.NEXT_PUBLIC_KEYCLOAK_CLIENT_ID ?? "controls",
 };
 
 const keycloak = new Keycloak(keycloakConfig);
