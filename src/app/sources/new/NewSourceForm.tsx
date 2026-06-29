@@ -2,7 +2,6 @@
 
 import { useActionState } from "react";
 import { createSource, type CreateState } from "./actions";
-import keycloak from "@/auth/keycloak";
 
 export default function NewSourceForm() {
   const [state, formAction, pending] = useActionState<CreateState, FormData>(
@@ -12,7 +11,6 @@ export default function NewSourceForm() {
 
   return (
     <form action={formAction} className="qf-form">
-      <input type="hidden" name="kc_token" value={keycloak.token ?? ""} />
       {state?.error && <div className="error">{state.error}</div>}
       <section className="qf-section">
         <div className="field">

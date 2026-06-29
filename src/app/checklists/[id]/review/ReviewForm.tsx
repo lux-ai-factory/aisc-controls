@@ -1,5 +1,4 @@
 "use client";
-import keycloak from "@/auth/keycloak";
 
 import { useActionState, useState } from "react";
 import type { Country, Regulation } from "@/data";
@@ -61,7 +60,6 @@ export default function ReviewForm({
 
   return (
     <form action={formAction} className="qf-form">
-      <input type="hidden" name="kc_token" value={keycloak.token ?? ""} />
       {state?.error && <div className="error">{state.error}</div>}
 
       <ChecklistMetaFields
