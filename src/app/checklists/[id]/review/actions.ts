@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { auditEvent } from "@/lib/audit";
 import { prisma } from "@/lib/prisma";
 import {
   parseMeta,
@@ -75,5 +76,7 @@ export async function saveReviewedQuestions(
     }),
   ]);
 
+  await auditEvent({ token: formData.get("kc_token")?.toString(), what: "checklist:review",
+                     consequence: { checklistId } });
   redirect(`/checklists`);
 }
