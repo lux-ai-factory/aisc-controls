@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import keycloak from "@/auth/keycloak";
 import { groupByCategory } from "@/lib/questions";
 import ScoreScale from "@/components/ScoreScale";
 import { saveDraft, type ActionState } from "./actions";
@@ -35,6 +36,7 @@ export default function DraftEditForm({
 
   return (
     <form action={formAction} className="qf-form">
+      <input type="hidden" name="kc_token" value={keycloak.token ?? ""} />
       {state?.error && <div className="error">{state.error}</div>}
 
       <section className="qf-section">
