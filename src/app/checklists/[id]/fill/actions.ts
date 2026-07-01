@@ -43,10 +43,11 @@ export async function submitForm(
   // gives the verified "who". Best-effort — auditEvent never throws.
   await auditEvent({
     token: formData.get("kc_token")?.toString(),
-    what: "checklist:answer",
-    consequence: {
+    action: "answer",
+    resource_type: "checklist",
+    resource_id: checklistId,
+    metadata: {
       submissionId: created.id,
-      checklistId,
       label: parsed.data.label,
       answerCount: answers.length,
     },

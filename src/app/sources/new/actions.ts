@@ -49,7 +49,7 @@ export async function createSource(
   }
 
   await prisma.source.create({ data: { name, slug, citation, url } });
-  await auditEvent({ token: formData.get("kc_token")?.toString(), what: "source:create",
-                     consequence: { name, slug } });
+  await auditEvent({ token: formData.get("kc_token")?.toString(), action: "create",
+                     resource_type: "source", resource_id: slug, metadata: { name } });
   redirect("/sources");
 }

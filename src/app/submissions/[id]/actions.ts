@@ -52,8 +52,9 @@ export async function saveDraft(
   revalidatePath(`/submissions/${submissionId}`);
   if (shouldClose) revalidatePath("/submissions");
   await auditEvent({ token: formData.get("kc_token")?.toString(),
-                     what: shouldClose ? "submission:close" : "submission:save_draft",
-                     consequence: { submissionId, label } });
+                     action: shouldClose ? "close" : "save_draft",
+                     resource_type: "submission", resource_id: submissionId,
+                     metadata: { label } });
   return undefined;
 }
 

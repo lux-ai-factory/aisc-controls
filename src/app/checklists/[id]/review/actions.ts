@@ -76,7 +76,7 @@ export async function saveReviewedQuestions(
     }),
   ]);
 
-  await auditEvent({ token: formData.get("kc_token")?.toString(), what: "checklist:review",
-                     consequence: { checklistId } });
+  await auditEvent({ token: formData.get("kc_token")?.toString(), action: "review",
+                     resource_type: "checklist", resource_id: checklistId, metadata: {} });
   redirect(`/checklists`);
 }
