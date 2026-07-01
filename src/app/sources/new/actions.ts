@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { slugify } from "@/lib/slugify";
+import { auditEvent } from "@/lib/audit";
 
 const schema = z.object({
   name: z.string().trim().min(1, "Name is required").max(100),
@@ -48,5 +49,7 @@ export async function createSource(
   }
 
   await prisma.source.create({ data: { name, slug, citation, url } });
+  await auditEvent({ token: formData.get("kc_token")?.toString(), action: "create",
+                     resource_type: "source", resource_id: slug, metadata: { name } });
   redirect("/sources");
 }
