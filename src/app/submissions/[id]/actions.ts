@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { auditEvent } from "@/lib/audit";
 import { prisma } from "@/lib/prisma";
 import { parseAnswers } from "@/lib/checklistForm";
 
@@ -50,6 +51,10 @@ export async function saveDraft(
 
   revalidatePath(`/submissions/${submissionId}`);
   if (shouldClose) revalidatePath("/submissions");
+  await auditEvent({ token: formData.get("kc_token")?.toString(),
+                     action: shouldClose ? "close" : "save_draft",
+                     resource_type: "submission", resource_id: submissionId,
+                     metadata: { label } });
   return undefined;
 }
 

@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import { groupByCategory } from "@/lib/questions";
 import ScoreScale from "@/components/ScoreScale";
 import { submitForm, type SubmitState } from "./actions";
+import keycloak from "@/auth/keycloak";
 
 type Q = {
   id: string;
@@ -29,6 +30,9 @@ export default function FillForm({
 
   return (
     <form action={formAction} className="qf-form">
+      {/* Forward the user's Keycloak token so the server action can attribute the audit event to
+          the verified user (the server decides `what`; the token only supplies the "who"). */}
+      <input type="hidden" name="kc_token" value={keycloak.token ?? ""} />
       {state?.error && <div className="error">{state.error}</div>}
 
       <section className="qf-section">

@@ -1,3 +1,5 @@
+import AuthButtons from "@/components/AuthButtons";
+
 export default function SiteHeader() {
   // Neither static files in public/ nor raw <a href> links are prefixed with
   // the configured basePath the way Next's own /_next assets and <Link>
@@ -14,6 +16,7 @@ export default function SiteHeader() {
         <nav>
           <a href={`${basePath}/checklists`}>Library</a>
           <a href={`${basePath}/submissions`}>Answered checklists</a>
+          <AuthButtons />
         </nav>
       </div>
     </header>

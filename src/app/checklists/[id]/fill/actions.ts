@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { parseAnswers } from "@/lib/checklistForm";
+import { auditEvent } from "@/lib/audit";
 
 const schema = z.object({
   label: z.string().min(1, "Give this submission a name"),
@@ -35,6 +36,21 @@ export async function submitForm(
       answers: { create: answers },
     },
     select: { id: true },
+  });
+
+  // AUDIT (server-side, before redirect): who answered which checklist + the result.
+  // `what` is set HERE by the server (not the client); the user's token (forwarded via a hidden field)
+  // gives the verified "who". Best-effort — auditEvent never throws.
+  await auditEvent({
+    token: formData.get("kc_token")?.toString(),
+    action: "answer",
+    resource_type: "checklist",
+    resource_id: checklistId,
+    metadata: {
+      submissionId: created.id,
+      label: parsed.data.label,
+      answerCount: answers.length,
+    },
   });
 
   redirect(`/submissions/${created.id}`);
