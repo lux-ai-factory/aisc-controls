@@ -1,0 +1,14 @@
+[
+  {
+    "name": "AESIA",
+    "slug": "aesia",
+    "citation": "Origin of the data: Spanish Agency for the Supervision of Artificial Intelligence",
+    "url": "https://aesia.digital.gob.es/en/guides"
+  },
+  {
+    "name": "EUSAiR",
+    "slug": "eusair",
+    "citation": "Origin of the data: EUSAiR",
+    "url": "https://eusair-project.eu/"
+  }
+]

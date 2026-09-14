@@ -1,0 +1,93 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum SubmissionStatus {
+  Draft
+  Closed
+}
+
+model Source {
+  id         String      @id @default(cuid())
+  slug       String      @unique
+  name       String      @unique
+  citation   String?
+  url        String?
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  checklists Checklist[]
+}
+
+model Checklist {
+  id              String       @id @default(cuid())
+  // Stable slug of the source catalogue control. Null for hand-made checklists.
+  // Unique so installing from the catalogue is idempotent and "installed?" is one lookup.
+  catalogueId     String?      @unique
+  title           String
+  sourceId        String
+  source          Source       @relation(fields: [sourceId], references: [id], onDelete: Restrict)
+  sourceUpdatedAt DateTime?
+  countryIds      String[]     @default([])
+  regulationIds   String[]     @default([])
+  controlTopic    String
+  description     String?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  questions       Question[]
+  submissions     Submission[]
+
+  @@index([sourceId])
+}
+
+model Question {
+  id          String             @id @default(cuid())
+  checklistId String
+  order       Int
+  text        String
+  article     String?
+  category    String?
+  checklist   Checklist          @relation(fields: [checklistId], references: [id], onDelete: Cascade)
+  answers     SubmissionAnswer[]
+
+  @@unique([checklistId, order])
+  @@index([checklistId])
+}
+
+model Submission {
+  id                String             @id @default(cuid())
+  checklistId       String
+  label             String
+  status            SubmissionStatus   @default(Draft)
+  version           Int                @default(1)
+  previousVersionId String?            @unique
+  closedAt          DateTime?
+  archivedAt        DateTime?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  checklist         Checklist          @relation(fields: [checklistId], references: [id], onDelete: Cascade)
+  previousVersion   Submission?        @relation("SubmissionVersionChain", fields: [previousVersionId], references: [id], onDelete: SetNull)
+  nextVersion       Submission?        @relation("SubmissionVersionChain")
+  answers           SubmissionAnswer[]
+
+  @@index([checklistId])
+  @@index([status])
+  @@index([archivedAt])
+}
+
+model SubmissionAnswer {
+  id           String     @id @default(cuid())
+  submissionId String
+  questionId   String
+  answer       String?
+  score        Int?
+  submission   Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  question     Question   @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([submissionId, questionId])
+  @@index([submissionId])
+}

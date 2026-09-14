@@ -1,0 +1,144 @@
+{
+  "questions": [
+    {
+      "text": "Has the provider defined a governance policy for logging and traceability?",
+      "article": "Article 12, Article 16, Article 19",
+      "category": "Governance & Design Stage"
+    },
+    {
+      "text": "Are roles and responsibilities for logging oversight clearly assigned (who maintains, audits, and reviews logs)?",
+      "article": "Article 12, Article 16, Article 19",
+      "category": "Governance & Design Stage"
+    },
+    {
+      "text": "Are access rules and authorization levels documented and aligned with security and data protection requirements?",
+      "article": "Article 12, Article 16, Article 19",
+      "category": "Governance & Design Stage"
+    },
+    {
+      "text": "Has a logging plan been approved by the responsible compliance or risk officer?",
+      "article": "Article 12, Article 16, Article 19",
+      "category": "Governance & Design Stage"
+    },
+    {
+      "text": "Are logging requirements integrated into the system architecture from the design phase (including interfaces and data flows)?",
+      "article": "Article 12, Article 16, Article 19",
+      "category": "Governance & Design Stage"
+    },
+    {
+      "text": "Are procedures in place to ensure logs remain comprehensive and tamper-resistant as the system evolves or updates?",
+      "article": "Article 12, Article 16, Article 19",
+      "category": "Governance & Design Stage"
+    },
+    {
+      "text": "Has the provider documented which events are logged (e.g., performance, cybersecurity, modifications, anomalies)?",
+      "article": "Article 12.3, ISO/IEC 24970",
+      "category": "Development Stage"
+    },
+    {
+      "text": "Does the provider maintain an information model for log fields (event type, timestamp, user ID, action, outcome, etc.)?",
+      "article": "Article 12.3, ISO/IEC 24970",
+      "category": "Development Stage"
+    },
+    {
+      "text": "Is logging implemented across all lifecycle stages (development, training, validation, testing, deployment)?",
+      "article": "Article 12.3, ISO/IEC 24970",
+      "category": "Development Stage"
+    },
+    {
+      "text": "Are logs technically protected (e.g., integrity checks, secure storage, controlled access)?",
+      "article": "Article 12.3, ISO/IEC 24970",
+      "category": "Development Stage"
+    },
+    {
+      "text": "Are privacy and data protection considerations integrated into the logging design (especially for sensitive data)?",
+      "article": "Article 12.3, ISO/IEC 24970",
+      "category": "Development Stage"
+    },
+    {
+      "text": "Are justification and rationale for logged events documented in the technical file, especially for safety- or rights-relevant events?",
+      "article": "Article 12.3, ISO/IEC 24970",
+      "category": "Development Stage"
+    },
+    {
+      "text": "Has the logging mechanism been tested for accuracy, completeness, and resilience against tampering?",
+      "article": "Article 12.2, 12.3, Article 13.3.b",
+      "category": "Validation & Testing Stage"
+    },
+    {
+      "text": "Are procedures in place to verify log accessibility by authorized personnel under controlled conditions?",
+      "article": "Article 12.2, 12.3, Article 13.3.b",
+      "category": "Validation & Testing Stage"
+    },
+    {
+      "text": "Are logs reviewed during validation to confirm they support incident reconstruction and risk assessment?",
+      "article": "Article 12.2, 12.3, Article 13.3.b",
+      "category": "Validation & Testing Stage"
+    },
+    {
+      "text": "Are log analysis tools documented and validated for usability and interpretability?",
+      "article": "Article 12.2, 12.3, Article 13.3.b",
+      "category": "Validation & Testing Stage"
+    },
+    {
+      "text": "Have cybersecurity event logging and alert mechanisms been tested for reliability?",
+      "article": "Article 12.2, 12.3, Article 13.3.b",
+      "category": "Validation & Testing Stage"
+    },
+    {
+      "text": "Is there a process for testing log retention and retrieval?",
+      "article": "Article 12.2, 12.3, Article 13.3.b",
+      "category": "Validation & Testing Stage"
+    },
+    {
+      "text": "Do validation records demonstrate that logging supports monitoring, explainability, and traceability requirements?",
+      "article": "Article 12.2, 12.3, Article 13.3.b",
+      "category": "Validation & Testing Stage"
+    },
+    {
+      "text": "Is there a procedure for periodic review of logs to detect anomalies, errors, or security events?",
+      "article": "Article 12.2, Article 9",
+      "category": "Deployment & Operation Stage"
+    },
+    {
+      "text": "Are designated investigators or auditors able to access logs promptly in case of significant incidents?",
+      "article": "Article 12.2, Article 9",
+      "category": "Deployment & Operation Stage"
+    },
+    {
+      "text": "Are logs integrated with the risk management and incident reporting workflows?",
+      "article": "Article 12.2, Article 9",
+      "category": "Deployment & Operation Stage"
+    },
+    {
+      "text": "Are changes to system configurations, models, or parameters automatically logged?",
+      "article": "Article 12.2, Article 9",
+      "category": "Deployment & Operation Stage"
+    },
+    {
+      "text": "Is user feedback captured in logs to support ongoing risk monitoring?",
+      "article": "Article 12.2, Article 9",
+      "category": "Deployment & Operation Stage"
+    },
+    {
+      "text": "Are logging mechanisms updated and revalidated when system modifications occur?",
+      "article": "Article 12.2, Article 13.3.c",
+      "category": "Change Management & Continuous Improvement Stage"
+    },
+    {
+      "text": "Are update and rollback procedures logged to maintain traceability of software or model versions?",
+      "article": "Article 12.2, Article 13.3.c",
+      "category": "Change Management & Continuous Improvement Stage"
+    },
+    {
+      "text": "Are procedures in place to ensure continuity of logs across version updates or infrastructure migrations?",
+      "article": "Article 12.2, Article 13.3.c",
+      "category": "Change Management & Continuous Improvement Stage"
+    },
+    {
+      "text": "Are lessons learned from incident investigations used to refine logging practices?",
+      "article": "Article 12.2, Article 13.3.c",
+      "category": "Change Management & Continuous Improvement Stage"
+    }
+  ]
+}

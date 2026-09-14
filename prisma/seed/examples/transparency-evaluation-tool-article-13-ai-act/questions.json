@@ -1,0 +1,194 @@
+{
+  "questions": [
+    {
+      "text": "Is the IFU available in both machine-readable and human-readable formats?",
+      "article": "Article 13.2",
+      "category": "Instructions for Use (IFU)"
+    },
+    {
+      "text": "Is the human-readable IFU concise, correct, clear, and accessible to target users?",
+      "article": "Article 13.2",
+      "category": "Instructions for Use (IFU)"
+    },
+    {
+      "text": "Does the IFU include instructions and examples for correctly interpreting system outputs?",
+      "article": "Article 13.2",
+      "category": "Instructions for Use (IFU)"
+    },
+    {
+      "text": "Are contact details and legal identity of the provider (and EU representative, if applicable) disclosed?",
+      "article": "Article 13.2",
+      "category": "Instructions for Use (IFU)"
+    },
+    {
+      "text": "Does the IFU describe limitations on system use in different operational contexts (e.g., demographic, environmental, or task-based)?",
+      "article": "Article 13.2",
+      "category": "Instructions for Use (IFU)"
+    },
+    {
+      "text": "Is the intended purpose, scope, and deployment context clearly stated?",
+      "article": "Article 13.3.a, 13.b.i, 13.b.iii",
+      "category": "System Description and Intended Purpose"
+    },
+    {
+      "text": "Are criteria for substantial modifications and re-assessment defined?",
+      "article": "Article 13.3.a, 13.b.i, 13.b.iii",
+      "category": "System Description and Intended Purpose"
+    },
+    {
+      "text": "Are forbidden uses described and what risks or limitations they pose?",
+      "article": "Article 13.3.a, 13.b.i, 13.b.iii",
+      "category": "System Description and Intended Purpose"
+    },
+    {
+      "text": "Are interactions between components (including third-party modules) explained?",
+      "article": "Article 13.3.a, 13.b.i, 13.b.iii",
+      "category": "System Description and Intended Purpose"
+    },
+    {
+      "text": "Are potential risks from foreseeable misuse identified and communicated to deployers?",
+      "article": "Article 13.3.a, 13.b.i, 13.b.iii",
+      "category": "System Description and Intended Purpose"
+    },
+    {
+      "text": "Are performance metrics (accuracy, precision, recall, etc.) reported with test results?",
+      "article": "Article 13(3)(b)(ii), 13(3)(b)(v), 13(3)(b)(vi)",
+      "category": "Performance, Warnings & Robustness"
+    },
+    {
+      "text": "Are verification and validation methods documented, with supporting test results?",
+      "article": "Article 13(3)(b)(ii), 13(3)(b)(v), 13(3)(b)(vi)",
+      "category": "Performance, Warnings & Robustness"
+    },
+    {
+      "text": "Are subgroup performance differences (including protected groups) analyzed and documented?",
+      "article": "Article 13(3)(b)(ii), 13(3)(b)(v), 13(3)(b)(vi)",
+      "category": "Performance, Warnings & Robustness"
+    },
+    {
+      "text": "Is robustness tested and documented against faults, attacks, and dependency failures?",
+      "article": "Article 13(3)(b)(ii), 13(3)(b)(v), 13(3)(b)(vi)",
+      "category": "Performance, Warnings & Robustness"
+    },
+    {
+      "text": "Are cybersecurity specifications in place and constant updating of these systems documented?",
+      "article": "Article 13(3)(b)(ii), 13(3)(b)(v), 13(3)(b)(vi)",
+      "category": "Performance, Warnings & Robustness"
+    },
+    {
+      "text": "Are robustness specifications included, covering documented events, attributes, assessment results, and incident reporting processes?",
+      "article": "Article 13(3)(b)(ii), 13(3)(b)(v), 13(3)(b)(vi)",
+      "category": "Performance, Warnings & Robustness"
+    },
+    {
+      "text": "Are hardware and software dependencies that affect robustness documented?",
+      "article": "Article 13(3)(b)(ii), 13(3)(b)(v), 13(3)(b)(vi)",
+      "category": "Performance, Warnings & Robustness"
+    },
+    {
+      "text": "Are requirements for input data quality defined (format, completeness, acceptable ranges)?",
+      "article": "Article 13(3)(b)(ii), 13(3)(b)(v), 13(3)(b)(vi)",
+      "category": "Performance, Warnings & Robustness"
+    },
+    {
+      "text": "Is information provided about training, validation, and test datasets (including sources, representativeness, and coverage)?",
+      "article": "Article 13(3)(b)(ii), 13(3)(b)(v), 13(3)(b)(vi)",
+      "category": "Performance, Warnings & Robustness"
+    },
+    {
+      "text": "Are data preparation and preprocessing steps required for operation described and validated?",
+      "article": "Article 13(3)(b)(ii), 13(3)(b)(v), 13(3)(b)(vi)",
+      "category": "Performance, Warnings & Robustness"
+    },
+    {
+      "text": "Are foreseeable risk scenarios documented where the system could produce unreliable or harmful outputs?",
+      "article": "Article 13(3)(b)(ii), 13(3)(b)(v), 13(3)(b)(vi)",
+      "category": "Performance, Warnings & Robustness"
+    },
+    {
+      "text": "Are specific warning indicators or system behaviors that may signal unsafe or degraded performance defined for deployers to monitor?",
+      "article": "Article 13(3)(b)(ii), 13(3)(b)(v), 13(3)(b)(vi)",
+      "category": "Performance, Warnings & Robustness"
+    },
+    {
+      "text": "Are supplemental information types (e.g., uncertainty, attributions, outlier flags) documented?",
+      "article": "Article 13(3)(b)(iv), 13(3)(b)(vii), 13(3)(d)",
+      "category": "Output Interpretation & Interpretability Tools"
+    },
+    {
+      "text": "Are interpretability tools (e.g., SHAP, LIME) described with their limitations?",
+      "article": "Article 13(3)(b)(iv), 13(3)(b)(vii), 13(3)(d)",
+      "category": "Output Interpretation & Interpretability Tools"
+    },
+    {
+      "text": "Are there clear instructions on how to act on interpretability outputs?",
+      "article": "Article 13(3)(b)(iv), 13(3)(b)(vii), 13(3)(d)",
+      "category": "Output Interpretation & Interpretability Tools"
+    },
+    {
+      "text": "Is a risk assessment for potential misinterpretation documented and mitigations in place?",
+      "article": "Article 13(3)(b)(iv), 13(3)(b)(vii), 13(3)(d)",
+      "category": "Output Interpretation & Interpretability Tools"
+    },
+    {
+      "text": "Are planned automatic or manual updates documented with scope and frequency?",
+      "article": "Article 13(3)(c)",
+      "category": "System Changes, Updates & Continuous Learning"
+    },
+    {
+      "text": "Are continuous learning mechanisms defined, with monitoring and rollback boundaries?",
+      "article": "Article 13(3)(c)",
+      "category": "System Changes, Updates & Continuous Learning"
+    },
+    {
+      "text": "Are deployers notified promptly of significant changes or model updates?",
+      "article": "Article 13(3)(c)",
+      "category": "System Changes, Updates & Continuous Learning"
+    },
+    {
+      "text": "Is there guidance for update validation, rollback, and reversion in case of failure or regression?",
+      "article": "Article 13(3)(c)",
+      "category": "System Changes, Updates & Continuous Learning"
+    },
+    {
+      "text": "Are the computational resource requirements for operating the AI system clearly documented (GPU/CPU models, memory, performance benchmarks, RAM specifications, storage capacity, network bandwidth)?",
+      "article": "Article 13(3)(e), 13(3)(f)",
+      "category": "Computational Resources, Maintenance & Lifecycle"
+    },
+    {
+      "text": "Is the expected operational lifetime of the AI system described?",
+      "article": "Article 13(3)(e), 13(3)(f)",
+      "category": "Computational Resources, Maintenance & Lifecycle"
+    },
+    {
+      "text": "Does the documentation include an obsolescence plan and describe migration pathways for replacement or transition?",
+      "article": "Article 13(3)(e), 13(3)(f)",
+      "category": "Computational Resources, Maintenance & Lifecycle"
+    },
+    {
+      "text": "Are expected performance degradation trends over time described, with indicators for when the system requires renewal or reassessment?",
+      "article": "Article 13(3)(e), 13(3)(f)",
+      "category": "Computational Resources, Maintenance & Lifecycle"
+    },
+    {
+      "text": "Is there a detailed maintenance schedule?",
+      "article": "Article 13(3)(e), 13(3)(f)",
+      "category": "Computational Resources, Maintenance & Lifecycle"
+    },
+    {
+      "text": "Are performance monitoring thresholds established for detecting abnormal drift or degradation?",
+      "article": "Article 13(3)(e), 13(3)(f)",
+      "category": "Computational Resources, Maintenance & Lifecycle"
+    },
+    {
+      "text": "Are maintenance activities traceable (logs, versioning, audit records)?",
+      "article": "Article 13(3)(e), 13(3)(f)",
+      "category": "Computational Resources, Maintenance & Lifecycle"
+    },
+    {
+      "text": "Are expected downtime windows, fallback modes, and user notification procedures defined?",
+      "article": "Article 13(3)(e), 13(3)(f)",
+      "category": "Computational Resources, Maintenance & Lifecycle"
+    }
+  ]
+}
