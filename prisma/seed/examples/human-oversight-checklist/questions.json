@@ -1,0 +1,124 @@
+{
+  "questions": [
+    {
+      "text": "Does the smart system have an associated risk management system in accordance with the requirements set out in Article 9 of the RIA?",
+      "article": "Article 14",
+      "category": "MG01 - Design and development measures for effective surveillance"
+    },
+    {
+      "text": "Does the system have a governance model associated with its data in accordance with the requirements set out in Article 10 of the RIA?",
+      "article": "Article 14",
+      "category": "MG01 - Design and development measures for effective surveillance"
+    },
+    {
+      "text": "Does the system have a Technical Documentation in accordance with the requirements set out in Article 11 of the RIA?",
+      "article": "Article 14",
+      "category": "MG01 - Design and development measures for effective surveillance"
+    },
+    {
+      "text": "Does the system have a management of Records in accordance with the requirements set out in Article 12 of the RIA?",
+      "article": "Article 14",
+      "category": "MG01 - Design and development measures for effective surveillance"
+    },
+    {
+      "text": "Does the system have transparency mechanisms in accordance with the requirements set out in Article 13 of the RIA?",
+      "article": "Article 14",
+      "category": "MG01 - Design and development measures for effective surveillance"
+    },
+    {
+      "text": "Does the system have Accuracy mechanisms in accordance with the requirements set out in Article 15 of the RIA?",
+      "article": "Article 14",
+      "category": "MG01 - Design and development measures for effective surveillance"
+    },
+    {
+      "text": "Does the system have Robustness mechanisms in accordance with the requirements set out in Article 15 of the RIA?",
+      "article": "Article 14",
+      "category": "MG01 - Design and development measures for effective surveillance"
+    },
+    {
+      "text": "Does the system have cybersecurity mechanisms in accordance with the requirements set out in Article 15 of the RIA?",
+      "article": "Article 14",
+      "category": "MG01 - Design and development measures for effective surveillance"
+    },
+    {
+      "text": "Does the intelligent system have an interface that allows it to manage its associated risk management system in accordance with the requirements set out in Article 9 of the RIA?",
+      "article": "Article 14",
+      "category": "MG02 - Enable a human-machine interface"
+    },
+    {
+      "text": "Does the system have an interface that allows you to manage the governance model associated with the data in accordance with the requirements set out in Article 10 of the RIA?",
+      "article": "Article 14",
+      "category": "MG02 - Enable a human-machine interface"
+    },
+    {
+      "text": "Does the system have an interface that allows you to manage your Technical Documentation?",
+      "article": "Article 14",
+      "category": "MG02 - Enable a human-machine interface"
+    },
+    {
+      "text": "Does the system have an interface that allows you to manage the information in the system logs?",
+      "article": "Article 14",
+      "category": "MG02 - Enable a human-machine interface"
+    },
+    {
+      "text": "Does the system have an interface that allows you to manage the Transparency of the system?",
+      "article": "Article 14",
+      "category": "MG02 - Enable a human-machine interface"
+    },
+    {
+      "text": "Does the system have an interface that allows you to manage the accuracy of the system?",
+      "article": "Article 14",
+      "category": "MG02 - Enable a human-machine interface"
+    },
+    {
+      "text": "Does the system have an interface that allows you to manage the robustness of the system?",
+      "article": "Article 14",
+      "category": "MG02 - Enable a human-machine interface"
+    },
+    {
+      "text": "Does the system have an interface that allows you to manage its Cybersecurity?",
+      "article": "Article 14",
+      "category": "MG02 - Enable a human-machine interface"
+    },
+    {
+      "text": "Does the system have an associated governance model that applies during the construction and use of the system and that includes, at least, an organizational structure, procedures, and training for its use?",
+      "article": "Article 14",
+      "category": "MG03 - Governance model"
+    },
+    {
+      "text": "If it is a remote biometric identification system, does this governance model include the validation of the separate identification of at least two natural persons with the necessary competence, training and authority?",
+      "article": "Article 14.5",
+      "category": "MG03 - Governance model"
+    },
+    {
+      "text": "Does the system provide \"forced error\" or equivalent functionality to avoid automation bias?",
+      "article": "Article 14",
+      "category": "MG04 - Awareness. Forced error"
+    },
+    {
+      "text": "Has the system's governance model contemplated the level of autonomy of the system, detailing the moment of the process in which the responsible person(s) intervene?",
+      "article": "Article 14",
+      "category": "MG05 - Human in/on the loop"
+    },
+    {
+      "text": "Does the system have agile mechanisms so that its responsible person can interrupt its operation?",
+      "article": "Article 14",
+      "category": "MG05 - Human in/on the loop"
+    },
+    {
+      "text": "Does the system have an associated risk management plan?",
+      "article": "Article 14",
+      "category": "MG06 - Risk Management"
+    },
+    {
+      "text": "Does the system have mechanisms for the management of Transparency that allow its correct Supervision?",
+      "article": "Article 14",
+      "category": "MG07 - Transparency"
+    },
+    {
+      "text": "Does the system comply with the Registries' measures aimed at providing transparency about its operation?",
+      "article": "Article 14",
+      "category": "MG08 - Records"
+    }
+  ]
+}

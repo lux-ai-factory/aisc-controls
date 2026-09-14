@@ -1,0 +1,12 @@
+{
+  "title": "Data Dictionary (accompanying the Data and Data Governance Evaluation Tool)",
+  "sourceName": "EUSAiR",
+  "controlTopic": "Data Dictionary (accompanying the Data and Data Governance Evaluation Tool)",
+  "description": "EUSAiR — European AI Sandbox compliance evaluation tools.",
+  "countryIds": [
+    "EU"
+  ],
+  "regulationIds": [
+    "ai-act"
+  ]
+}

@@ -1,0 +1,359 @@
+{
+  "questions": [
+    {
+      "text": "Have interpretable-by-design models (e.g., rule-based systems or decision trees) been prioritized over black-box systems for high-stakes decisions?",
+      "article": "Article 14",
+      "category": "Human oversight measures for risk mitigation"
+    },
+    {
+      "text": "Have oversight functions such as monitoring, alarms, and intervention capabilities been integrated into the system architecture?",
+      "article": "Article 14",
+      "category": "Human oversight measures for risk mitigation"
+    },
+    {
+      "text": "Can the system evaluate whether the conditions needed to reliably complete a task are met before proceeding?",
+      "article": "Article 14",
+      "category": "Human oversight measures for risk mitigation"
+    },
+    {
+      "text": "Are guardrails implemented to halt or modify the system's actions when it operates under conditions for which it is ill-equipped, and are such situations clearly communicated to users?",
+      "article": "Article 14",
+      "category": "Human oversight measures for risk mitigation"
+    },
+    {
+      "text": "Has the design considered risks to health, safety, or fundamental rights that may emerge during intended or foreseeable misuse conditions?",
+      "article": "Article 14",
+      "category": "Human oversight measures for risk mitigation"
+    },
+    {
+      "text": "Has the system avoided prioritizing automation over manual input to ensure operators can act swiftly when intervention is needed?",
+      "article": "Article 14",
+      "category": "Human oversight measures for risk mitigation"
+    },
+    {
+      "text": "What is the defined level of autonomy of the AI system?",
+      "article": "Article 14",
+      "category": "Human oversight measures for risk mitigation"
+    },
+    {
+      "text": "Is this level of autonomy appropriate for the context in which the AI system will be used?",
+      "article": "Article 14",
+      "category": "Human oversight measures for risk mitigation"
+    },
+    {
+      "text": "Have natural persons assigned human oversight roles been informed of the system's capacities, and through which mechanisms?",
+      "article": "Article 14",
+      "category": "Human oversight measures for risk mitigation"
+    },
+    {
+      "text": "Have natural persons assigned human oversight roles been informed of the system's limitations, and through which mechanisms?",
+      "article": "Article 14",
+      "category": "Human oversight measures for risk mitigation"
+    },
+    {
+      "text": "Have regular external audits been planned or implemented to evaluate both technical performance and human oversight effectiveness?",
+      "article": "Article 14",
+      "category": "Human oversight measures for risk mitigation"
+    },
+    {
+      "text": "Is the allocation of roles and responsibilities between human operators and the AI system clearly defined?",
+      "article": "Article 14",
+      "category": "Human oversight measures for risk mitigation"
+    },
+    {
+      "text": "Has a data retention period for oversight logs been defined that aligns with regulatory and risk requirements?",
+      "article": "Article 14",
+      "category": "Human oversight measures for risk mitigation"
+    },
+    {
+      "text": "Are alarms and alert mechanisms implemented to detect anomalies, safety risks, or unexpected outputs?",
+      "article": "Article 14.3",
+      "category": "Information Mechanisms, Real-time and Retrospective"
+    },
+    {
+      "text": "Have alarm thresholds and prioritization mechanisms been tested and validated for accuracy and reliability?",
+      "article": "Article 14.3",
+      "category": "Information Mechanisms, Real-time and Retrospective"
+    },
+    {
+      "text": "Are oversight tools accessible and usable by designated personnel during critical system operations?",
+      "article": "Article 14.3",
+      "category": "Information Mechanisms, Real-time and Retrospective"
+    },
+    {
+      "text": "Are all human interventions, overrides, and disregard actions logged with timestamps and operator identity?",
+      "article": "Article 14.3",
+      "category": "Information Mechanisms, Real-time and Retrospective"
+    },
+    {
+      "text": "Do logs capture inputs, outputs, and context surrounding each intervention or anomaly detection?",
+      "article": "Article 14.3",
+      "category": "Information Mechanisms, Real-time and Retrospective"
+    },
+    {
+      "text": "Are oversight logs integrated with the broader logging and risk-management framework?",
+      "article": "Article 14.3",
+      "category": "Information Mechanisms, Real-time and Retrospective"
+    },
+    {
+      "text": "Are access controls applied to oversight logs specifying who can view, modify, or delete them?",
+      "article": "Article 14.3",
+      "category": "Information Mechanisms, Real-time and Retrospective"
+    },
+    {
+      "text": "Does the logging process achieve adequate coverage of relevant system events?",
+      "article": "Article 14.3",
+      "category": "Information Mechanisms, Real-time and Retrospective"
+    },
+    {
+      "text": "Do logs include complete metadata such as timestamps, inputs, and outputs?",
+      "article": "Article 14.3",
+      "category": "Information Mechanisms, Real-time and Retrospective"
+    },
+    {
+      "text": "Are data retention and retrieval procedures compliant with retention rules and performance requirements?",
+      "article": "Article 14.3",
+      "category": "Information Mechanisms, Real-time and Retrospective"
+    },
+    {
+      "text": "Are logged events auditable, consistent, reproducible, and verifiable?",
+      "article": "Article 14.3",
+      "category": "Information Mechanisms, Real-time and Retrospective"
+    },
+    {
+      "text": "Has a sampling method been established for human review when real-time oversight of all outputs is not feasible?",
+      "article": "Article 14.3",
+      "category": "Information Mechanisms, Real-time and Retrospective"
+    },
+    {
+      "text": "Is the sampling method periodically re-evaluated for fairness, accuracy, and governance quality?",
+      "article": "Article 14.3",
+      "category": "Information Mechanisms, Real-time and Retrospective"
+    },
+    {
+      "text": "Has the \"two people approval\" mechanism been implemented for critical decisions, and is its effectiveness monitored?",
+      "article": "Article 14.3",
+      "category": "Information Mechanisms, Real-time and Retrospective"
+    },
+    {
+      "text": "Is there a mechanism to measure the contestability rate (i.e., percentage of AI decisions reviewed or contested by humans)?",
+      "article": "Article 14.3",
+      "category": "Information Mechanisms, Real-time and Retrospective"
+    },
+    {
+      "text": "Is override latency measured — the time it takes for a human operator to intervene once an AI output is flagged as problematic?",
+      "article": "Article 14.3",
+      "category": "Information Mechanisms, Real-time and Retrospective"
+    },
+    {
+      "text": "Is there a system in place for oversight records and logs to be made available to competent authorities upon request for conformity assessments or audits?",
+      "article": "Article 14.3",
+      "category": "Information Mechanisms, Real-time and Retrospective"
+    },
+    {
+      "text": "Are intervention functions such as pause, override, disregard, or reversal of system decisions implemented and tested?",
+      "article": "Article 14.4.a, 14.4.d",
+      "category": "Deployer-implemented oversight measures"
+    },
+    {
+      "text": "Do oversight interfaces allow manual control and corrective action without causing cascading failures?",
+      "article": "Article 14.4.a, 14.4.d",
+      "category": "Deployer-implemented oversight measures"
+    },
+    {
+      "text": "Have stress or degraded-condition tests confirmed that human intervention remains possible under adverse conditions?",
+      "article": "Article 14.4.a, 14.4.d",
+      "category": "Deployer-implemented oversight measures"
+    },
+    {
+      "text": "Is a fallback interface available and functional under degraded or constrained operating conditions (e.g., low power or limited display)?",
+      "article": "Article 14.4.a, 14.4.d",
+      "category": "Deployer-implemented oversight measures"
+    },
+    {
+      "text": "Does the interface provide real-time visibility of system status, alarms, and intervention options (e.g., override, stop, reset)?",
+      "article": "Article 14.4.a, 14.4.d",
+      "category": "Deployer-implemented oversight measures"
+    },
+    {
+      "text": "Does the interface provide clear visibility of the system's operational state and decision rationale?",
+      "article": "Article 14.4.a, 14.4.d",
+      "category": "Deployer-implemented oversight measures"
+    },
+    {
+      "text": "Have usability tests with representative users measured task-success rate, time-to-intervention, misinterpretation rate, and cognitive workload?",
+      "article": "Article 14.4.a, 14.4.d",
+      "category": "Deployer-implemented oversight measures"
+    },
+    {
+      "text": "Have thresholds, alert refresh rates, and alarm mechanisms been validated to ensure timely perception and intervention?",
+      "article": "Article 14.4.a, 14.4.d",
+      "category": "Deployer-implemented oversight measures"
+    },
+    {
+      "text": "Are vigilance or wake-up prompts implemented to verify sustained operator attention during continuous oversight?",
+      "article": "Article 14.4.a, 14.4.d",
+      "category": "Deployer-implemented oversight measures"
+    },
+    {
+      "text": "Has a human-factors and usability assessment been performed?",
+      "article": "Article 14.4.a, 14.4.d",
+      "category": "Deployer-implemented oversight measures"
+    },
+    {
+      "text": "Does the system include a clearly identifiable and functional stop button?",
+      "article": "Article 14.4.a, 14.4.d",
+      "category": "Deployer-implemented oversight measures"
+    },
+    {
+      "text": "Have users been informed and trained on the mechanisms for overriding or stopping system outputs?",
+      "article": "Article 14.4.a, 14.4.d",
+      "category": "Deployer-implemented oversight measures"
+    },
+    {
+      "text": "Have mechanisms been implemented to detect and mitigate automation bias in operator decisions? If so, which mechanisms?",
+      "article": "Article 14.4.b",
+      "category": "Mitigating automation bias and human factors"
+    },
+    {
+      "text": "To what extent do operators rely uncritically on system outputs (percentage of accepted outputs in final decisions)?",
+      "article": "Article 14.4.b",
+      "category": "Mitigating automation bias and human factors"
+    },
+    {
+      "text": "Is the interface design tested for the risk of over-trust or blind acceptance of automated results?",
+      "article": "Article 14.4.b",
+      "category": "Mitigating automation bias and human factors"
+    },
+    {
+      "text": "Have training programs been implemented to promote critical thinking and reduce automation bias?",
+      "article": "Article 14.4.b",
+      "category": "Mitigating automation bias and human factors"
+    },
+    {
+      "text": "Does the organisational culture encourage challenge and questioning of automated outputs?",
+      "article": "Article 14.4.b",
+      "category": "Mitigating automation bias and human factors"
+    },
+    {
+      "text": "Have developers received adequate ethical and oversight training relevant to system risk?",
+      "article": "Article 14.4.b",
+      "category": "Mitigating automation bias and human factors"
+    },
+    {
+      "text": "Have affected individuals been meaningfully involved in the design and deployment of the AI system?",
+      "article": "Article 14.4.b",
+      "category": "Mitigating automation bias and human factors"
+    },
+    {
+      "text": "Are explainable AI (XAI) techniques such as SHAP and LIME implemented for complex models?",
+      "article": "Article 14.4.c",
+      "category": "Interpretation of outputs and interpretation tools"
+    },
+    {
+      "text": "Are feature-importance scores available to rank input features by their contribution to the model's output?",
+      "article": "Article 14.4.c",
+      "category": "Interpretation of outputs and interpretation tools"
+    },
+    {
+      "text": "Do the explanations provide consistent instance-level interpretation of feature contributions?",
+      "article": "Article 14.4.c",
+      "category": "Interpretation of outputs and interpretation tools"
+    },
+    {
+      "text": "Do the explanations provide understandable local approximations of model behaviour for specific predictions?",
+      "article": "Article 14.4.c",
+      "category": "Interpretation of outputs and interpretation tools"
+    },
+    {
+      "text": "Are confidence scores provided to help operators assess the reliability of system outputs?",
+      "article": "Article 14.4.c",
+      "category": "Interpretation of outputs and interpretation tools"
+    },
+    {
+      "text": "Does the system provide a clear rationale for each decision made?",
+      "article": "Article 14.4.c",
+      "category": "Interpretation of outputs and interpretation tools"
+    },
+    {
+      "text": "Does the system notify users when operating under conditions for which it is ill-equipped?",
+      "article": "Article 14.4.c",
+      "category": "Interpretation of outputs and interpretation tools"
+    },
+    {
+      "text": "Are guidelines provided to users for interpreting confidence measures and uncertainty indicators?",
+      "article": "Article 14.4.c",
+      "category": "Interpretation of outputs and interpretation tools"
+    },
+    {
+      "text": "Are XAI tools used to clarify routine decision-making processes in an interpretable way?",
+      "article": "Article 14.4.c",
+      "category": "Interpretation of outputs and interpretation tools"
+    },
+    {
+      "text": "Do oversight interfaces enable manual control without introducing cascading system failures?",
+      "article": "Article 14.4.c",
+      "category": "Interpretation of outputs and interpretation tools"
+    },
+    {
+      "text": "Are designated oversight personnel provided with appropriate tools, access, and authority to intervene during critical operations?",
+      "article": "Article 14.4.c",
+      "category": "Interpretation of outputs and interpretation tools"
+    },
+    {
+      "text": "Does the interface design ensure operators have sufficient time and information to intervene meaningfully?",
+      "article": "Article 14.4.c",
+      "category": "Interpretation of outputs and interpretation tools"
+    },
+    {
+      "text": "Have degraded-condition or stress tests verified that human intervention remains possible in all conditions?",
+      "article": "Article 14.4.c",
+      "category": "Interpretation of outputs and interpretation tools"
+    },
+    {
+      "text": "Do interfaces minimize alert fatigue and provide clear, intuitive feedback supporting situational awareness?",
+      "article": "Article 14.4.c",
+      "category": "Interpretation of outputs and interpretation tools"
+    },
+    {
+      "text": "Does the interface balance information clarity with avoidance of cognitive overload for the operator?",
+      "article": "Article 14.4.c",
+      "category": "Interpretation of outputs and interpretation tools"
+    },
+    {
+      "text": "Is there a \"safe state\" or fallback mode that can be triggered by human intervention?",
+      "article": "Article 14.4.e",
+      "category": "Safe state(s) transition"
+    },
+    {
+      "text": "Can the system transition to a defined safe state upon human or automatic trigger?",
+      "article": "Article 14.4.e",
+      "category": "Safe state(s) transition"
+    },
+    {
+      "text": "Has the safe-state transition process been tested for stability and effectiveness?",
+      "article": "Article 14.4.e",
+      "category": "Safe state(s) transition"
+    },
+    {
+      "text": "Is the fallback interface functional and accessible during low-resource or degraded conditions?",
+      "article": "Article 14.4.e",
+      "category": "Safe state(s) transition"
+    },
+    {
+      "text": "Are all safe-state activations and transitions logged and auditable?",
+      "article": "Article 14.4.e",
+      "category": "Safe state(s) transition"
+    },
+    {
+      "text": "Are users clearly notified when the system enters a safe state or operates under degraded conditions?",
+      "article": "Article 14.4.e",
+      "category": "Safe state(s) transition"
+    },
+    {
+      "text": "Are log retention and access-control measures applied consistently to safe-state transition events?",
+      "article": "Article 14.4.e",
+      "category": "Safe state(s) transition"
+    }
+  ]
+}
