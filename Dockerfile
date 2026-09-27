@@ -33,12 +33,15 @@ ENV NEXT_BASE_PATH=$NEXT_BASE_PATH
 RUN apt-get update && apt-get install -y --no-install-recommends openssl \
     && rm -rf /var/lib/apt/lists/*
 # Full node_modules (incl. prisma CLI + tsx) so the migrate service can run
-# `prisma migrate deploy` and `prisma db seed` from this same image.
+# scripts/migrate-projects.mjs (prisma migrate deploy per project database)
+# from this same image.
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/src ./src
+# migrate-projects.mjs, run by the controls-migrate service at start
+COPY --from=builder /app/scripts ./scripts
 COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/next.config.ts ./next.config.ts
 COPY --from=builder /app/tsconfig.json ./tsconfig.json

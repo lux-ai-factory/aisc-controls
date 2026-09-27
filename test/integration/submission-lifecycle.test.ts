@@ -13,20 +13,43 @@ vi.mock("next/navigation", () => ({
   },
 }));
 
+// These tests are about where the data goes, not who may put it there
+// (test/integration/action-access.test.ts is): everybody is an editor.
+vi.mock("@/lib/access/projectAccess", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/access/projectAccess")>()),
+  fetchAccess: async () => ({ role: "editor", admin: false, may_write: true }),
+}));
+vi.mock("@/lib/access/callerToken", () => ({
+  GATEWAY_TOKEN_HEADER: "x-auth-request-access-token",
+  callerToken: async () => "caller-token",
+}));
+
+import { execSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
-import { prisma } from "@/lib/prisma";
-import { submitForm } from "@/app/checklists/[id]/fill/actions";
+import { prismaFor, projectDatabaseName } from "@/lib/projectDb";
+import { submitForm } from "@/app/p/[project]/checklists/[id]/fill/actions";
 import {
   saveDraft,
   reopenForAmendment,
   archiveSubmission,
   restoreSubmission,
-} from "@/app/submissions/[id]/actions";
+} from "@/app/p/[project]/submissions/[id]/actions";
 
-// Integration tests need a database. They run against DATABASE_URL (the dev DB
-// locally, a throwaway Postgres in CI) and clean up everything they create, so
-// they never touch seeded data. Skipped when no DATABASE_URL is set.
-const hasDb = Boolean(process.env.DATABASE_URL);
+// Integration tests need a project database, made the way the platform makes
+// one, and dropped afterwards. The SQL runs inside the postgres container,
+// using its own env for the superuser role, so no password is handled here.
+const hasDb = Boolean(process.env.PROJECT_DATABASE_URL);
+const su = (sql: string, db = "platform") =>
+  execSync(`docker exec postgres sh -c 'psql -U "$POSTGRES_USER" -d ${db} -v ON_ERROR_STOP=1 -Atc "${sql}"'`);
+
+function makeProject(): string {
+  const pid = randomUUID();
+  const db = projectDatabaseName(pid);
+  su(`create database ${db}`);
+  su(`grant connect on database ${db} to controls_rw`, db);
+  su(`create schema controls; grant usage, create on schema controls to controls_rw`, db);
+  return pid;
+}
 
 async function captureRedirect(fn: () => Promise<unknown>): Promise<string> {
   try {
@@ -51,9 +74,15 @@ describe.skipIf(!hasDb)("submission lifecycle (integration)", () => {
   let checklistId: string;
   let q1: string;
   let q2: string;
+  // Every answered checklist is answered for a project, so the lifecycle runs
+  // inside one, made here and dropped afterwards.
+  let project: string;
 
   beforeAll(async () => {
+    project = makeProject();
+    const prisma = await prismaFor(project);
     const tag = randomUUID().slice(0, 8);
+
     const source = await prisma.source.create({
       data: { name: `Test Source ${tag}`, slug: `test-source-${tag}` },
     });
@@ -78,18 +107,16 @@ describe.skipIf(!hasDb)("submission lifecycle (integration)", () => {
     checklistId = checklist.id;
     q1 = checklist.questions[0].id;
     q2 = checklist.questions[1].id;
-  });
+  }, 60_000);
 
-  afterAll(async () => {
-    // Deleting the checklist cascades to its questions, submissions, and answers.
-    if (checklistId) await prisma.checklist.deleteMany({ where: { id: checklistId } });
-    if (sourceId) await prisma.source.deleteMany({ where: { id: sourceId } });
-    await prisma.$disconnect();
+  afterAll(() => {
+    su(`drop database if exists ${projectDatabaseName(project)} with (force)`);
   });
 
   it("submitForm creates a draft submission with answers and scores", async () => {
     const url = await captureRedirect(() =>
       submitForm(
+        project,
         checklistId,
         undefined,
         field({
@@ -100,9 +127,10 @@ describe.skipIf(!hasDb)("submission lifecycle (integration)", () => {
         }),
       ),
     );
-    expect(url).toMatch(/^\/submissions\/.+/);
+    expect(url).toMatch(new RegExp(`^/p/${project}/submissions/.+`));
 
     const id = url.split("/").pop() as string;
+    const prisma = await prismaFor(project);
     const sub = await prisma.submission.findUnique({
       where: { id },
       include: { answers: true },
@@ -113,14 +141,16 @@ describe.skipIf(!hasDb)("submission lifecycle (integration)", () => {
     const byQ = Object.fromEntries((sub?.answers ?? []).map((a) => [a.questionId, a]));
     expect(byQ[q1]).toMatchObject({ answer: "Yes", score: 4 });
     expect(byQ[q2]).toMatchObject({ answer: null, score: 2 });
-  });
+  }, 30_000);
 
   it("saveDraft with intent=close closes the draft", async () => {
+    const prisma = await prismaFor(project);
     const draft = await prisma.submission.create({
       data: { checklistId, label: "To close" },
     });
 
     const result = await saveDraft(
+      project,
       draft.id,
       undefined,
       field({
@@ -140,9 +170,10 @@ describe.skipIf(!hasDb)("submission lifecycle (integration)", () => {
     expect(updated?.closedAt).not.toBeNull();
     expect(updated?.label).toBe("Closed run");
     expect(updated?.answers).toHaveLength(1);
-  });
+  }, 30_000);
 
   it("reopenForAmendment creates a new draft version that copies answers", async () => {
+    const prisma = await prismaFor(project);
     const closed = await prisma.submission.create({
       data: {
         checklistId,
@@ -153,7 +184,7 @@ describe.skipIf(!hasDb)("submission lifecycle (integration)", () => {
       },
     });
 
-    const url = await captureRedirect(() => reopenForAmendment(closed.id));
+    const url = await captureRedirect(() => reopenForAmendment(project, closed.id));
     const newId = url.split("/").pop() as string;
 
     const next = await prisma.submission.findUnique({
@@ -164,9 +195,10 @@ describe.skipIf(!hasDb)("submission lifecycle (integration)", () => {
     expect(next?.version).toBe(2);
     expect(next?.previousVersionId).toBe(closed.id);
     expect(next?.answers[0]).toMatchObject({ answer: "prev", score: 3 });
-  });
+  }, 30_000);
 
   it("archive then restore toggles archivedAt", async () => {
+    const prisma = await prismaFor(project);
     const closed = await prisma.submission.create({
       data: {
         checklistId,
@@ -176,14 +208,14 @@ describe.skipIf(!hasDb)("submission lifecycle (integration)", () => {
       },
     });
 
-    await archiveSubmission(closed.id);
+    await archiveSubmission(project, closed.id);
     expect(
       (await prisma.submission.findUnique({ where: { id: closed.id } }))?.archivedAt,
     ).not.toBeNull();
 
-    await restoreSubmission(closed.id);
+    await restoreSubmission(project, closed.id);
     expect(
       (await prisma.submission.findUnique({ where: { id: closed.id } }))?.archivedAt,
     ).toBeNull();
-  });
+  }, 30_000);
 });

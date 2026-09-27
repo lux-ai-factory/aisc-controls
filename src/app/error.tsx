@@ -20,15 +20,15 @@ export default function Error({
       <div className="empty-state">
         <h1>Something went wrong</h1>
         <p>
-          An unexpected error occurred. You can try again, or head back to the
-          library.
+          An unexpected error occurred. You can try again, or head back to your
+          projects.
         </p>
         <div className="library-toolbar">
           <button className="btn" type="button" onClick={reset}>
             Try again
           </button>
-          <Link className="btn ghost" href="/checklists">
-            Back to the library
+          <Link className="btn ghost" href="/">
+            Back to your projects
           </Link>
         </div>
       </div>

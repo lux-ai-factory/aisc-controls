@@ -6,8 +6,8 @@ export default function NotFound() {
       <div className="empty-state">
         <h1>Not found</h1>
         <p>The page or record you&rsquo;re looking for doesn&rsquo;t exist.</p>
-        <Link className="btn" href="/checklists">
-          Back to the library
+        <Link className="btn" href="/">
+          Back to your projects
         </Link>
       </div>
     </main>

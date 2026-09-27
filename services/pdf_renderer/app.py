@@ -21,6 +21,8 @@ from fastapi.responses import Response
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from weasyprint import HTML
 
+from service_token import ServiceTokens
+
 ROOT = Path(__file__).resolve().parent
 TEMPLATES = ROOT / "templates"
 
@@ -32,6 +34,8 @@ env = Environment(
 )
 
 app = FastAPI(title="AISC Controls PDF Renderer", version="0.1.0")
+# Only controls-web calls this (the submission report route), with its own token.
+app.add_middleware(ServiceTokens, names=("CONTROLS_WEB_TO_PDF_TOKEN",))
 
 
 @app.get("/health")

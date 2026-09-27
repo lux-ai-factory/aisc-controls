@@ -1,8 +1,7 @@
 // Install a checklist *template* sent by the catalogue (catalogue does the
 // mapping; see CATALOGUE_CONTROLS_SYNC.md). This file is deliberately thin: a
 // pure validator/normaliser (unit-tested, no DB) plus one upsert keyed on
-// `catalogueId` so re-installing the same control updates in place instead of
-// duplicating.
+// `catalogueId`. Installing a control the project already has changes nothing.
 import type { PrismaClient } from "@prisma/client";
 import { slugify } from "@/lib/slugify";
 
@@ -82,53 +81,59 @@ export function parseInstallPackage(pkg: unknown): NormalisedChecklist {
 export type InstallResult = { checklistId: string; catalogueId: string; created: boolean };
 
 /**
- * Upsert a catalogue checklist into the local DB, keyed on `catalogueId`.
- * Idempotent: re-installing updates the template and replaces its question set.
- * User submissions reference the checklist, so they survive a re-install.
+ * Install a catalogue checklist into the local DB, keyed on `catalogueId`.
+ * Installing a control the project already has changes nothing.
  */
 export async function installChecklist(prisma: PrismaClient, pkg: unknown): Promise<InstallResult> {
   const data = parseInstallPackage(pkg);
+  const { catalogueId } = data.checklist;
+  const findInstalled = () =>
+    prisma.checklist.findUnique({ where: { catalogueId }, select: { id: true } });
 
-  const source = await prisma.source.upsert({
-    where: { name: data.source.name },
-    update: { url: data.source.url ?? undefined },
-    create: { name: data.source.name, slug: slugify(data.source.name), url: data.source.url },
-  });
+  // Already in this project: leave it exactly as it is. Replacing its questions
+  // would cascade into the answers already given to them.
+  const existing = await findInstalled();
+  if (existing) return { checklistId: existing.id, catalogueId, created: false };
 
-  const existing = await prisma.checklist.findUnique({
-    where: { catalogueId: data.checklist.catalogueId },
-    select: { id: true },
-  });
+  let checklistId: string;
+  try {
+    checklistId = await createChecklist(prisma, data);
+  } catch (err) {
+    // Two installs at once (a double click): both saw nothing, one created it,
+    // and the other hit the unique catalogueId (or the source's unique name).
+    // The second is "already installed", not an error.
+    if ((err as { code?: unknown }).code !== "P2002") throw err;
+    const raced = await findInstalled();
+    if (raced) return { checklistId: raced.id, catalogueId, created: false };
+    // Only the source collided: it exists now, so the upsert finds it.
+    checklistId = await createChecklist(prisma, data);
+  }
 
-  const checklistFields = {
-    title: data.checklist.title,
-    sourceId: source.id,
-    controlTopic: data.checklist.controlTopic,
-    description: data.checklist.description,
-    countryIds: data.checklist.countryIds,
-    regulationIds: data.checklist.regulationIds,
-    sourceUpdatedAt: data.checklist.sourceUpdatedAt,
-  };
+  return { checklistId, catalogueId, created: true };
+}
 
-  const checklistId = await prisma.$transaction(async (tx) => {
-    if (existing) {
-      await tx.checklist.update({ where: { id: existing.id }, data: checklistFields });
-      await tx.question.deleteMany({ where: { checklistId: existing.id } });
-      await tx.question.createMany({
-        data: data.questions.map((q) => ({ ...q, checklistId: existing.id })),
-      });
-      return existing.id;
-    }
+/** The checklist, its questions and (if new) its source, in one transaction. Returns the checklist's id. */
+function createChecklist(prisma: PrismaClient, data: NormalisedChecklist): Promise<string> {
+  return prisma.$transaction(async (tx) => {
+    const source = await tx.source.upsert({
+      where: { name: data.source.name },
+      update: { url: data.source.url ?? undefined },
+      create: { name: data.source.name, slug: slugify(data.source.name), url: data.source.url },
+    });
     const created = await tx.checklist.create({
       data: {
         catalogueId: data.checklist.catalogueId,
-        ...checklistFields,
+        title: data.checklist.title,
+        sourceId: source.id,
+        controlTopic: data.checklist.controlTopic,
+        description: data.checklist.description,
+        countryIds: data.checklist.countryIds,
+        regulationIds: data.checklist.regulationIds,
+        sourceUpdatedAt: data.checklist.sourceUpdatedAt,
         questions: { create: data.questions },
       },
       select: { id: true },
     });
     return created.id;
   });
-
-  return { checklistId, catalogueId: data.checklist.catalogueId, created: !existing };
 }

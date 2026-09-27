@@ -39,12 +39,15 @@ export default function ChecklistMetaFields({
   regulations,
   sources,
   fieldErrors,
+  project,
 }: {
   initial?: ChecklistMeta;
   countries: Country[];
   regulations: Regulation[];
   sources: SourceOption[];
   fieldErrors?: FieldErrors;
+  /** The project whose sources these are; "register one" links into it. */
+  project: string;
 }) {
   const [meta, setMeta] = useState<ChecklistMeta>(initial);
   const [selectedCountries, setSelectedCountries] = useState<Set<string>>(
@@ -88,7 +91,7 @@ export default function ChecklistMetaFields({
           {sources.length === 0 ? (
             <p className="qf-help">
               No sources registered yet.{" "}
-              <Link href="/sources/new">Register one</Link> before continuing.
+              <Link href={`/p/${project}/sources/new`}>Register one</Link> before continuing.
             </p>
           ) : (
             <select
@@ -111,7 +114,7 @@ export default function ChecklistMetaFields({
           )}
           {sources.length > 0 && (
             <span className="qf-help">
-              Missing one? <Link href="/sources/new">Register a new source</Link>.
+              Missing one? <Link href={`/p/${project}/sources/new`}>Register a new source</Link>.
             </span>
           )}
         </div>

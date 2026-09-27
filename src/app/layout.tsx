@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import SiteHeader from "@/components/SiteHeader";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -24,7 +23,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body>
-        <SiteHeader />
+        {/* The header is rendered by each page's own layout, because inside a
+            project its links stay inside it and lead back to that project. */}
         {children}
       </body>
     </html>

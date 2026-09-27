@@ -1,10 +1,9 @@
-// Startup setup: makes a working DB available, applies migrations, and seeds
-// the bundled examples. Bringing Postgres up runs on EVERY `npm run dev` so a
+// Startup setup: makes Postgres available and migrates the project databases
+// that already exist. Bringing Postgres up runs on EVERY `npm run dev` so a
 // stopped container heals and the persistent volume (with your answered
-// checklists) is reconnected. Migrations + seeding are gated by a marker file
-// so we only pay that cost once. Everything is idempotent — deleting the
-// marker, or re-seeding, is always safe (the seed skips checklists already in
-// the DB and never touches submissions).
+// checklists) is reconnected. The migration sweep is gated by a marker file so
+// we only pay that cost once. Nothing is seeded: a project's checklists are
+// the ones installed into it from the catalogue. Everything is idempotent.
 
 import {
   existsSync,
@@ -18,6 +17,8 @@ import path from "node:path";
 
 const MARKER_DIR = path.resolve("node_modules/.cache/aisc-controls");
 const MARKER = path.join(MARKER_DIR, "setup-done");
+// The `db` service of this repo's docker-compose.yml, on its host port.
+const BUNDLED_DB_URL = "postgresql://aisc:aisc@localhost:5444/";
 
 // Platform mode: running as an aisc submodule against shared infra. The platform
 // owns Postgres and applies migrations via its own init service (controls-migrate),
@@ -37,25 +38,30 @@ if (!existsSync(envFile) && existsSync(envExample)) {
   console.log("[setup] created .env from .env.example");
 }
 
-// 2. load .env so DATABASE_URL is visible here and to spawned `prisma` calls
+// 2. load .env so PROJECT_DATABASE_URL is visible here and to spawned calls.
+// There is no single app database: each project has its own, and this is the
+// template its URL is made from.
 loadDotenv(envFile);
 
-if (!process.env.DATABASE_URL) {
+const projectDatabaseUrl = process.env.PROJECT_DATABASE_URL ?? "";
+if (!projectDatabaseUrl.includes("{database}")) {
   console.warn(
-    "[setup] DATABASE_URL not set — edit .env then run `npm run setup`.",
+    process.env.DATABASE_URL && !projectDatabaseUrl
+      ? "[setup] .env sets DATABASE_URL, which this app no longer reads. Set PROJECT_DATABASE_URL instead, e.g.\n" +
+          '[setup]   PROJECT_DATABASE_URL="postgresql://aisc:aisc@localhost:5444/{database}?schema=controls&connection_limit=2"\n' +
+          "[setup] then run `npm run setup`."
+      : "[setup] PROJECT_DATABASE_URL not set, or has no {database} — edit .env then run `npm run setup`.",
   );
   process.exit(0);
 }
 
-// 3. bring Postgres up via docker compose whenever DATABASE_URL points at the
+// 3. bring Postgres up via docker compose whenever PROJECT_DATABASE_URL points at the
 // bundled service. Doing this unconditionally (not just on first run) means a
 // failed earlier attempt — or a stopped container — heals on the next
 // `npm run dev` instead of stranding the user. `docker compose up -d` is
 // idempotent: a no-op when the container is already running and healthy.
 const composeFile = path.resolve("docker-compose.yml");
-const usesBundledDb = (process.env.DATABASE_URL ?? "").startsWith(
-  "postgresql://aisc:aisc@localhost:5444/aisc",
-);
+const usesBundledDb = projectDatabaseUrl.startsWith(BUNDLED_DB_URL);
 if (usesBundledDb && existsSync(composeFile) && hasCommand("docker")) {
   console.log("[setup] ensuring Postgres is up (docker compose up -d db)…");
   runStrict("docker", ["compose", "up", "-d", "db"]);
@@ -65,7 +71,7 @@ if (usesBundledDb && existsSync(composeFile) && hasCommand("docker")) {
   }
 } else if (usesBundledDb && !hasCommand("docker")) {
   console.warn(
-    "[setup] docker not found — install Docker, or point DATABASE_URL in .env at your own Postgres before continuing.",
+    "[setup] docker not found — install Docker, or point PROJECT_DATABASE_URL in .env at your own Postgres before continuing.",
   );
   process.exit(1);
 }
@@ -79,19 +85,16 @@ if (existsSync(composeFile) && hasCommand("docker")) {
   runLoose("docker", ["compose", "up", "-d", "pdf"]);
 }
 
-// 4. migrate + seed — gated by the marker so it only runs the first time.
-// The DB is already up (step 3 above) on every run, so re-runs just reconnect
-// to the persistent volume and keep every answered checklist intact.
+// 4. migrate the project databases that exist — gated by the marker so it
+// only runs the first time. A project database made later is migrated by the
+// app the first time it is opened, so this is never the only chance.
 if (existsSync(MARKER)) {
-  console.log("[setup] already initialised — DB is up, skipping migrate/seed.");
+  console.log("[setup] already initialised — DB is up, skipping the migration sweep.");
   process.exit(0);
 }
 
-console.log("[setup] applying migrations…");
-runStrict("npx", ["prisma", "migrate", "deploy"]);
-
-console.log("[setup] seeding bundled examples…");
-runStrict("npx", ["prisma", "db", "seed"]);
+console.log("[setup] migrating the project databases…");
+runStrict("node", ["scripts/migrate-projects.mjs"]);
 
 mkdirSync(MARKER_DIR, { recursive: true });
 writeFileSync(MARKER, new Date().toISOString());

@@ -1030,3 +1030,51 @@ a.tag--source:hover {
   color: var(--muted);
   font-style: italic;
 }
+
+/* Install a control: one dialog, like the engine's for a test */
+.install-dialog {
+  max-width: 520px;
+}
+.install-dialog h1 {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  margin: 0 0 18px;
+}
+.install-control {
+  border-left: 3px solid var(--primary);
+  padding-left: 14px;
+  margin-bottom: 22px;
+}
+.install-control h2 {
+  margin: 0 0 4px;
+  font-size: 20px;
+}
+.install-control p.subtitle {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+.install-description {
+  margin: 10px 0 0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.install-already {
+  background: var(--info-soft);
+  padding: 10px 12px;
+  font-size: 14px;
+  margin: 0 0 14px;
+}
+.install-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 8px;
+}
+.install-actions .btn {
+  width: auto;
+  min-width: 110px;
+}

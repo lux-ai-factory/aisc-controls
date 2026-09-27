@@ -14,7 +14,7 @@ you start the app.
 - **Node ≥ 18.18** (required by Next.js 15)
 - **Docker** with the daemon running. Used for Postgres and for the bundled
   **PDF report renderer** (`services/pdf_renderer`). To use your own Postgres
-  instead, copy `.env.example` → `.env`, edit `DATABASE_URL`, then run
+  instead, copy `.env.example` → `.env`, edit `PROJECT_DATABASE_URL`, then run
   `npm run dev`; the setup script sees `.env` already exists and skips the
   docker step for the DB.
 
@@ -34,8 +34,15 @@ On first run, `npm run dev` will:
 2. Start a Postgres container (`docker compose up -d db`) — **only when it
    created the `.env` in step 1**, so the bundled defaults match the bundled
    container.
-3. Apply migrations (`prisma migrate deploy`).
-4. Seed the bundled checklists (`prisma db seed`).
+3. Migrate every project database that already exists
+   (`node scripts/migrate-projects.mjs`). There is no single app database:
+   each project has its own, named `project_<pid without hyphens>`, made by the
+   platform when the project is made. `PROJECT_DATABASE_URL` is a template with
+   `{database}` where that name goes, e.g.
+   `postgresql://aisc:aisc@localhost:5444/{database}?schema=controls&connection_limit=2`.
+   A project database made later is migrated the first time it is opened.
+4. Seed nothing: a project's checklists are the ones installed into it from
+   the catalogue.
 5. Best-effort start the bundled PDF report renderer
    (`docker compose up -d pdf`) — builds its image on first run. This step
    never blocks startup; if it fails, only report downloads are affected.
@@ -45,7 +52,7 @@ Subsequent runs skip steps 1–4 (gated by
 `node_modules/.cache/aisc-controls/setup-done`). Run `npm run setup` to force
 a fresh setup.
 
-You're done. Open the app and browse `/checklists`.
+You're done. Open a project's checklists at `/p/{pid}/checklists` (from the platform's project page).
 
 ### Adding new checklists
 
@@ -96,6 +103,13 @@ Platform-side wiring (handled in the parent `aisc` repo):
   `depends_on` (rename if yours differs).
 - Add a Caddy route to `controls-web:3000`. For a **subpath** (e.g. `/controls`)
   build with `CONTROLS_BASE_PATH=/controls`; for a **subdomain**, leave it unset.
+
+Installing controls from the catalogue:
+
+- `CATALOGUE_URL`: the catalogue's API, e.g. `https://<public catalogue>/api`. Controls are
+  fetched from `<CATALOGUE_URL>/control/<slug>/export`.
+- `CATALOGUE_TOKEN`: leave unset for the public catalogue (its export is anonymous); set it
+  only for a private catalogue that asks for one.
 
 ## Concepts
 
@@ -192,7 +206,7 @@ aisc-controls/
 │     └─ prisma.ts
 └─ test/
    ├─ unit/                   # pure-logic unit tests (no DB)
-   └─ integration/            # server-action tests (needs DATABASE_URL)
+   └─ integration/            # server-action tests (needs PROJECT_DATABASE_URL)
 ```
 
 ## Testing
@@ -210,7 +224,9 @@ npm run test:watch
   server actions (create, save & close, reopen as a new version, archive /
   restore) against a real database. They create and clean up their own rows, so
   they never disturb seeded data, and they **skip automatically when
-  `DATABASE_URL` is not set**.
+  `PROJECT_DATABASE_URL` is not set**. Each makes its own throwaway project
+  databases (through `docker exec postgres`) and drops them afterwards:
+  `PROJECT_DATABASE_URL='postgresql://controls_rw:controls_rw@127.0.0.1:5432/{database}?schema=controls&connection_limit=2' npx vitest run`.
 
 ## License
 

@@ -1,5 +1,6 @@
-import { describe, it, expect } from "vitest";
-import { parseInstallPackage } from "@/lib/installChecklist";
+import { describe, it, expect, vi } from "vitest";
+import type { PrismaClient } from "@prisma/client";
+import { installChecklist, parseInstallPackage } from "@/lib/installChecklist";
 
 const pkg = (overrides: Record<string, unknown> = {}, questions?: unknown[]) => ({
   meta: {
@@ -59,5 +60,33 @@ describe("parseInstallPackage", () => {
 
   it("throws when questions is not an array", () => {
     expect(() => parseInstallPackage({ meta: pkg().meta, questions: "nope" })).toThrow(/array/);
+  });
+});
+
+describe("installChecklist, pressed twice at once", () => {
+  const unique = () => Object.assign(new Error("Unique constraint failed on catalogueId"), { code: "P2002" });
+
+  it("the one that lost the race says already installed, with the winner's id", async () => {
+    const findUnique = vi.fn().mockResolvedValueOnce(null).mockResolvedValueOnce({ id: "winner" });
+    const prisma = { checklist: { findUnique }, $transaction: vi.fn().mockRejectedValue(unique()) };
+    const got = await installChecklist(prisma as unknown as PrismaClient, pkg());
+    expect(got).toEqual({ checklistId: "winner", catalogueId: "accuracy-checklist", created: false });
+    expect(prisma.$transaction).toHaveBeenCalledTimes(1);
+  });
+
+  it("when only the source collided, tries once more and creates it", async () => {
+    const findUnique = vi.fn().mockResolvedValue(null);
+    const $transaction = vi.fn().mockRejectedValueOnce(unique()).mockResolvedValueOnce("made");
+    const prisma = { checklist: { findUnique }, $transaction };
+    const got = await installChecklist(prisma as unknown as PrismaClient, pkg());
+    expect(got).toEqual({ checklistId: "made", catalogueId: "accuracy-checklist", created: true });
+  });
+
+  it("any other error is still an error", async () => {
+    const prisma = {
+      checklist: { findUnique: vi.fn().mockResolvedValue(null) },
+      $transaction: vi.fn().mockRejectedValue(Object.assign(new Error("boom"), { code: "P1001" })),
+    };
+    await expect(installChecklist(prisma as unknown as PrismaClient, pkg())).rejects.toThrow("boom");
   });
 });
