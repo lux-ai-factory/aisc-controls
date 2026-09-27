@@ -10,7 +10,8 @@
  */
 import { execSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { projectDatabaseName } from "@/lib/projectDb";
@@ -39,16 +40,24 @@ export function su(sql: string, db = "platform"): string {
   ).toString();
 }
 
-const TEMPLATE_0001 = fileURLToPath(
-  new URL("../../../../platform/project-template/0001_controls.sql", import.meta.url),
-);
+// Isolation C1: a project database is made with EVERY platform template file, in order, as
+// platform_rw (the role projectdb.provision connects as), exactly as isolationDb.makeTemplatedProject
+// does. Controls' answer key refers to project.system (template 0006), so a database with only
+// 0001 can no longer be migrated. ISOLATION_TEMPLATE_DIR as in ./isolationDb.ts. The loop is
+// inline because isolationDb imports this file.
+const TEMPLATE_DIR =
+  process.env.ISOLATION_TEMPLATE_DIR ??
+  fileURLToPath(new URL("../../../../platform/project-template/", import.meta.url));
 
-/** A project database made the way the platform makes one (template 0001). */
+/** A project database made the way the platform makes one (every template file). */
 export function makeProject(): string {
   const pid = randomUUID();
   const db = projectDatabaseName(pid);
   su(`CREATE DATABASE ${db} OWNER platform_rw`);
-  su(readFileSync(TEMPLATE_0001, "utf8"), db);
+  const files = readdirSync(TEMPLATE_DIR)
+    .filter((f) => /^\d{4}_.*\.sql$/.test(f))
+    .sort();
+  for (const file of files) su(`SET ROLE platform_rw;\n${readFileSync(join(TEMPLATE_DIR, file), "utf8")}`, db);
   return pid;
 }
 

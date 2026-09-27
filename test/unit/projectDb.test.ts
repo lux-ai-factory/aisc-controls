@@ -135,4 +135,22 @@ describe("the open project databases", () => {
     expect(isMissingDatabase(new Error("connection refused"))).toBe(false);
     expect(isMissingDatabase(null)).toBe(false);
   });
+
+  // Isolation C1 (I2.5): `prisma migrate deploy` run through execFile fails with the
+  // Prisma error in its output, not in a code the error object carries.
+  it("recognise a missing database in a failed migration's output", () => {
+    const failed = Object.assign(new Error("Command failed: npx prisma migrate deploy"), {
+      stdout: "",
+      stderr: "Error: P1003: Database `project_x` does not exist at `postgres:5432`",
+    });
+    expect(isMissingDatabase(failed)).toBe(true);
+    expect(isMissingDatabase({ stdout: 'database "project_x" does not exist' })).toBe(true);
+    expect(isMissingDatabase({ stderr: "Error: P1001: Can't reach database server" })).toBe(false);
+  });
+
+  it("do not take a lost connection, on its own, for a missing database", () => {
+    expect(isMissingDatabase({ code: "P1001" })).toBe(false);
+    expect(isMissingDatabase({ errorCode: "P1017", message: "Server has closed the connection." })).toBe(false);
+    expect(isMissingDatabase(new Error("terminating connection due to administrator command"))).toBe(false);
+  });
 });

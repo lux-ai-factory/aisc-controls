@@ -37,9 +37,9 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { randomUUID } from "node:crypto";
 
-import { prismaFor, projectDatabaseUrl, closeProjectDatabases } from "@/lib/projectDb";
+import { prismaFor, projectDatabaseName, projectDatabaseUrl, closeProjectDatabases } from "@/lib/projectDb";
 import { saveDraft, reopenForAmendment } from "@/app/p/[project]/submissions/[id]/actions";
-import { hasThrowawayDb, makeProject, dropProject, rows } from "./throwawayDb";
+import { hasThrowawayDb, makeProject, dropProject, rows, su } from "./throwawayDb";
 
 const V1 = "11111111-1111-4111-8111-111111111111";
 const V2 = "22222222-2222-4222-8222-222222222222";
@@ -113,6 +113,14 @@ describe.skipIf(!hasThrowawayDb)("answers carry the system version (WP10)", () =
     process.env.PLATFORM_URL = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
 
     project = makeProject();
+    // Isolation C1 (I6.2): an answer's stamp is a foreign key into this database's
+    // project.system, so the versions the stub platform names must be rows there, as the
+    // platform writes them before it answers "latest" (D2, I2.2).
+    su(
+      "SET ROLE platform_rw; INSERT INTO project.system (pid, number, name) VALUES " +
+        `('${V1}', 1, 'MCAS'), ('${V2}', 2, 'MCAS')`,
+      projectDatabaseName(project),
+    );
     const prisma = await prismaFor(project);
     const tag = randomUUID().slice(0, 8);
     const source = await prisma.source.create({ data: { name: `S ${tag}`, slug: `s-${tag}` } });

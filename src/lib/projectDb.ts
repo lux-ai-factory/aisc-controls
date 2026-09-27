@@ -15,6 +15,7 @@ import { PrismaClient } from "@prisma/client";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { notFound } from "next/navigation";
+import pg from "pg";
 
 import { decide, fetchAccess, READ_ONLY, type Access } from "@/lib/access/projectAccess";
 import { callerToken } from "@/lib/access/callerToken";
@@ -88,12 +89,51 @@ function forget(url: string, entry: Entry) {
   entry.client.$disconnect().catch(() => {});
 }
 
-/** Postgres says the database is not there: the project was deleted, most likely. */
+const MISSING = /database .* does not exist/i;
+
+/**
+ * Postgres says the database is not there: the project was deleted, most likely.
+ * A failed `prisma migrate deploy` (run through execFile) says so in its output.
+ */
 export function isMissingDatabase(err: unknown): boolean {
-  const e = err as { code?: unknown; errorCode?: unknown; message?: unknown } | null;
+  const e = err as { code?: unknown; errorCode?: unknown; message?: unknown; stderr?: unknown; stdout?: unknown } | null;
   if (!e || typeof e !== "object") return false;
   if (e.code === "P1003" || e.errorCode === "P1003") return true;
-  return typeof e.message === "string" && /database .* does not exist/i.test(e.message);
+  if (typeof e.message === "string" && MISSING.test(e.message)) return true;
+  return [e.stderr, e.stdout].some((out) => out != null && (/\bP1003\b/.test(String(out)) || MISSING.test(String(out))));
+}
+
+/** The connection went away under the client: the database may have been dropped (I2.5). */
+function isLostConnection(err: unknown): boolean {
+  const e = err as { code?: unknown; errorCode?: unknown; message?: unknown } | null;
+  if (!e || typeof e !== "object") return false;
+  if (["P1001", "P1017"].includes(e.code as string) || ["P1001", "P1017"].includes(e.errorCode as string)) return true;
+  return typeof e.message === "string" && /terminating connection|server has closed the connection/i.test(e.message);
+}
+
+/**
+ * Whether this project's database is still there, asked of the cluster (the `postgres`
+ * database, as scripts/migrate-projects.mjs does). Null when the cluster does not answer,
+ * so the caller keeps the error it had.
+ */
+async function databaseExists(pid: string): Promise<boolean | null> {
+  const catalog = new pg.Client({
+    connectionString: (process.env.PROJECT_DATABASE_URL ?? "").replace("{database}", "postgres").split("?")[0],
+  });
+  try {
+    await catalog.connect();
+    const { rowCount } = await catalog.query("SELECT 1 FROM pg_database WHERE datname = $1", [projectDatabaseName(pid)]);
+    return (rowCount ?? 0) > 0;
+  } catch {
+    return null;
+  } finally {
+    await catalog.end().catch(() => {});
+  }
+}
+
+/** A dropped (or never made) project database is "not found" for that pid (I2.5), never a 500. */
+async function notFoundIfGone(pid: string, err: unknown): Promise<void> {
+  if (isMissingDatabase(err) || (await databaseExists(pid)) === false) notFound();
 }
 
 /**
@@ -119,12 +159,22 @@ export async function prismaFor(
     const created: Entry = { client, ready };
     entry = created;
     open.set(url, created);
-    // A database that went away (the project was deleted) is not kept open.
+    // A database that went away (the project was deleted) is not kept open, and the
+    // request that finds out is "not found" (I2.5). The first request after
+    // DROP DATABASE ... WITH (FORCE) sees its connection closed, not a missing database,
+    // so a lost connection asks the cluster whether the database is still there.
     client.$use(async (params, next) => {
       try {
         return await next(params);
       } catch (err) {
-        if (isMissingDatabase(err)) forget(url, created);
+        if (isMissingDatabase(err)) {
+          forget(url, created);
+          notFound();
+        }
+        if (isLostConnection(err)) {
+          forget(url, created);
+          if ((await databaseExists(pid)) === false) notFound();
+        }
         throw err;
       }
     });
@@ -160,7 +210,14 @@ export async function projectDbFor(pid: string, { write }: { write: boolean }): 
   const access = await callerAccess(pid);
   switch (decide(write ? "POST" : "GET", access)) {
     case "allow":
-      return prismaFor(pid);
+      try {
+        return await prismaFor(pid);
+      } catch (err) {
+        // Opening migrates first; for a database that is not there, `migrate deploy` fails
+        // (it may even try to create it, and is refused), so the cluster is asked (I2.5).
+        await notFoundIfGone(pid, err);
+        throw err;
+      }
     case "not-found":
       return notFound();
     case "forbidden":

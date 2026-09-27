@@ -43,8 +43,33 @@ describe.skipIf(!hasThrowawayDb)("the dashboard may read a project's controls (W
     expect(() => rows(`SET ROLE dashboard_ro; DELETE FROM controls.submission_answer;`, project)).toThrow();
   }, 120_000);
 
-  it("a table controls_rw makes later is readable too (default privileges)", async () => {
+  // Isolation C1 (01-specs.md I2.6, 03-coding-plan.md N5): this case used to pin that a later
+  // table is readable through a default privilege. The approved design forbids reader grants by
+  // default privilege (it would also cover secrets): readers get exactly the listed tables,
+  // granted by the owner's migration 20260926000100_readers_read_the_listed_tables.
+  it("I2.6: a table controls_rw makes later is not readable (no default privilege to a reader)", async () => {
     rows(`SET ROLE controls_rw; CREATE TABLE controls.later_table (id int);`, project);
-    expect(rows(`SET ROLE dashboard_ro; SELECT count(*) FROM controls.later_table;`, project)).toEqual(["0"]);
+    expect(() => rows(`SET ROLE dashboard_ro; SELECT count(*) FROM controls.later_table;`, project)).toThrow();
+    expect(
+      rows(
+        `SELECT count(*) FROM pg_default_acl
+          WHERE array_to_string(defaclacl, ',') ~ '(report_ro|dashboard_ro)='`,
+        project,
+      ),
+    ).toEqual(["0"]);
+  }, 60_000);
+
+  it("I2.6: report_ro and dashboard_ro read exactly the five listed tables, not _prisma_migrations", async () => {
+    const readable = (reader: string) =>
+      rows(
+        `SELECT c.relname FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
+          WHERE n.nspname = 'controls' AND c.relkind = 'r'
+            AND has_table_privilege('${reader}', c.oid, 'SELECT') ORDER BY 1`,
+        project,
+      );
+    const listed = ["checklist", "checklist_question", "source", "submission", "submission_answer"];
+    expect(readable("dashboard_ro")).toEqual(listed);
+    expect(readable("report_ro")).toEqual(listed);
+    expect(rows(`SET ROLE report_ro; SELECT count(*) FROM controls.submission_answer;`, project)).toEqual(["0"]);
   }, 60_000);
 });
