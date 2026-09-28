@@ -1078,3 +1078,8 @@ a.tag--source:hover {
   width: auto;
   min-width: 110px;
 }
+
+/* The catalogue page has only a search box, not the library's four filters. */
+.catalogue-filters {
+  grid-template-columns: 1fr auto;
+}
