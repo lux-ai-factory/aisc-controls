@@ -1,9 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState } from "react";
-import { installFromCatalogue, type InstallState } from "../install/actions";
+import { installHere, type InstallHereState } from "./actions";
 
-/** Install one catalogue checklist into this project, then open it. */
+/** Install one catalogue checklist into this project, staying on the page. */
 export default function InstallButton({
   project,
   slug,
@@ -13,10 +14,20 @@ export default function InstallButton({
   slug: string;
   disabledReason: string | null;
 }) {
-  const [state, formAction, pending] = useActionState<InstallState, FormData>(
-    installFromCatalogue.bind(null, project, slug),
+  const [state, formAction, pending] = useActionState<InstallHereState, FormData>(
+    installHere.bind(null, project, slug),
     undefined,
   );
+  if (state?.installed) {
+    return (
+      <>
+        <span className="tag">Installed</span>
+        <Link className="btn ghost" href={state.installed}>
+          Open
+        </Link>
+      </>
+    );
+  }
   return (
     <form action={formAction}>
       {state?.error && <div className="error">{state.error}</div>}
