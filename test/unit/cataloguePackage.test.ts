@@ -50,7 +50,15 @@ describe("fetchCataloguePackage", () => {
     expect(got).toEqual({ ok: false, reason: "The catalogue refused this platform: check CATALOGUE_TOKEN. Nothing was installed." });
   });
 
-  it.each(["", "../admin", "a b", "x/y"])("refuses the slug %j without asking", async (slug) => {
+  it("asks for a slug with a run of hyphens, as the catalogue names four of its controls", async () => {
+    const slug = "data-and-data-governance-evaluation-tool---article-10-ai-act";
+    const fetchImpl = ok({ meta: { catalogueId: slug }, questions: [] });
+    const got = await fetchCataloguePackage(slug, { baseUrl: "http://cat:8000", fetchImpl });
+    expect(fetchImpl).toHaveBeenCalledWith(`http://cat:8000/control/${slug}/export`, expect.anything());
+    expect(got.ok).toBe(true);
+  });
+
+  it.each(["", "../admin", "a b", "x/y", "-lead", "trail-", "a..b"])("refuses the slug %j without asking", async (slug) => {
     const fetchImpl = vi.fn();
     expect((await fetchCataloguePackage(slug, { baseUrl: "http://cat:8000", fetchImpl })).ok).toBe(false);
     expect(fetchImpl).not.toHaveBeenCalled();

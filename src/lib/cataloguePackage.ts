@@ -6,7 +6,9 @@
  */
 import { bearer, withoutTrailingSlash } from "@/lib/http";
 
-const SLUG = /^[a-z0-9]+(?:[-_][a-z0-9]+)*$/i;
+// Runs of - or _ are allowed: four of the catalogue's controls have "---" in
+// their slug. Slashes, dots and spaces never are, so a slug stays one path segment.
+const SLUG = /^[a-z0-9]+(?:[-_]+[a-z0-9]+)*$/i;
 
 const NOT_ANSWERING = "The catalogue is not answering. Nothing was installed.";
 
