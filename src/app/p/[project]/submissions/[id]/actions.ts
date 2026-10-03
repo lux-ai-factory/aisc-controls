@@ -7,6 +7,18 @@ import type { PrismaClient, SubmissionAnswer } from "@prisma/client";
 import { parseAnswers, type ParsedAnswer } from "@/lib/checklistForm";
 import { latestVersion } from "@/lib/systemVersion";
 import { callerToken } from "@/lib/access/callerToken";
+import { emitEvent } from "@/lib/ledger/emit";
+
+/** What a submission says, as its ledger events keep it: the whole of it, so the item's chain holds. */
+function stateOf(label: string, status: string, answers: { questionId: string; answer: string | null; score: number | null }[]) {
+  return {
+    label,
+    status,
+    answers: answers
+      .map((a) => ({ questionId: a.questionId, answer: a.answer, score: a.score }))
+      .sort((x, y) => x.questionId.localeCompare(y.questionId)),
+  };
+}
 
 export type ActionState = { error?: string } | undefined;
 
@@ -87,16 +99,29 @@ export async function saveDraft(
     return { submissionId, ...answer, ...stamp };
   });
 
-  await prisma.$transaction([
-    prisma.submission.update({
+  // The draft, its answers and its event, in one transaction (ledger phase 7). The answers it replaces
+  // are its event's `before`: the ledger keeps what the form overwrites.
+  const before = stateOf(sub.label, sub.status, [...old.values()]);
+  const after = stateOf(label, shouldClose ? "Closed" : "Draft", rows);
+  await prisma.$transaction(async (tx) => {
+    await tx.submission.update({
       where: { id: submissionId },
       data: shouldClose
         ? { label, status: "Closed", closedAt: new Date() }
         : { label },
-    }),
-    prisma.submissionAnswer.deleteMany({ where: { submissionId } }),
-    prisma.submissionAnswer.createMany({ data: rows }),
-  ]);
+    });
+    await tx.submissionAnswer.deleteMany({ where: { submissionId } });
+    await tx.submissionAnswer.createMany({ data: rows });
+    await emitEvent(tx, {
+      action: shouldClose ? "controls.submission.closed" : "controls.submission.draft_saved",
+      itemType: "submission",
+      itemId: submissionId,
+      details: shouldClose ? { score: rows.reduce((n, r) => n + (r.score ?? 0), 0) } : {},
+      content: after,
+      before,
+      after,
+    });
+  });
 
   const base = inProject(project);
   revalidatePath(`${base}/submissions/${submissionId}`);
@@ -125,7 +150,8 @@ export async function reopenForAmendment(project: string, submissionId: string):
     redirect(`${base}/submissions/${previous.nextVersion.id}`);
   }
 
-  const next = await prisma.submission.create({
+  const next = await prisma.$transaction(async (tx) => {
+    const made = await tx.submission.create({
     data: {
       checklistId: previous.checklistId,
       label: previous.label,
@@ -145,6 +171,15 @@ export async function reopenForAmendment(project: string, submissionId: string):
       },
     },
     select: { id: true },
+    });
+    // the amendment is a new submission (its own item); this event is the closed one's
+    await emitEvent(tx, {
+      action: "controls.submission.reopened",
+      itemType: "submission",
+      itemId: previous.id,
+      details: { next: made.id, version: previous.version + 1 },
+    });
+    return made;
   });
 
   revalidatePath(`${base}/submissions`);
@@ -163,19 +198,25 @@ export async function archiveSubmission(project: string, submissionId: string): 
   }
   if (sub.archivedAt) return;
 
-  await prisma.submission.update({
-    where: { id: submissionId },
-    data: { archivedAt: new Date() },
+  await prisma.$transaction(async (tx) => {
+    await tx.submission.update({ where: { id: submissionId }, data: { archivedAt: new Date() } });
+    await emitEvent(tx, { action: "controls.submission.archived", itemType: "submission", itemId: submissionId });
   });
   revalidateSubmissionPages(project, submissionId);
 }
 
 export async function restoreSubmission(project: string, submissionId: string): Promise<void> {
   const prisma = await projectDbFor(project, { write: true });
-  const restored = await prisma.submission.updateMany({
-    where: { id: submissionId },
-    data: { archivedAt: null },
+  const restored = await prisma.$transaction(async (tx) => {
+    const done = await tx.submission.updateMany({
+      where: { id: submissionId, archivedAt: { not: null } },               // only an archived one comes back
+      data: { archivedAt: null },
+    });
+    if (done.count > 0) {
+      await emitEvent(tx, { action: "controls.submission.restored", itemType: "submission", itemId: submissionId });
+    }
+    return done.count > 0 || (await tx.submission.count({ where: { id: submissionId } })) > 0;
   });
-  if (restored.count === 0) throw new Error("Submission not found.");
+  if (!restored) throw new Error("Submission not found.");
   revalidateSubmissionPages(project, submissionId);
 }

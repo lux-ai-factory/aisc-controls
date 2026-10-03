@@ -2,7 +2,7 @@
 // mapping; see CATALOGUE_CONTROLS_SYNC.md). This file is deliberately thin: a
 // pure validator/normaliser (unit-tested, no DB) plus one upsert keyed on
 // `catalogueId`. Installing a control the project already has changes nothing.
-import type { PrismaClient } from "@prisma/client";
+import type { Prisma, PrismaClient } from "@prisma/client";
 import { slugify } from "@/lib/slugify";
 
 export type InstallPackage = {
@@ -84,7 +84,13 @@ export type InstallResult = { checklistId: string; catalogueId: string; created:
  * Install a catalogue checklist into the local DB, keyed on `catalogueId`.
  * Installing a control the project already has changes nothing.
  */
-export async function installChecklist(prisma: PrismaClient, pkg: unknown): Promise<InstallResult> {
+/** The caller's ledger event for a new install, written in the install's own transaction (ledger phase 7). */
+export type InstallRecorder = (
+  tx: Prisma.TransactionClient,
+  installed: { checklistId: string; catalogueId: string; questions: number },
+) => Promise<unknown>;
+
+export async function installChecklist(prisma: PrismaClient, pkg: unknown, record?: InstallRecorder): Promise<InstallResult> {
   const data = parseInstallPackage(pkg);
   const { catalogueId } = data.checklist;
   const findInstalled = () =>
@@ -97,7 +103,7 @@ export async function installChecklist(prisma: PrismaClient, pkg: unknown): Prom
 
   let checklistId: string;
   try {
-    checklistId = await createChecklist(prisma, data);
+    checklistId = await createChecklist(prisma, data, record);
   } catch (err) {
     // Two installs at once (a double click): both saw nothing, one created it,
     // and the other hit the unique catalogueId (or the source's unique name).
@@ -106,14 +112,14 @@ export async function installChecklist(prisma: PrismaClient, pkg: unknown): Prom
     const raced = await findInstalled();
     if (raced) return { checklistId: raced.id, catalogueId, created: false };
     // Only the source collided: it exists now, so the upsert finds it.
-    checklistId = await createChecklist(prisma, data);
+    checklistId = await createChecklist(prisma, data, record);
   }
 
   return { checklistId, catalogueId, created: true };
 }
 
 /** The checklist, its questions and (if new) its source, in one transaction. Returns the checklist's id. */
-function createChecklist(prisma: PrismaClient, data: NormalisedChecklist): Promise<string> {
+function createChecklist(prisma: PrismaClient, data: NormalisedChecklist, record?: InstallRecorder): Promise<string> {
   return prisma.$transaction(async (tx) => {
     const source = await tx.source.upsert({
       where: { name: data.source.name },
@@ -134,6 +140,9 @@ function createChecklist(prisma: PrismaClient, data: NormalisedChecklist): Promi
       },
       select: { id: true },
     });
+    if (record) {
+      await record(tx, { checklistId: created.id, catalogueId: data.checklist.catalogueId, questions: data.questions.length });
+    }
     return created.id;
   });
 }

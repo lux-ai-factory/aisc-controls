@@ -5,7 +5,7 @@
 import { callerToken } from "@/lib/access/callerToken";
 import { platformUrl } from "@/lib/appUrls";
 import { fetchCataloguePackage } from "@/lib/cataloguePackage";
-import { installChecklist, parseInstallPackage } from "@/lib/installChecklist";
+import { installChecklist, parseInstallPackage, type InstallRecorder } from "@/lib/installChecklist";
 import { PROJECT_ID, projectDbFor, writableProject } from "@/lib/projectDb";
 import { writableProjects, type ProjectChoice } from "@/lib/writableProjects";
 
@@ -67,6 +67,7 @@ export async function installOptions(slug: string, wanted?: string | null): Prom
 export async function installForCaller(
   project: string,
   slug: string,
+  record?: InstallRecorder,
 ): Promise<Refusal | { ok: true; checklistId: string; created: boolean; path: string }> {
   if (!PROJECT_ID.test(project)) return { ok: false, status: 400, error: "Choose a project." };
   const { prisma, refused } = await writableProject(project);
@@ -75,7 +76,7 @@ export async function installForCaller(
   if (!fetched.ok) return catalogueRefusal(fetched.reason);
   let result;
   try {
-    result = await installChecklist(prisma, fetched.pkg);
+    result = await installChecklist(prisma, fetched.pkg, record);
   } catch (err) {
     return unreadable(err);
   }

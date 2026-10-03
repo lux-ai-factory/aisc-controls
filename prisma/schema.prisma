@@ -42,6 +42,8 @@ model Checklist {
   updatedAt       DateTime     @updatedAt @map("updated_at") @db.Timestamptz(3)
   questions       Question[]
   submissions     Submission[]
+  /// Which revision of its questions this is: 1 as installed, +1 on each question review (ledger phase 7).
+  questionsVersion Int        @default(1) @map("questions_version")
 
   @@index([sourceId])
   @@map("checklist")

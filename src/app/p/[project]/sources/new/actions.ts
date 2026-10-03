@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { writableProject } from "@/lib/projectDb";
 import { slugify } from "@/lib/slugify";
+import { emitEvent } from "@/lib/ledger/emit";
 
 const schema = z.object({
   name: z.string().trim().min(1, "Name is required").max(100),
@@ -50,6 +51,14 @@ export async function createSource(
     slug = `${baseSlug}-${n++}`;
   }
 
-  await prisma.source.create({ data: { name, slug, citation, url } });
+  await prisma.$transaction(async (tx) => {
+    const made = await tx.source.create({ data: { name, slug, citation, url } });
+    await emitEvent(tx, {
+      action: "controls.source.created",
+      itemType: "source",
+      itemId: made.id,
+      content: { name, slug, citation, url },
+    });
+  });
   redirect(`/p/${project}/sources`);
 }
