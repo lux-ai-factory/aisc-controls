@@ -1,7 +1,6 @@
 # syntax=docker/dockerfile:1
-# Multi-stage build for the Next.js app. Used when running aisc-controls as an
-# aisc platform service (apps/controls). Standalone dev still uses `npm run dev`
-# and does NOT need this image.
+# The image of the controls-web and controls-migrate services of the aisc stack.
+# Standalone development uses `npm run dev` and does not need it.
 
 FROM node:20-bookworm-slim AS deps
 WORKDIR /app
@@ -23,17 +22,17 @@ RUN npx prisma generate && npm run build
 FROM node:20-bookworm-slim AS runner
 WORKDIR /app
 ENV NODE_ENV=production
-# `next start` re-evaluates next.config.ts at runtime, which derives basePath from
-# NEXT_BASE_PATH. Build ARG/ENV don't cross stages, so re-declare it here; without
-# this the baked /controls prefix is dropped and the app serves at root
-# (Caddy's /controls* route then 404s). next.config.ts is copied below.
+# `next start` evaluates next.config.ts again at run time, and that reads basePath
+# from NEXT_BASE_PATH. A build ARG/ENV does not cross stages, so it is declared
+# again here: without it the app serves at the root and Caddy's /controls* route
+# gets 404s.
 ARG NEXT_BASE_PATH=""
 ENV NEXT_BASE_PATH=$NEXT_BASE_PATH
 # OpenSSL is required by the Prisma query engine at runtime.
 RUN apt-get update && apt-get install -y --no-install-recommends openssl \
     && rm -rf /var/lib/apt/lists/*
-# Full node_modules (incl. prisma CLI + tsx) so the migrate service can run
-# scripts/migrate-projects.mjs (prisma migrate deploy per project database)
+# All of node_modules (with the prisma CLI and tsx), so controls-migrate can run
+# scripts/migrate-projects.mjs (prisma migrate deploy on each project database)
 # from this same image.
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/.next ./.next

@@ -10,10 +10,10 @@ export const dynamic = "force-dynamic";
 const RENDERER_URL = process.env.PDF_RENDERER_URL ?? "http://localhost:8005";
 
 /**
- * GET /submissions/:id/report — renders the submission's answers + scores to a
- * PDF via the bundled renderer (services/pdf_renderer) and streams it back as a
- * download. The core app does not depend on the renderer; if it is unreachable
- * we return a 502 with a hint rather than crashing the page.
+ * GET /p/{project}/submissions/{id}/report: the submission's answers and scores
+ * as a PDF, made by the bundled renderer (services/pdf_renderer) and sent back as
+ * a download. The app does not depend on the renderer: when it is unreachable
+ * this returns a 502 with a hint rather than crashing the page.
  */
 export async function GET(
   _req: Request,

@@ -1,7 +1,7 @@
-// Install a checklist *template* sent by the catalogue (catalogue does the
-// mapping; see CATALOGUE_CONTROLS_SYNC.md). This file is deliberately thin: a
-// pure validator/normaliser (unit-tested, no DB) plus one upsert keyed on
-// `catalogueId`. Installing a control the project already has changes nothing.
+// Install a checklist template sent by the catalogue (the catalogue maps its
+// control into this package shape). Two parts: a pure validator/normaliser
+// (unit-tested, no database) and one insert keyed on `catalogueId`. Installing
+// a control the project already has changes nothing.
 import type { Prisma, PrismaClient } from "@prisma/client";
 import { slugify } from "@/lib/slugify";
 import { packageDigest, questionsState } from "@/lib/ledger/state";
@@ -81,17 +81,13 @@ export function parseInstallPackage(pkg: unknown): NormalisedChecklist {
 
 export type InstallResult = { checklistId: string; catalogueId: string; created: boolean };
 
-/**
- * Install a catalogue checklist into the local DB, keyed on `catalogueId`.
- * Installing a control the project already has changes nothing.
- */
-/** The caller's ledger event for a new install, written in the install's own transaction (ledger phase 7). */
+/** The caller's ledger event for a new install, written in the install's own transaction. */
 export type InstallRecorder = (
   tx: Prisma.TransactionClient,
   installed: { checklistId: string; catalogueId: string; questions: number; content: InstalledContent },
 ) => Promise<unknown>;
 
-/** What an install put in the project, as its event keeps it (review m5): the package's digest, the source
+/** What an install put in the project, as its event keeps it: the package's digest, the source
  *  it filed the checklist under (made by this install when it was new), and the questions with their ids,
  *  so every later answer's questionId can be tied to the question it answered. */
 export type InstalledContent = {
@@ -109,6 +105,10 @@ function digestOf(pkg: unknown): string | null {
   }
 }
 
+/**
+ * Install a catalogue checklist into the project's database, keyed on `catalogueId`.
+ * Installing a control the project already has changes nothing.
+ */
 export async function installChecklist(prisma: PrismaClient, pkg: unknown, record?: InstallRecorder): Promise<InstallResult> {
   const data = parseInstallPackage(pkg);
   const { catalogueId } = data.checklist;

@@ -103,7 +103,7 @@ export function isMissingDatabase(err: unknown): boolean {
   return [e.stderr, e.stdout].some((out) => out != null && (/\bP1003\b/.test(String(out)) || MISSING.test(String(out))));
 }
 
-/** The connection went away under the client: the database may have been dropped (I2.5). */
+/** The connection went away under the client: the database may have been dropped. */
 function isLostConnection(err: unknown): boolean {
   const e = err as { code?: unknown; errorCode?: unknown; message?: unknown } | null;
   if (!e || typeof e !== "object") return false;
@@ -131,7 +131,7 @@ async function databaseExists(pid: string): Promise<boolean | null> {
   }
 }
 
-/** A dropped (or never made) project database is "not found" for that pid (I2.5), never a 500. */
+/** A dropped (or never made) project database is "not found" for that pid, never a 500. */
 async function notFoundIfGone(pid: string, err: unknown): Promise<void> {
   if (isMissingDatabase(err) || (await databaseExists(pid)) === false) notFound();
 }
@@ -160,7 +160,7 @@ export async function prismaFor(
     entry = created;
     open.set(url, created);
     // A database that went away (the project was deleted) is not kept open, and the
-    // request that finds out is "not found" (I2.5). The first request after
+    // request that finds out is "not found". The first request after
     // DROP DATABASE ... WITH (FORCE) sees its connection closed, not a missing database,
     // so a lost connection asks the cluster whether the database is still there.
     client.$use(async (params, next) => {
@@ -214,7 +214,7 @@ export async function projectDbFor(pid: string, { write }: { write: boolean }): 
         return await prismaFor(pid);
       } catch (err) {
         // Opening migrates first; for a database that is not there, `migrate deploy` fails
-        // (it may even try to create it, and is refused), so the cluster is asked (I2.5).
+        // (it may even try to create it, and is refused), so the cluster is asked.
         await notFoundIfGone(pid, err);
         throw err;
       }

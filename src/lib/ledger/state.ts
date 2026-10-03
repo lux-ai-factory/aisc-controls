@@ -1,6 +1,6 @@
 /**
- * The states the controls app's ledger events keep (ledger phase 7). Each is built one way only, so an
- * item's chain holds: an event's `before` is its item's previous `after` (verify.py's chain check).
+ * The states the controls app's ledger events keep. Each is built one way only, so an item's chain holds:
+ * an event's `before` is its item's previous `after`, which the platform's ledger verifier checks.
  */
 import { createHash } from "node:crypto";
 
@@ -8,7 +8,7 @@ import { canonical } from "./canonical";
 
 type Answer = { questionId: string; answer: string | null; score: number | null };
 
-/** What a submission says: the whole of it, its answers ordered by question id (review m3). */
+/** What a submission says: the whole of it, its answers ordered by question id. */
 export function submissionState(label: string, status: string, answers: Answer[]) {
   return {
     label,
@@ -51,7 +51,7 @@ export function questionsState(questions: QuestionRow[]) {
     .map((q) => ({ id: q.id, order: q.order, text: q.text, article: q.article, category: q.category }));
 }
 
-/** The sha256 of a catalogue package as received, over its canonical form (review m5). */
+/** The sha256 of a catalogue package as received, over its canonical form. */
 export function packageDigest(pkg: unknown): string {
   return createHash("sha256").update(canonical(pkg), "utf8").digest("hex");
 }

@@ -1,6 +1,7 @@
-"""API auth WP2 (2026-09-25), inventory findings 8 and 11: the service-token door.
+"""The service-token door of the checklist report renderer (controls-pdf).
 
-The checklist report renderer (controls-pdf) is called by controls-web only, from the submission report route. Each caller has a token of its own, sent in X-AISC-Service-Token.
+controls-web is its only caller, from the submission report route, with a token
+of its own sent in X-AISC-Service-Token.
 /health stays open; everything else (the API, /docs and /openapi.json) is 401
 without the right token and 503 when this service has no token set.
 """

@@ -81,9 +81,9 @@ export default async function SubmissionDetailPage({
 }) {
   const { project, id } = await params;
 
-  // Raw <a href> links are not rewritten by Next's basePath — prefix
-  // explicitly (same pattern as SiteHeader) so the report download works
-  // when the app is served under a subpath (e.g. /controls behind Caddy).
+  // Next does not add basePath to a raw <a href> link, so it is prefixed here
+  // (as in SiteHeader) and the report download works when the app is served
+  // under a subpath (/controls behind Caddy).
   const basePath = process.env.NEXT_BASE_PATH || "";
 
   // Read in this project's own database, so an id from the URL can only reach

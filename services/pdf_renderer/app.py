@@ -1,10 +1,12 @@
-"""FastAPI service that renders arbitrary JSON to PDF via Jinja + WeasyPrint.
+"""The checklist report renderer: a submission's report JSON to PDF.
 
-Treat this as a starting point: define a Pydantic model that matches the JSON
-your Next.js app will POST, write a Jinja template under ``templates/`` that
-renders that model, and the service will return a PDF.
+The controls app POSTs the payload built by src/lib/report.ts to /render/pdf;
+templates/document.html.j2 renders it, WeasyPrint turns it into a PDF.
+/render/html returns the same page as HTML, for looking at the template.
+Every path but /health needs the CONTROLS_WEB_TO_PDF_TOKEN in
+X-AISC-Service-Token.
 
-Run locally:
+Run locally (with CONTROLS_WEB_TO_PDF_TOKEN set):
     python3 -m venv .venv
     source .venv/bin/activate
     pip install -r requirements.txt
@@ -45,7 +47,7 @@ def health() -> Dict[str, str]:
 
 @app.post("/render/html", response_class=Response)
 def render_html(payload: Dict[str, Any]) -> Response:
-    """Render the default template with the given JSON payload and return HTML."""
+    """The report page as HTML, rendered from the payload."""
     template = env.get_template("document.html.j2")
     html = template.render(data=payload)
     return Response(content=html, media_type="text/html; charset=utf-8")

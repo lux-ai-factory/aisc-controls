@@ -1,5 +1,5 @@
-// Export a Checklist (with its questions) into prisma/seed/examples/<slug>/
-// so it gets committed and replayed by `prisma db seed` after clone.
+// Export a checklist (with its questions) from the database DATABASE_URL names
+// into prisma/seed/examples/<slug>/, where `prisma db seed` can replay it.
 //
 // Usage:
 //   npx tsx prisma/seed/export.ts <checklistId> [folderSlug]

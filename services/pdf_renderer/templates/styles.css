@@ -78,7 +78,7 @@ code {
   font-size: 9pt;
 }
 
-/* ---------- Checklist report ---------- */
+/* Checklist report */
 
 /* Table-based layout (not flexbox): WeasyPrint renders CSS tables reliably,
    whereas its flexbox support can collapse columns onto each other. */

@@ -57,8 +57,8 @@ export type ReportPayload = {
   scoredCount: number;
   totalQuestions: number;
   scoreScale: { value: number; label: string }[];
-  // NB: field is `entries`, not `items` — in Jinja `group.items` resolves to
-  // the dict's built-in items() method, not this list.
+  // The field is `entries`, not `items`: in Jinja `group.items` resolves to the
+  // dict's built-in items() method, not this list.
   groups: { category: string | null; entries: ReportItem[] }[];
   generatedAt: string;
 };

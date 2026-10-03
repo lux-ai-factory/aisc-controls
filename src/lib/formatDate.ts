@@ -1,6 +1,6 @@
-// dd/mm/yyyy formatters for user-facing date display. HTML <input type="date">
-// values stay as YYYY-MM-DD because the spec requires it; the browser still
-// renders them in the visitor's locale.
+// dd/mm/yyyy formatters for dates shown to people. The value of an HTML
+// <input type="date"> stays YYYY-MM-DD, the only format it accepts; the browser
+// still shows it in the visitor's locale.
 
 const pad = (n: number) => String(n).padStart(2, "0");
 

@@ -63,8 +63,8 @@ export async function saveReviewedQuestions(
     regulationIds: tags.regulationIds,
   };
 
-  // The review, and its event, in one transaction (ledger phase 7), with the checklist locked first so two
-  // reviews at once take turns and an answer can't slip in between the reads and the delete (review m4).
+  // The review and its ledger event, in one transaction. The checklist is locked first, so two reviews at
+  // once take turns and an answer cannot slip in between the reads and the delete.
   await prisma.$transaction(async (tx) => {
     await tx.$queryRaw`SELECT id FROM controls.checklist WHERE id = ${checklistId} FOR UPDATE`;
     const was = await tx.checklist.findUniqueOrThrow({
@@ -75,8 +75,8 @@ export async function saveReviewedQuestions(
       q.text === questions[idx].text && q.article === questions[idx].article && q.category === questions[idx].category);
 
     if (same) {
-      // The questions stay as they are (review M1, guard 1): only the checklist's own fields change, so no
-      // question is replaced and no answer goes with it.
+      // The questions are unchanged: only the checklist's own fields change, so no question is replaced and
+      // no answer goes with it.
       await tx.checklist.update({ where: { id: checklistId }, data: fields });
       await emitEvent(tx, {
         action: "controls.checklist.edited",
@@ -90,7 +90,7 @@ export async function saveReviewedQuestions(
 
     // Replacing the questions removes the answers given to them (closed submissions' too; the database
     // cascades): the event keeps the old questions and every answer removed, so the ledger holds what the
-    // review deleted. With the ledger off nothing reads them (review m8).
+    // review deleted. With the ledger off they are not read.
     const removed = ledgerOn()
       ? await tx.submissionAnswer.findMany({
           where: { question: { checklistId } },
@@ -119,14 +119,14 @@ export async function saveReviewedQuestions(
                  closed_answers_removed: removed.filter((a) => a.submission.status === "Closed").length },
       content: {
         before: questionsState(was.questions),
-        after: questionsState(made),                                   // with the new ids (review m5)
+        after: questionsState(made),                                   // with the new ids
         checklist: { before: checklistState(was), after: checklistState(fields) },
         removed_answers: removed.map((a) => ({ submission: a.submissionId, status: a.submission.status,
                                                version: a.submission.version, question: a.questionId,
                                                answer: a.answer, score: a.score })),
       },
     });
-  }, { timeout: 30_000 });                                              // a big checklist's review (review m8)
+  }, { timeout: 30_000 });                                              // a big checklist's review takes time
 
   redirect(`/p/${project}/checklists`);
 }

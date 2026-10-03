@@ -33,7 +33,7 @@ export async function submitForm(
   const validIds = new Set(checklist.questions.map((q) => q.id));
   const answers = parseAnswers(formData, validIds);
 
-  // the submission and its event, in one transaction (ledger phase 7)
+  // The submission and its ledger event, in one transaction.
   const created = await prisma.$transaction(async (tx) => {
     const made = await tx.submission.create({
       data: {

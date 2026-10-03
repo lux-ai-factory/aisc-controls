@@ -1,24 +1,11 @@
-# aisc platform fragment for apps/controls.
+# Out of date, and not used by the aisc stack. The stack defines controls-pdf,
+# controls-migrate and controls-web in the aisc repo's own
+# docker-compose.development.yml; use that (see README.md). This fragment still
+# migrates and seeds one shared database, which the app no longer has: each
+# project has a database of its own.
 #
-# Merge it with the platform infra (which provides the shared Postgres `postgres`
-# on the `backend` network):
-#   docker compose --env-file env.development \
-#     -f docker-compose-infra.development.yml \
-#     -f apps/controls/docker-compose.development.yml up -d controls-web
-#
-# Platform-side prereqs:
-#   - A `controls` database must exist in the shared Postgres (Prisma applies the
-#     schema but does not create the database). e.g. once infra is up:
-#       docker exec postgres createdb -U aisc-postgres-user controls
-#   - A Caddy route to controls-web:3000 (see the platform Caddyfile).
-#
-# Differences from the standalone docker-compose.yml: no bundled `db`, no
-# top-level `name:`, migrations run as a one-shot init service, and services
-# join the platform's `backend`/`frontend` networks.
-#
-# Build contexts are written relative to the PLATFORM PROJECT ROOT (the dir of
-# the first -f file), matching the platform's own `build: apps/<name>/`
-# convention — so this assumes the submodule is mounted at apps/controls.
+# Build contexts are relative to the aisc repo root (the directory of the first
+# -f file), so this assumes the repo is mounted at apps/controls.
 
 services:
   # PDF report renderer sidecar. Internal-only; reached as http://controls-pdf:8005.
@@ -30,9 +17,8 @@ services:
     restart: unless-stopped
     networks: [backend]
 
-  # One-shot: apply migrations + seed the bundled checklists, then exit. The infra
-  # Postgres has no healthcheck, so retry migrate until it accepts connections.
-  # Seeding is idempotent (skips checklists already present).
+  # One-shot: migrate and seed, then exit; retried until Postgres accepts
+  # connections.
   controls-migrate:
     build: apps/controls
     container_name: controls-migrate
@@ -47,7 +33,7 @@ services:
     build:
       context: apps/controls
       args:
-        # Set CONTROLS_BASE_PATH=/controls for path-prefix routing behind Caddy.
+        # CONTROLS_BASE_PATH=/controls serves the app under /controls behind Caddy.
         NEXT_BASE_PATH: ${CONTROLS_BASE_PATH:-}
     container_name: controls-web
     env_file: apps/controls/env.development
@@ -57,8 +43,7 @@ services:
       controls-pdf:
         condition: service_started
     ports:
-      # Optional direct access; behind Caddy you can drop this. Defaults to 3100
-      # to avoid clashing with the platform webapp.
+      # Direct access, besides Caddy. 3100 by default, clear of the webapp.
       - "${CONTROLS_WEB_PORT:-3100}:3000"
     restart: unless-stopped
     networks: [backend, frontend]

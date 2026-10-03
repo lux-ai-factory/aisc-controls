@@ -89,9 +89,9 @@ export async function saveDraft(
     return { submissionId, ...answer, ...stamp };
   });
 
-  // The draft, its answers and its event, in one transaction (ledger phase 7). The draft is locked and read
-  // again inside it (review m1): one closed in another tab since the reads above is refused, not rewritten,
-  // and the answers it replaces, read under the lock, are its event's `before`.
+  // The draft, its answers and its ledger event, in one transaction. The draft is locked and read again
+  // inside it: one closed in another tab since the reads above is refused, not rewritten, and the answers
+  // it replaces, read under the lock, are its event's `before`.
   const after = submissionState(label, shouldClose ? "Closed" : "Draft", rows);
   const saved = await prisma.$transaction(async (tx) => {
     const [now] = await tx.$queryRaw<{ label: string; status: string }[]>`
@@ -169,7 +169,7 @@ export async function reopenForAmendment(project: string, submissionId: string):
     select: { id: true },
     });
     // The amendment is a new submission (its own item); this event is the closed one's. Its content is the
-    // amendment's first state, which the amendment's first save continues as its `before` (review m6).
+    // amendment's first state, which the amendment's first save continues as its `before`.
     await emitEvent(tx, {
       action: "controls.submission.reopened",
       itemType: "submission",

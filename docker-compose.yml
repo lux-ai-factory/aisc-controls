@@ -1,26 +1,25 @@
-# Project name drives container/volume namespacing (aisc-controls-db-1, etc.)
-# regardless of the directory name.
+# Standalone development only: Postgres and the PDF renderer for `npm run dev`.
+# The aisc stack does not use this file. The project name fixes the container
+# and volume names (aisc-controls-db-1, ...) whatever the directory is called.
 name: aisc-controls
 
 services:
   db:
     image: postgres:16-alpine
-    # No container_name: let Compose namespace it per-project (aisc-controls-db-1)
-    # so this stack never collides with another project's container, and stays
-    # fully standalone.
+    # No container_name: Compose names it per project (aisc-controls-db-1), so it
+    # never collides with a container of the aisc stack.
     restart: unless-stopped
     environment:
       POSTGRES_USER: aisc
       POSTGRES_PASSWORD: aisc
       POSTGRES_DB: aisc
     ports:
-      # Host port 5444 (non-default) so we don't fight any other Postgres a
-      # contributor might already run on 5432. The container side stays 5432.
+      # Host port 5444, so it never clashes with a Postgres on 5432 (such as the
+      # aisc stack's). The container side stays 5432.
       - "5444:5432"
     volumes:
-      # Named volume → answered checklists and every other row survive
-      # `docker compose down`, container recreation, and reboots. Only
-      # `docker compose down -v` (or `npm run db:reset`) wipes it.
+      # A named volume: the data survives `docker compose down`, a recreated
+      # container and a reboot. Only `docker compose down -v` deletes it.
       - postgres-data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U aisc -d aisc"]
@@ -28,14 +27,16 @@ services:
       timeout: 3s
       retries: 20
 
-  # Bundled PDF report renderer. Powers the submission "Download report (PDF)"
-  # action: the Next.js app POSTs report JSON to /render/pdf on host port 8005.
-  # The app does not depend on it — if it is down, only report downloads fail.
+  # The PDF report renderer behind a submission's "Download report (PDF)": the
+  # app POSTs report JSON to /render/pdf on host port 8005. The app does not
+  # depend on it: when it is down, only report downloads fail. It refuses every
+  # call (503) unless CONTROLS_WEB_TO_PDF_TOKEN is set in its environment, which
+  # this file does not do.
   pdf:
     build: ./services/pdf_renderer
     restart: unless-stopped
     ports:
-      # Host 8005 → container 8005. Matches the PDF_RENDERER_URL default.
+      # Matches the PDF_RENDERER_URL default.
       - "8005:8005"
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8005/health')"]

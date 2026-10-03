@@ -6,7 +6,7 @@ import { installChosen, type ChooseState } from "./actions";
 import type { ControlSummary } from "@/lib/installControl";
 import type { ProjectChoice } from "@/lib/writableProjects";
 
-/** One screen: the control, the project, Install. Like the engine's dialog for a test. */
+/** One screen: the control, the project to install it into, and Install. */
 export default function InstallDialog({
   slug,
   control,

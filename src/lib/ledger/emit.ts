@@ -1,12 +1,12 @@
 /**
- * The app's ledger emitter (docs/superpowers/ledger-2026-10-02/02-spec.md 6.4, 6.5).
+ * The app's ledger emitter.
  *
  * An event is written with the project database's `ledger.emit(jsonb)` in the
- * SAME transaction as the change it describes, so a rollback leaves no event
- * and a committed change always has one (R2.4). The app never names who
- * acted: it cites the request the gateway witnessed (X-AISC-Request-Id), and
- * the platform's relay takes the person from that witness record. It sends
- * plain content; the platform computes every keyed digest (N4).
+ * same transaction as the change it describes, so a rollback leaves no event
+ * and a committed change always has one. The app never names who acted: it
+ * cites the request the gateway witnessed (X-AISC-Request-Id), and the
+ * platform's relay takes the person from that witness record. It sends plain
+ * content; the platform computes every keyed digest.
  *
  * Nothing is written while LEDGER_MODE is off (the default), so rows don't
  * pile up before the ledger is turned on.
@@ -61,7 +61,7 @@ export async function isServerAction(): Promise<boolean> {
   }
 }
 
-/** Fields that would name who acted: the witness says who did, an event never does (I2, I10; review M6). */
+/** Fields that would name who acted: the witness says who did, an event never does. */
 const WHO_FIELDS = new Set(["createdBy", "created_by", "updatedBy", "updated_by", "savedBy"]);
 
 /** `value` without any field that names a person, at any depth. */
@@ -94,7 +94,7 @@ export function eventBody(event: LedgerEvent, requestId: string | null): string 
   if (event.runId) body.run_id = event.runId;
   if (event.model) body.model = event.model;
   const sent = JSON.stringify(body);
-  ledgerSafe(JSON.parse(sent)); // what is sent (undefined fields dropped), refused now if the ledger would later
+  ledgerSafe(JSON.parse(sent)); // check what is sent (undefined fields dropped): refuse now what the ledger would refuse later
   return sent;
 }
 

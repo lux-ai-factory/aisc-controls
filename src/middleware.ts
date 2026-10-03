@@ -16,9 +16,9 @@ import { tokenFromHeaders } from "@/lib/access/callerToken";
 import { platformUrl } from "@/lib/appUrls";
 
 export const config = {
-  // Only the pages that are inside a project. The methodology, the health
-  // check and the static assets are not, and have nothing project-specific on
-  // them.
+  // Only the pages inside a project. The rest (the root page, /install and its
+  // API, the static assets) has nothing project-specific; /install checks the
+  // project it is given itself.
   matcher: ["/p/:path*"],
 };
 

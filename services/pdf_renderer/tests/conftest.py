@@ -1,6 +1,5 @@
 import pytest
 
-# ── API auth WP2 (2026-09-25): the service-token door ────────────────────────
 # Every endpoint of this service is behind service_token.py. The endpoint tests
 # are about the endpoints, so their client carries a caller's token; the door is
 # tested in test_service_token.py (DOOR_TEST = True), whose clients carry exactly

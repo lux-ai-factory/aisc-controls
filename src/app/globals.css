@@ -61,7 +61,7 @@ a:hover {
   color: var(--accent);
 }
 
-/* Site header — full-width, logo flush left, nav flush right */
+/* Site header: full width, logo flush left, nav flush right */
 .site-header {
   background: #ffffff;
   border-bottom: 1px solid var(--border);
@@ -256,7 +256,7 @@ a:hover {
   margin-top: 4px;
 }
 
-/* Home page — full layout */
+/* Project home page */
 .home {
   max-width: 1200px;
   margin: 0 auto;
@@ -835,7 +835,7 @@ a.tag--source:hover {
   font-weight: 800;
 }
 
-/* Banner shown while extraction is running */
+/* Info banner (e.g. "Installed from the catalogue" on the fill page) */
 .info-banner {
   background: var(--info-soft);
   border: 1px solid var(--info);
@@ -1031,7 +1031,7 @@ a.tag--source:hover {
   font-style: italic;
 }
 
-/* Install a control: one dialog, like the engine's for a test */
+/* Install dialog for one control */
 .install-dialog {
   max-width: 520px;
 }

@@ -6,9 +6,9 @@ export const metadata: Metadata = {
   description: "Compliance checklists — curate, answer, track.",
 };
 
-// Every page reads from the database per-request, so render dynamically. This
-// also keeps `next build` (used for the platform Docker image) from trying to
-// prerender — and hit the DB — at build time.
+// Every page reads from the database per request, so render dynamically. This
+// also keeps `next build` (run for the Docker image) from prerendering pages,
+// and so reaching for the database, at build time.
 export const dynamic = "force-dynamic";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

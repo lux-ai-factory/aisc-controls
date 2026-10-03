@@ -68,7 +68,7 @@ function parseDateOrNull(input: string | null | undefined): Date | null {
 }
 
 async function main() {
-  // 1. Sources registry — upsert citations and slugs ahead of any checklists.
+  // Sources first: upsert their citations and slugs before any checklist refers to them.
   if (existsSync(SOURCES_FILE)) {
     const sources = JSON.parse(await readFile(SOURCES_FILE, "utf8")) as SourceEntry[];
     for (const s of sources) await upsertSourceFromEntry(s);
