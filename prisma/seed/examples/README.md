@@ -1,7 +1,10 @@
-# Bundled checklist examples
+# Example checklists
 
-Anything in this folder is committed to git and replayed by `prisma db seed` so a
-fresh clone has data to look at without uploading anything by hand.
+Seventeen checklists (AESIA and EUSAiR), with their sources in
+`../sources.json`. `prisma db seed` (`prisma/seed.ts`) loads them into the
+database `DATABASE_URL` names. Nothing runs it automatically: in AISC a
+project's checklists are the ones installed into it from the catalogue, so
+these are for trying the app on one project database.
 
 ## Layout
 
@@ -9,7 +12,7 @@ Each example is a folder:
 
 ```
 prisma/seed/examples/
-  aepd-rgpd-controls/
+  <folder-slug>/
     meta.json
     questions.json
 ```
@@ -18,7 +21,7 @@ prisma/seed/examples/
 
 ```json
 {
-  "title": "AEPD — RGPD operational controls",
+  "title": "AEPD: RGPD operational controls",
   "sourceName": "AEPD",
   "controlTopic": "Data protection",
   "description": "Spanish DPA reference checklist for RGPD operational controls.",
@@ -26,6 +29,9 @@ prisma/seed/examples/
   "regulationIds": ["GDPR"]
 }
 ```
+
+`sourceName` names the source (from `../sources.json`, or made by the seed if
+it is not there yet); `sourceUpdatedAt` (YYYY-MM-DD) is optional.
 
 `questions.json`:
 
@@ -37,19 +43,16 @@ prisma/seed/examples/
 }
 ```
 
-## Adding an example you created in the UI
-
-Run the export helper after you've added a checklist in the app:
+## Exporting a checklist into a new example
 
 ```bash
-npx tsx prisma/seed/export.ts <checklistId> [folderSlug]
+DATABASE_URL='postgresql://.../project_<hex>?schema=controls' \
+  npx tsx prisma/seed/export.ts <checklistId> [folderSlug]
 ```
 
-It writes `meta.json` + `questions.json` into a new folder here; commit the
-folder and the checklist seeds on the next fresh clone.
+It writes `meta.json` and `questions.json` into a new folder here.
 
-## Re-seeding
+## Seeding again
 
-The seed is idempotent — it skips entries whose title already exists for the
-system user. To force a re-seed of one entry, delete that checklist in the
-DB first.
+The seed skips a checklist whose title is already in the database. To load one
+again, delete that checklist from the database first.

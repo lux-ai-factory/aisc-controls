@@ -1,234 +1,234 @@
 # AISC Controls
 
-Compliance checklists — curate the questions and answer each checklist against
-your AI system to capture audit evidence. Ships with
-**17 bundled checklists (687 questions)** across **2 sources**
-([AESIA](https://aesia.digital.gob.es/en/guides),
-[EUSAiR](https://eusair-project.eu/)) that load automatically the first time
-you start the app.
+The controls checklists of AISC, the AI Assessment Sandbox Configurator. AISC
+walks a project through six steps: 1 qualification, 2 control objectives,
+3 install plugins and tools, 4 execute tests and address controls, 5 analyse
+the results on the dashboard, 6 compose the report. This app is the "address
+controls" half of step 4. A project installs compliance checklists (controls)
+from the AISC catalogue, answers each one against its AI system with a 1 to 5
+readiness score per question, and keeps the answered sheets (submissions)
+through a Draft, Closed, reopened-as-new-version lifecycle, with a PDF report
+for each. The results dashboard (step 5) and the report (step 6) read the
+answers from the project's database.
 
-## Quick start
+## How it works
 
-### Requirements
+- **Next.js 15 app** (`src/`), served under `/controls` behind the AISC
+  gateway (Caddy + oauth2-proxy + Keycloak). Every project page lives under
+  `/p/{project}/...`: the checklist library, the catalogue, the fill and
+  review pages, the sources, and the submissions with their PDF report.
+- **One Postgres database per project.** The platform service makes a database
+  `project_<project id without hyphens>` when a project is created. This app
+  keeps its tables in that database's `controls` schema (Prisma, connected as
+  `controls_rw`) and nowhere else, so one project can never read another's
+  answers. A project database is migrated the first time the app opens it,
+  and every existing one is migrated at start by `scripts/migrate-projects.mjs`.
+- **Access is decided by the platform.** Signing in is the gateway's job. On
+  every request to a project page, `src/middleware.ts` asks the platform
+  (`GET {PLATFORM_URL}/authz/projects/{project}`, with the caller's token)
+  whether the person is in that project and may change it; every server action
+  asks again for the project it was given. If the platform does not answer,
+  the page answers 503: it never fails open.
+- **Catalogue.** Controls are fetched server-side from the hosted catalogue
+  (`{CATALOGUE_URL}/tool/` for the list, `{CATALOGUE_URL}/control/{slug}/export`
+  for one package) and installed into the project's database. The catalogue's
+  own install dialog can also call this app's `/api/install` from the browser,
+  only from `CATALOGUE_ORIGIN`.
+- **AI card version.** Each answer is stamped with the AI card version that
+  was the latest when it was given (`GET {PLATFORM_URL}/projects/{pid}/system-versions/latest`).
+- **Ledger.** With `LEDGER_MODE` on, every write records an event with the
+  project database's `ledger.emit()` in the same transaction as the change;
+  the platform relays it to the immudb ledger.
+- **PDF renderer** (`services/pdf_renderer`): a small FastAPI + Jinja +
+  WeasyPrint service. The report route POSTs the submission's report JSON to
+  it and streams back the PDF. Only report downloads depend on it.
 
-- **Node ≥ 18.18** (required by Next.js 15)
-- **Docker** with the daemon running. Used for Postgres and for the bundled
-  **PDF report renderer** (`services/pdf_renderer`). To use your own Postgres
-  instead, copy `.env.example` → `.env`, edit `PROJECT_DATABASE_URL`, then run
-  `npm run dev`; the setup script sees `.env` already exists and skips the
-  docker step for the DB.
+```
+browser -> gateway (Caddy /controls*) -> controls-web (Next.js)
+                                           |-> platform        (who may do what, card versions)
+                                           |-> catalogue       (control packages)
+                                           |-> controls-pdf    (report PDF)
+                                           '-> postgres: project_<pid>, schema controls
+```
 
-### Run it
+## Install and run
 
-The 17 bundled checklists, the library, filters, review, fill, and saved
-submissions all work out of the box. Two commands:
+### Inside the AISC stack (the usual way)
+
+The aisc repo's `docker-compose.development.yml` defines three services from
+this repo:
+
+| Service | What it does |
+| --- | --- |
+| `controls-migrate` | One-shot: `node scripts/migrate-projects.mjs` brings every project database to this app's schema, then exits. |
+| `controls-web` | The app (`Dockerfile`, built with `NEXT_BASE_PATH=/controls`), on port 3000 inside the `backend`/`frontend` networks. |
+| `controls-pdf` | The PDF renderer (`services/pdf_renderer/Dockerfile`), internal only. |
+
+Both app services read `env.development` from this repo; the aisc compose file
+adds the rest (platform, catalogue, ledger, token). From the aisc repo root:
+
+```bash
+./scripts/secrets.sh      # once: writes env.secrets and env.runtime (CONTROLS_WEB_TO_PDF_TOKEN among them)
+docker compose -p aisc --env-file env.runtime -f docker-compose.plugin_downloader.yml \
+  -f docker-compose-infra.development.yml -f docker-compose.development.yml up -d --build
+```
+
+Then open <http://localhost:8100>, sign in, open a project and its step 4
+controls page: the app is at `http://localhost:8100/controls/p/{project}/checklists`.
+To rebuild only this app after a change:
+`docker compose -p aisc --env-file env.runtime -f docker-compose-infra.development.yml -f docker-compose.development.yml up -d --build controls-migrate controls-web`.
+
+The `docker-compose.development.yml` inside this repo is an older fragment
+that the stack does not use and that no longer works (it migrates one shared
+database); use the aisc repo's file.
+
+### Standalone, for development
+
+Prerequisites: Node 20 (the image uses `node:20`; `package.json` asks for
+at least 18.18) with npm, and Docker for the bundled Postgres and PDF renderer.
 
 ```bash
 npm install
 npm run dev
 ```
 
-On first run, `npm run dev` will:
+`npm run dev` runs `scripts/setup-once.mjs` first, which:
 
-1. Copy `.env.example` → `.env` if missing.
-2. Start a Postgres container (`docker compose up -d db`) — **only when it
-   created the `.env` in step 1**, so the bundled defaults match the bundled
-   container.
-3. Migrate every project database that already exists
-   (`node scripts/migrate-projects.mjs`). There is no single app database:
-   each project has its own, named `project_<pid without hyphens>`, made by the
-   platform when the project is made. `PROJECT_DATABASE_URL` is a template with
-   `{database}` where that name goes, e.g.
-   `postgresql://aisc:aisc@localhost:5444/{database}?schema=controls&connection_limit=2`.
-   A project database made later is migrated the first time it is opened.
-4. Seed nothing: a project's checklists are the ones installed into it from
-   the catalogue.
-5. Best-effort start the bundled PDF report renderer
-   (`docker compose up -d pdf`) — builds its image on first run. This step
-   never blocks startup; if it fails, only report downloads are affected.
-6. Boot Next.js at <http://localhost:3000> (falls back to 3001 if 3000 is busy).
+1. copies `.env.example` to `.env` if there is none;
+2. starts the bundled Postgres (`docker compose up -d db`, host port 5444) when
+   `PROJECT_DATABASE_URL` points at it, on every run;
+3. tries to start the PDF renderer (`docker compose up -d pdf`, host port 8005),
+   without stopping on failure;
+4. on the first run only, migrates the project databases that exist
+   (marker: `node_modules/.cache/aisc-controls/setup-done`; `npm run setup`
+   runs it all again);
 
-Subsequent runs skip steps 1–4 (gated by
-`node_modules/.cache/aisc-controls/setup-done`). Run `npm run setup` to force
-a fresh setup.
+then starts `next dev` on <http://localhost:3000>.
 
-You're done. Open a project's checklists at `/p/{pid}/checklists` (from the platform's project page).
+What this gives you is limited. The project pages need the platform: with
+`PLATFORM_URL` empty (the `.env.example` default) every `/p/...` page answers
+503, and with a platform the request also needs a signed-in caller's token,
+which only the gateway adds. A project database must also exist, made by the
+platform (its template creates schemas such as `project`, which the
+`controls` migrations refer to). In practice, develop against the unit tests,
+and check pages in the AISC stack. Nothing is seeded: a project's checklists
+are the ones installed into it from the catalogue.
 
-### Adding new checklists
+The bundled PDF renderer started by `docker-compose.yml` has no
+`CONTROLS_WEB_TO_PDF_TOKEN`, so it refuses every report (503, shown as a 502
+"PDF renderer" error). To try reports standalone, run the renderer by hand
+with the token set (see [PDF renderer](#pdf-renderer)) and set the same
+variable for `npm run dev`.
 
-New checklists are authored upstream and can be exported into this repo's
-bundled examples — see [Bundled examples](#bundled-examples) below.
+## Configuration
 
-### Troubleshooting
+Environment variables read by the app (`src/`, `scripts/`, `next.config.ts`):
 
-- **`docker compose up` fails with "Cannot connect to the Docker daemon"** —
-  start Docker Desktop / `dockerd` and re-run `npm run dev`.
-- **Port already in use.** Next falls back from 3000 → 3001 automatically.
-  Postgres is mapped to host `5444` (non-default, to avoid clashing with any
-  Postgres already on `5432`) — free the port or change the mapping in
-  `docker-compose.yml`.
-- **"Download report" returns a 502 / "PDF renderer unreachable".** The renderer
-  container isn't up. Start it with `docker compose up -d pdf` (first run builds
-  the image, which can take a minute). It listens on host port `8005`; override
-  with `PDF_RENDERER_URL` if you run it elsewhere.
+| Variable | Meaning | Default |
+| --- | --- | --- |
+| `PROJECT_DATABASE_URL` | Template of a project database's URL; `{database}` is replaced by `project_<pid without hyphens>`. Keep `schema=controls` and `connection_limit=2` (the app keeps at most 20 project databases open, so at most 40 connections). In the stack: `postgresql://controls_rw:<password>@postgres:5432/{database}?schema=controls&connection_limit=2` (`env.development`). | none: required |
+| `DATABASE_URL` | Read by the Prisma CLI only. The app sets it per project for `prisma migrate deploy`; set it yourself for `npm run db:studio`, `db:seed` or `examples:export` on one project database. | none |
+| `PLATFORM_URL` | The platform API: who is in which project, which projects a person may change, the latest AI card version. Empty means every project page answers 503. Stack: `http://platform:8000`. | empty |
+| `LAUNCHER_URL` | The launcher, where a project is chosen; the app sends people there when they arrive without a project. | `http://localhost:8100/` |
+| `CATALOGUE_URL` | The catalogue's API, from which controls are listed and fetched. Stack: `${CATALOGUE_API_URL}`, by default the hosted catalogue `https://sandboxconfigurator.aifactory.lu/api/api`. | empty |
+| `CATALOGUE_TOKEN` | Bearer token for a catalogue that asks for one. Empty for the public catalogue. | empty |
+| `CATALOGUE_ORIGIN` | The only browser origin allowed to call `/api/install` (the catalogue's own install dialog). Empty refuses every call. Stack default: `https://sandboxconfigurator.aifactory.lu`. | empty |
+| `PDF_RENDERER_URL` | The PDF renderer. Stack: `http://controls-pdf:8005`. | `http://localhost:8005` |
+| `CONTROLS_WEB_TO_PDF_TOKEN` | Token sent to the renderer in `X-AISC-Service-Token`; the renderer needs the same value. Made by the aisc repo's `scripts/secrets.sh`. | none |
+| `LEDGER_MODE` | `record` or `enforce` writes a ledger event with every change; anything else writes none. Stack: `${LEDGER_MODE:-off}`. | `off` |
+| `NEXT_BASE_PATH` | Path prefix the app is served under, read at build time and by `next start`. Stack: `/controls`. | empty (served at the root) |
+| `AISC_ENABLE_TEMPLATE_EDITOR` | `true` shows each checklist's "Edit template" action (the review page). | hidden |
+| `AISC_PLATFORM` | `1` makes `scripts/setup-once.mjs` skip the standalone setup (set in `env.development`). | unset |
 
-## Running as an aisc platform app (apps/controls)
+The PDF renderer reads `CONTROLS_WEB_TO_PDF_TOKEN`: without it, every path but
+`/health` answers 503; with a wrong token, 401.
 
-This repo runs two ways. **Standalone** (everything above) bundles its own
-Postgres and bootstraps itself. **Platform mode** runs it as a submodule of the
-[aisc](https://github.com/lux-ai-factory/aisc) platform, using the platform's
-**shared** Postgres instead of its own.
+Test-only variables: `CONTROLS_TEST_PG_CONTAINER` and `ISOLATION_TEMPLATE_DIR`
+(integration tests, below), `CHAIN_JSON` (the aisc pipeline chain).
 
-Platform mode uses separate, additive files — the standalone setup is untouched:
-
-| File | Role |
-| --- | --- |
-| `Dockerfile` | Builds the Next.js app image (`next build` → `next start`). |
-| `docker-compose.development.yml` | `controls-web` + `controls-pdf` + a one-shot `controls-migrate`; **no** bundled `db`, **no** `name:`. |
-| `env.development` | Service-name hosts (`db:5432`, `controls-pdf:8005`) + `AISC_PLATFORM=1`. |
-
-Merge it with the platform infra (which provides the shared Postgres):
+## Tests
 
 ```bash
-docker compose --env-file env.development \
-  -f docker-compose-infra.development.yml \
-  -f apps/controls/docker-compose.development.yml up
+npx vitest run test/unit     # or: npm run test:unit
+npm test                     # everything; the integration and chain tests skip themselves without their variables
 ```
 
-Platform-side wiring (handled in the parent `aisc` repo):
+- **Unit tests** (`test/unit/`) need no database and no network.
+- **Integration tests** (`test/integration/`) need a throwaway Postgres, and
+  the aisc checkout around this repo (they make project databases from the
+  aisc repo's `platform/project-template/`). They skip unless
+  `CONTROLS_TEST_PG_CONTAINER` names a container starting with `aisc-t-` and
+  `PROJECT_DATABASE_URL` is not on port 5432, and they refuse to run their SQL
+  otherwise. To make a throwaway one, from the aisc repo root, in bash:
 
-- The `controls` database must exist in the shared Postgres (Prisma applies the
-  schema but does not create the database itself).
-- Confirm the infra Postgres service is named `db` in `controls-migrate`'s
-  `depends_on` (rename if yours differs).
-- Add a Caddy route to `controls-web:3000`. For a **subpath** (e.g. `/controls`)
-  build with `CONTROLS_BASE_PATH=/controls`; for a **subdomain**, leave it unset.
+  ```bash
+  . scripts/lib/throwaway-pg.sh
+  tpg_start controls          # container aisc-t-controls-<hex> on a free 127.0.0.1 port, removed when the shell exits
+  tpg_init_platform .         # the roles and grants the stack's Postgres has
+  cd apps/controls
+  CONTROLS_TEST_PG_CONTAINER=$TPG_NAME \
+  PROJECT_DATABASE_URL="$(tpg_dsn controls_rw '{database}')?schema=controls&connection_limit=2" \
+    npx vitest run test/integration
+  ```
 
-Installing controls from the catalogue:
+  **Never point the tests at the running stack's Postgres (port 5432).** It
+  holds live data, and the tests create and drop databases.
+- **Chain tests** (`test/chain/`) are steps of the aisc repo's
+  `scripts/test-pipeline-chain.sh`, which sets `CHAIN_JSON` and a throwaway
+  database; they skip otherwise.
+- **PDF renderer tests**, see below.
 
-- `CATALOGUE_URL`: the catalogue's API, e.g. `https://<public catalogue>/api`. Controls are
-  fetched from `<CATALOGUE_URL>/control/<slug>/export`.
-- `CATALOGUE_TOKEN`: leave unset for the public catalogue (its export is anonymous); set it
-  only for a private catalogue that asks for one.
-
-## Concepts
-
-- **Source** — the authority, standards body, or organisation that published
-  a document (e.g. AESIA, EUSAiR). Registered once via `/sources/new`, reused
-  across many checklists, and surfaced as a clickable filter tag in the
-  library. Each source can carry an attribution `citation` string and a `url`
-  that get rendered alongside every checklist from it.
-- **Checklist** — one source document, normalised into ordered questions.
-  Tagged with `controlTopic`, `countryIds[]`, `regulationIds[]`, and an
-  optional `sourceUpdatedAt` (the date the publishing authority last revised
-  the document — required by some authorities when re-using their data).
-- **Submission** — a saved set of answers against one checklist. Each answer
-  can carry a 1–5 readiness **score**; submissions move through a
-  **Draft → Closed** lifecycle, can be **reopened** into a new version
-  (version chain), and **archived** / restored.
-- **Report** — every submission has a **Download report (PDF)** action. The
-  Next.js route (`/submissions/[id]/report`) builds a report payload and POSTs
-  it to the bundled renderer (`services/pdf_renderer`, a FastAPI + WeasyPrint
-  service on host port `8005`), which returns the PDF. Configure its location
-  with `PDF_RENDERER_URL` (defaults to the bundled container).
-
-## Useful scripts
-
-| Command | What it does |
-| --- | --- |
-| `npm run dev` | First-run setup, then `next dev`. |
-| `npm run setup` | Re-run the full first-run setup (DB up, migrate, seed). |
-| `npm run db:up` / `db:down` | Start / stop the Postgres container. |
-| `npm run db:reset` | Drop and recreate the DB (then re-seeds). |
-| `npm run db:studio` | Open Prisma Studio. |
-| `npm run examples:export <id> [slug]` | Dump a checklist to `prisma/seed/examples/<slug>/`. |
-
-## Bundled examples
-
-`prisma/seed/examples/` ships 17 checklists:
-
-- **AESIA** (12) — AI Act compliance checklists from the
-  [Spanish Agency for the Supervision of Artificial Intelligence](https://aesia.digital.gob.es/en/guides).
-- **EUSAiR** (5) — AI Act evaluation tools from the
-  [EUSAiR project](https://eusair-project.eu/) (Data Governance, Data
-  Dictionary, Human Oversight, Logging, Transparency).
-
-Source-level attribution lives in `prisma/seed/sources.json` (citation, URL).
-Per-checklist metadata lives in `prisma/seed/examples/<slug>/meta.json`
-including the optional `sourceUpdatedAt` date. The seed is idempotent — it
-skips entries whose title is already in the DB. To force a re-seed of one
-entry, delete that checklist in Prisma Studio (`npm run db:studio`) first,
-then `npm run db:seed`.
-
-To add your own bundled example, create the checklist upstream, then run:
+### PDF renderer
 
 ```bash
-npm run examples:export <checklistId> [folder-slug]
+cd services/pdf_renderer
+python3 -m venv .venv && . .venv/bin/activate
+pip install -r requirements.txt pytest httpx
+pytest                                                           # the tests
+CONTROLS_WEB_TO_PDF_TOKEN=<token> uvicorn app:app --port 8005    # run it
 ```
 
-This writes `meta.json` + `questions.json` into the folder; commit it and new
-clones get the checklist on first run.
+Python 3.12 (the image's version). WeasyPrint needs Pango, Cairo and
+GDK-Pixbuf installed on the system (see its `Dockerfile`).
 
-## Project layout
+## Layout
 
 ```
-aisc-controls/
-├─ docker-compose.yml         # Postgres
-├─ prisma/
-│  ├─ schema.prisma
-│  ├─ seed.ts                 # replays sources.json + examples/* into the DB
-│  └─ seed/
-│     ├─ sources.json         # source registry (name, citation, url)
-│     ├─ examples/            # bundled checklists (committed to git)
-│     └─ export.ts            # CLI: dump a checklist from DB → examples/
-├─ scripts/
-│  └─ setup-once.mjs          # first-run bootstrapper invoked by `predev`
-├─ services/
-│  └─ pdf_renderer/           # FastAPI + WeasyPrint service → submission PDFs
-├─ src/
-│  ├─ app/
-│  │  ├─ page.tsx             # homepage hero + stats
-│  │  ├─ checklists/          # library, review, fill
-│  │  ├─ sources/             # source registry CRUD
-│  │  └─ submissions/         # answered checklists, version history, report PDF
-│  ├─ components/
-│  │  ├─ ChecklistMetaFields.tsx  # shared meta + chips form section
-│  │  ├─ ScoreScale.tsx       # shared 1–5 readiness radio scale
-│  │  ├─ SiteHeader.tsx
-│  │  └─ SourceCitation.tsx   # citation / url / last-updated rendering
-│  ├─ data/                   # countries + regulations taxonomies (JSON)
-│  └─ lib/
-│     ├─ checklistForm.ts     # shared FormData parsing + validation
-│     ├─ scoring.ts           # score parsing + readiness % (pure)
-│     ├─ questions.ts         # group questions by category (pure)
-│     ├─ formatDate.ts        # dd/mm/yyyy user-facing date formatting
-│     ├─ slugify.ts
-│     └─ prisma.ts
-└─ test/
-   ├─ unit/                   # pure-logic unit tests (no DB)
-   └─ integration/            # server-action tests (needs PROJECT_DATABASE_URL)
+src/app/p/[project]/   project pages: home, checklists (library, fill, review), catalogue,
+                       sources, submissions (version history, archive, report/route.ts)
+src/app/install/       install one control into a chosen project (a page and its action)
+src/app/api/install/   the same, for the catalogue's own dialog
+src/lib/               project databases (projectDb.ts), access (access/), catalogue,
+                       install, scoring, report payload, ledger events (ledger/)
+src/middleware.ts      asks the platform about every /p/... request
+prisma/                schema.prisma, migrations/, seed.ts and seed/ (sources and example checklists)
+scripts/               migrate-projects.mjs (every project database), setup-once.mjs (standalone setup)
+services/pdf_renderer/ the PDF renderer
+test/                  unit/, integration/, chain/, fixtures/
 ```
 
-## Testing
+`prisma/seed/` holds 17 example checklists from AESIA and EUSAiR
+(`prisma/seed/examples/`, see its README) and their sources. Nothing seeds
+them automatically; `DATABASE_URL='postgresql://.../project_<hex>?schema=controls' npm run db:seed`
+loads them into one project database.
 
-```bash
-npm test          # run everything once
-npm run test:unit # unit tests only (pure logic, no database)
-npm run test:watch
-```
+## Contributing
 
-- **Unit tests** (`test/unit/`) cover the pure helpers in `src/lib/` — score
-  parsing, readiness %, question grouping, slugify, date formatting, and the
-  `FormData` parsers/validators. They need no database.
-- **Integration tests** (`test/integration/`) drive the submission-lifecycle
-  server actions (create, save & close, reopen as a new version, archive /
-  restore) against a real database. They create and clean up their own rows, so
-  they never disturb seeded data, and they **skip automatically when
-  `PROJECT_DATABASE_URL` is not set**. Each makes its own throwaway project
-  databases (through `docker exec postgres`) and drops them afterwards:
-  `PROJECT_DATABASE_URL='postgresql://controls_rw:controls_rw@127.0.0.1:5432/{database}?schema=controls&connection_limit=2' npx vitest run`.
+- Branch: `feat/unified-modules` is the only AISC branch to work on.
+- Schema changes are Prisma migrations in `prisma/migrations/`
+  (`npx prisma migrate dev` against a throwaway database). They run on every
+  project database, at start (`controls-migrate`) and when a project is first
+  opened, so they must work on databases with data in them. Do not edit an
+  applied migration: Prisma checks each one's checksum, and some tests read
+  their SQL.
+- The `controls` migrations depend on the platform's project template (the
+  `project` schema, the reader roles `dashboard_ro` and `report_ro`).
+- `services/pdf_renderer/service_token.py` is the same file in every AISC
+  service that has a service-token door; the aisc repo's
+  `scripts/tests/test_service_tokens.py` checks that the copies are identical.
+- See [CONTRIBUTING.md](CONTRIBUTING.md) for the contributor licence terms.
 
 ## License
 
-This project is licensed under the [Apache License 2.0](LICENSE).  
+This project is licensed under the [Apache License 2.0](LICENSE.md).
 © 2024–2026 Université du Luxembourg and Luxembourg Institute of Science and Technology.
