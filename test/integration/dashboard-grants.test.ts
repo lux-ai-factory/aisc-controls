@@ -1,7 +1,6 @@
 import { describe, it, expect, afterAll } from "vitest";
 
-// WP11 data (pipeline 2026-09-23, 03-specs.md, D5): the dashboard reads a
-// project's answers with dashboard_ro. The tables belong to controls_rw
+// The dashboard reads a project's answers with dashboard_ro. The tables belong to controls_rw
 // (Prisma makes them), so the SELECT grant comes from a controls migration,
 // 20260923210100_dashboard_reads_controls; the project template (0002) gives
 // CONNECT and schema USAGE, which is simulated here.
@@ -33,7 +32,7 @@ describe.skipIf(!hasThrowawayDb)("the dashboard may read a project's controls (W
   it("dashboard_ro can SELECT every controls table after migrating, and nothing more", async () => {
     project = makeProject();
     const db = projectDatabaseName(project);
-    // What template 0002_dashboard.sql grants (WP11, run by the platform).
+    // What the platform's template 0002_dashboard.sql grants.
     su(`GRANT CONNECT ON DATABASE ${db} TO dashboard_ro; GRANT USAGE ON SCHEMA controls TO dashboard_ro;`, db);
     await prismaFor(project); // migrates, as controls_rw
 
@@ -43,10 +42,9 @@ describe.skipIf(!hasThrowawayDb)("the dashboard may read a project's controls (W
     expect(() => rows(`SET ROLE dashboard_ro; DELETE FROM controls.submission_answer;`, project)).toThrow();
   }, 120_000);
 
-  // Isolation C1 (01-specs.md I2.6, 03-coding-plan.md N5): this case used to pin that a later
-  // table is readable through a default privilege. The approved design forbids reader grants by
-  // default privilege (it would also cover secrets): readers get exactly the listed tables,
-  // granted by the owner's migration 20260926000100_readers_read_the_listed_tables.
+  // Readers get no default privilege (it would also cover tables holding secrets): they get
+  // exactly the listed tables, granted by the owner's migration
+  // 20260926000100_readers_read_the_listed_tables.
   it("I2.6: a table controls_rw makes later is not readable (no default privilege to a reader)", async () => {
     rows(`SET ROLE controls_rw; CREATE TABLE controls.later_table (id int);`, project);
     expect(() => rows(`SET ROLE dashboard_ro; SELECT count(*) FROM controls.later_table;`, project)).toThrow();

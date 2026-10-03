@@ -27,9 +27,9 @@ import { submitForm } from "@/app/p/[project]/checklists/[id]/fill/actions";
 import { submissionsOfProject } from "@/lib/submissions";
 
 // Every project has its own database, made the way the platform makes them,
-// and dropped afterwards. The SQL runs inside the postgres container, using
-// its own env for the superuser role, so no password is handled here.
-// The live container is never used: the SQL runs in the throwaway one (ledger phase 7 review M4).
+// and dropped afterwards. The SQL runs inside the throwaway Postgres container
+// (see ./throwawayDb.ts), with its own env for the superuser role, so no
+// password is handled here.
 const hasDb = hasThrowawayDb;
 
 async function captureRedirect(fn: () => Promise<unknown>): Promise<string> {
@@ -132,11 +132,9 @@ describe.skipIf(!hasDb)("a submission belongs to a project", () => {
 // A project's answers are not readable, or writable, from inside another
 // project just by knowing an id.
 //
-// The listing above was scoped from the start. What was not: every lookup that
-// takes a submission id straight out of the URL. The door checks that you are
-// in the project named in the path; these functions run against that
-// project's own database, so an id from another project's database is simply
-// not there to find.
+// The middleware checks that you are in the project named in the path; the
+// lookups that take a submission id from the URL run against that project's
+// own database, so an id from another project's database is not there to find.
 describe.skipIf(!hasDb)("one project cannot reach into another by id", () => {
   let mine: string;
   let theirs: string;

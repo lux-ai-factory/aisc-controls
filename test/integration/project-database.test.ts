@@ -30,10 +30,9 @@ import { submitForm } from "@/app/p/[project]/checklists/[id]/fill/actions";
 import { submissionsOfProject } from "@/lib/submissions";
 
 // Two project databases, made the way the platform makes them, and dropped
-// afterwards. Needs PROJECT_DATABASE_URL (pointing at 127.0.0.1). The SQL is
-// run inside the postgres container, using its own env for the superuser
-// role, so no password is handled here.
-// The live container is never used: the SQL runs in the throwaway one (ledger phase 7 review M4).
+// afterwards. The SQL runs inside the throwaway Postgres container (see
+// ./throwawayDb.ts), with its own env for the superuser role, so no password
+// is handled here.
 const hasDb = hasThrowawayDb;
 
 describe.skipIf(!hasDb)("a project's controls live in its own database", () => {
@@ -85,7 +84,7 @@ describe.skipIf(!hasDb)("a project's controls live in its own database", () => {
     expect(await client.checklist.count()).toBe(0);
     su(`drop database ${projectDatabaseName(gone)} with (force)`);
     // The pooled connection was cut, so the first query may only say that;
-    // the one that reconnects finds the database missing, and the request is "not found" (I2.5).
+    // the one that reconnects finds the database missing, and the request is "not found".
     let last: unknown;
     for (let i = 0; i < 3; i++) {
       last = await client.checklist.count().then(() => null, (err: unknown) => err);

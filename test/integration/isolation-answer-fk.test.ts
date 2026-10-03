@@ -1,12 +1,12 @@
 import { describe, it, expect, afterAll } from "vitest";
 
-// Isolation 2026-09-25 (01-specs.md I6.2, I2.1): inside a project database an answer's
-// system_version_pid is a foreign key to project.system(pid), ON DELETE NO ACTION, added by a
-// new controls migration that refuses (clear message) when an answer names an absent pid.
+// Inside a project database an answer's system_version_pid is a foreign key to
+// project.system(pid), ON DELETE NO ACTION, added by a controls migration that refuses, with
+// a clear message, when an answer names an absent pid.
 //
 // The project database is made with every platform template file (./isolationDb.ts), so
-// project.system comes from the real 0006_project_system.sql (WP P1), not from a copy here.
-// Until that file exists each test FAILS on "I2.1 template 0006_project_system.sql missing".
+// project.system comes from the platform's real 0006_project_system.sql, not from a copy here.
+// Without that file each test fails on "template 0006_project_system.sql missing".
 // Runs only against a throwaway Postgres (see ./throwawayDb.ts).
 
 import { randomUUID } from "node:crypto";
@@ -96,7 +96,7 @@ describe.skipIf(!hasThrowawayDb)("I6.2: answers point at a card version of their
     await prismaFor(project);
     const db = projectDatabaseName(project);
     // Back to the shape before the key, with an answer whose version is not in project.system,
-    // as a database would look if the data move had not run before this migration (I13 order).
+    // as a database would look if the data move had not run before this migration.
     su(`ALTER TABLE controls.submission_answer DROP CONSTRAINT IF EXISTS submission_answer_system_version_pid_fkey`, db);
     (await answered(project, ABSENT))();
     let message = "";

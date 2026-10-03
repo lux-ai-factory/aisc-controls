@@ -61,7 +61,7 @@ import {
   restoreSubmission,
 } from "@/app/p/[project]/submissions/[id]/actions";
 
-// The live container is never used: the SQL runs in the throwaway one (ledger phase 7 review M4).
+// The SQL runs in the throwaway container, never the live one (see ./throwawayDb.ts).
 const hasDb = hasThrowawayDb;
 
 function field(entries: Record<string, string | string[]>): FormData {

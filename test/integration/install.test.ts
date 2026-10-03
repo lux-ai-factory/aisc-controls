@@ -15,10 +15,9 @@ import { installChecklist } from "@/lib/installChecklist";
 import { prismaFor, projectDatabaseName } from "@/lib/projectDb";
 
 // Two project databases, made the way the platform makes them, and dropped
-// afterwards. Needs PROJECT_DATABASE_URL (pointing at 127.0.0.1). The SQL is
-// run inside the postgres container, using its own env for the superuser
-// role, so no password is handled here.
-// The live container is never used: the SQL runs in the throwaway one (ledger phase 7 review M4).
+// afterwards. The SQL runs inside the throwaway Postgres container (see
+// ./throwawayDb.ts), with its own env for the superuser role, so no password
+// is handled here.
 const hasDb = hasThrowawayDb;
 
 const pkg = {

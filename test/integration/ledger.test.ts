@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from "vitest";
 
-// Ledger phase 7 (K1-K3) against a project database made the platform's way (its template has
-// ledger.emit, 0020): every controls write records its event in the change's own transaction, a
+// The ledger, against a project database made the platform's way (its template has
+// ledger.emit): every controls write records its event in the change's own transaction, a
 // failure after the event leaves neither, and a question review's event keeps what the review deletes
 // (the old questions, and every answer removed, closed submissions' too). Throwaway Postgres only.
 

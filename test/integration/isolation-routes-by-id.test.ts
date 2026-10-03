@@ -1,20 +1,14 @@
 import { describe, it, expect, beforeAll, afterAll, vi } from "vitest";
 
-// Isolation 2026-09-25 (01-specs.md I16.5, I2.5, I17.1, I6.1; risk 3): every controls route
-// and action that addresses an object by id, opened under ANOTHER project's pid, is "not found"
-// (the id is not in that project's database), and the owning project still reaches it.
-//
-// Controls is already one database per project (plan 1), so the cross-project cases are
-// expected GREEN guards: they pin that isolation keeps holding. project-scope.test.ts covers
-// some of the same actions but runs its SQL in the live `postgres` container, so it is never
-// run by the isolation pipeline; this file is the throwaway-only version, covering every route.
-//
-// The dropped-database cases (I2.5) are expected RED until a dropped project answers 404.
+// Every controls route and action that addresses an object by id, opened under ANOTHER
+// project's pid, is "not found" (the id is not in that project's database), and the owning
+// project still reaches it. project-scope.test.ts covers some of the same actions; this file
+// covers every route. A project whose database was dropped answers 404, not 500.
 //
 // Runs only against a throwaway Postgres (see ./throwawayDb.ts). Who may write is mocked:
 // everybody is an editor, so every refusal below comes from the database, not the door.
 //
-// Route inventory (src/app, 2026-09-25), every one addressed by an id:
+// The routes of src/app that address an object by id:
 //   page   /p/[project]/checklists/[id]/fill          FillPage
 //   action /p/[project]/checklists/[id]/fill          submitForm(project, checklistId)
 //   page   /p/[project]/checklists/[id]/review        ReviewPage

@@ -1,11 +1,10 @@
 /**
- * Isolation 2026-09-25 (docs/superpowers/isolation-2026-09-25/01-specs.md, 02-tests.md):
- * a project database on the THROWAWAY Postgres, made with EVERY platform template file that
- * exists (0001..0005 today, 0006_project_system.sql and later once WP P1 adds them), the way
- * `platform_service.projectdb.provision` makes one. The guards of ./throwawayDb.ts apply.
+ * A project database on the THROWAWAY Postgres, made with every platform template file
+ * (the aisc repo's platform/project-template/), the way `platform_service.projectdb.provision`
+ * makes one. The guards of ./throwawayDb.ts apply.
  *
  * A test that needs `project.system` asserts `hasTemplate("0006_project_system.sql")` first,
- * so it FAILS with "I2.1 template 0006_project_system.sql missing" instead of erroring.
+ * so it fails with a clear message instead of erroring.
  */
 import { randomUUID } from "node:crypto";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
@@ -15,8 +14,8 @@ import { fileURLToPath } from "node:url";
 import { projectDatabaseName } from "@/lib/projectDb";
 import { su } from "./throwawayDb";
 
-// ISOLATION_TEMPLATE_DIR lets 02-tests.md's dry check point this at a scratch copy with a
-// stand-in 0006, to prove the test bodies before WP P1 exists. Unset in every real run.
+// ISOLATION_TEMPLATE_DIR points this at another template directory (a scratch copy, say).
+// Unset in a normal run.
 export const TEMPLATE_DIR =
   process.env.ISOLATION_TEMPLATE_DIR ??
   fileURLToPath(new URL("../../../../platform/project-template/", import.meta.url));
@@ -37,12 +36,12 @@ export function makeTemplatedProject(): string {
   const db = projectDatabaseName(pid);
   su(`CREATE DATABASE ${db} OWNER platform_rw`);
   // As platform_rw, the role projectdb.provision connects as, so every schema the template
-  // makes is owned by platform_rw exactly as in a provisioned database (I1.2, D10).
+  // makes is owned by platform_rw exactly as in a provisioned database.
   for (const file of templateFiles()) su(`SET ROLE platform_rw;\n${readFileSync(join(TEMPLATE_DIR, file), "utf8")}`, db);
   return pid;
 }
 
-/** A card version row, written the way the platform writes it (D2: platform_rw only). */
+/** A card version row, written the way the platform writes it (as platform_rw, its only writer). */
 export function addSystemVersion(pid: string, versionPid: string, number: number): void {
   su(
     `SET ROLE platform_rw; INSERT INTO project.system (pid, number, name) VALUES ('${versionPid}', ${number}, 'MCAS');`,
@@ -50,7 +49,7 @@ export function addSystemVersion(pid: string, versionPid: string, number: number
   );
 }
 
-/** The migration directory whose SQL adds the I6.2 key, or undefined. */
+/** The migration directory whose SQL adds the answer's foreign key to project.system, or undefined. */
 export function fkMigration(): { dir: string; sql: string } | undefined {
   const root = fileURLToPath(new URL("../../prisma/migrations/", import.meta.url));
   for (const dir of readdirSync(root).sort()) {

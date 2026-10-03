@@ -1,9 +1,8 @@
 import { describe, it, expect, beforeAll, afterAll, vi } from "vitest";
 
-// WP10 (pipeline 2026-09-23, 03-specs.md): every answer carries the AI card
-// version that was the latest when it was answered. saveDraft still deletes
-// and recreates the rows (D7), so an unchanged answer must carry its old stamp
-// over, or every save would restamp every answer.
+// Every answer carries the AI card version that was the latest when it was
+// answered. saveDraft deletes and recreates the rows, so an unchanged answer
+// must carry its old stamp over, or every save would restamp every answer.
 //
 // Runs only against a throwaway Postgres (see ./throwawayDb.ts). The platform
 // is a stub HTTP server; who may write is mocked, as in submission-lifecycle.
@@ -113,9 +112,9 @@ describe.skipIf(!hasThrowawayDb)("answers carry the system version (WP10)", () =
     process.env.PLATFORM_URL = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
 
     project = makeProject();
-    // Isolation C1 (I6.2): an answer's stamp is a foreign key into this database's
-    // project.system, so the versions the stub platform names must be rows there, as the
-    // platform writes them before it answers "latest" (D2, I2.2).
+    // An answer's stamp is a foreign key into this database's project.system, so the
+    // versions the stub platform names must be rows there, as the platform writes them
+    // before it answers "latest".
     su(
       "SET ROLE platform_rw; INSERT INTO project.system (pid, number, name) VALUES " +
         `('${V1}', 1, 'MCAS'), ('${V2}', 2, 'MCAS')`,
@@ -245,7 +244,7 @@ describe.skipIf(!hasThrowawayDb)("a project database made before WP10 (S10.4)", 
 
   it("S10.4: gains the stamp columns when first opened, and its old answers are unstamped", async () => {
     project = makeProject();
-    // Migrate it with only the migrations that existed before WP10.
+    // Migrate it with only the migrations from before the answer stamps.
     tmp = mkdtempSync(join(tmpdir(), "controls-pre-wp10-"));
     const prismaDir = fileURLToPath(new URL("../../prisma/", import.meta.url));
     cpSync(join(prismaDir, "schema.prisma"), join(tmp, "schema.prisma"));

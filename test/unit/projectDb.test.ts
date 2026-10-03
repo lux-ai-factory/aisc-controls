@@ -78,15 +78,13 @@ describe("prismaFor", () => {
       .mockRejectedValueOnce(new Error("connection failed"))
       .mockResolvedValueOnce(undefined);
 
-    // First call fails, client should be disconnected
     await expect(prismaFor(pid, { migrate })).rejects.toThrow("connection failed");
     expect(disconnectSpy).toHaveBeenCalledTimes(1);
 
-    // Second call succeeds with a new client
     const client = await prismaFor(pid, { migrate });
     expect(client).toBeDefined();
     expect(migrate).toHaveBeenCalledTimes(2);
-    expect(disconnectSpy).toHaveBeenCalledTimes(1); // Still only called once, on the failed one
+    expect(disconnectSpy).toHaveBeenCalledTimes(1); // only the failed one
 
     disconnectSpy.mockRestore();
   });
@@ -113,7 +111,7 @@ describe("the open project databases", () => {
     for (let i = 0; i < MAX_OPEN_PROJECTS; i++) clients.push(await prismaFor(pid(i), { migrate }));
     const disconnected = clients.map((c) => vi.spyOn(c, "$disconnect").mockResolvedValue(undefined));
 
-    await prismaFor(pid(0), { migrate }); // used again: now the most recent
+    await prismaFor(pid(0), { migrate }); // used again, so the most recent
     await prismaFor(pid(MAX_OPEN_PROJECTS), { migrate }); // the 21st
 
     expect(disconnected[1]).toHaveBeenCalledTimes(1);
@@ -136,7 +134,7 @@ describe("the open project databases", () => {
     expect(isMissingDatabase(null)).toBe(false);
   });
 
-  // Isolation C1 (I2.5): `prisma migrate deploy` run through execFile fails with the
+  // `prisma migrate deploy` run through execFile fails with the
   // Prisma error in its output, not in a code the error object carries.
   it("recognise a missing database in a failed migration's output", () => {
     const failed = Object.assign(new Error("Command failed: npx prisma migrate deploy"), {

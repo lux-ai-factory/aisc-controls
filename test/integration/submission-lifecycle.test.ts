@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeAll, afterAll, vi } from "vitest";
 
 // The server actions call Next's redirect()/revalidatePath(), which only work
-// inside a request. Mock them so we can drive the actions directly and assert
-// the database side effects. redirect() is turned into a catchable throw that
+// inside a request. They are mocked so the actions can be called directly and
+// their effect on the database checked. redirect() is turned into a catchable throw that
 // carries its target URL.
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 vi.mock("next/navigation", () => ({
@@ -36,9 +36,9 @@ import {
 } from "@/app/p/[project]/submissions/[id]/actions";
 
 // Integration tests need a project database, made the way the platform makes
-// one, and dropped afterwards. The SQL runs inside the postgres container,
-// using its own env for the superuser role, so no password is handled here.
-// The live container is never used: the SQL runs in the throwaway one (ledger phase 7 review M4).
+// one, and dropped afterwards. The SQL runs inside the throwaway Postgres
+// container (see ./throwawayDb.ts), with its own env for the superuser role,
+// so no password is handled here.
 const hasDb = hasThrowawayDb;
 
 async function captureRedirect(fn: () => Promise<unknown>): Promise<string> {

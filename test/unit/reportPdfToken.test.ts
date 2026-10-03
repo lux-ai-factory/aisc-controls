@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 
-// API auth WP2 (2026-09-25), inventory finding 11. controls-pdf now refuses a
-// caller without a token (services/pdf_renderer/service_token.py). Its one
+// controls-pdf refuses a caller without a token (services/pdf_renderer/service_token.py). Its one
 // caller is this route, which sends CONTROLS_WEB_TO_PDF_TOKEN in
 // X-AISC-Service-Token, and a refusal is still reported as the renderer's 502.
 

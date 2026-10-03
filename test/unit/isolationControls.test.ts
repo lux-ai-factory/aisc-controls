@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 import { MAX_OPEN_PROJECTS } from "@/lib/projectDb";
 import { fkMigration } from "../integration/isolationDb";
 
-// Isolation 2026-09-25 (01-specs.md sections 6 and 17). Static checks, no database.
+// Project isolation: static checks, no database.
 
 describe("I6.1 / I17.1: controls keeps its routing and its connection budget", () => {
   it("I6.1: at most 20 project clients (LRU), as today", () => {
@@ -26,7 +26,7 @@ describe("I6.2: an answer's version stamp is a real foreign key into project.sys
   it("I6.2: a new migration adds submission_answer_system_version_pid_fkey", () => {
     const found = fkMigration();
     expect(found, "I6.2: no prisma migration adds submission_answer_system_version_pid_fkey").toBeDefined();
-    // After the three migrations that exist before isolation.
+    // After the first three migrations.
     expect(found!.dir > "20260923210100_dashboard_reads_controls").toBe(true);
   });
 

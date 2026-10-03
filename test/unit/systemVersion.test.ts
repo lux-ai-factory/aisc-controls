@@ -2,10 +2,9 @@ import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from "vites
 import { createServer, type Server } from "node:http";
 import type { AddressInfo } from "node:net";
 
-// WP10 (pipeline 2026-09-23, 03-specs.md): src/lib/systemVersion.ts
-// latestVersion(pid, token) asks the platform which saved AI card version is
-// the latest, so an answer can carry it. It never throws: when the platform
-// does not answer, the answer is saved unstamped (S10.2).
+// latestVersion(pid, token) in src/lib/systemVersion.ts asks the platform which
+// saved AI card version is the latest, so an answer can carry it. It never
+// throws: when the platform does not answer, the answer is saved unstamped.
 
 const PID = "3f2b8c1e-0d4a-4e7b-9a55-1c2d3e4f5a6b";
 const V2 = "9b0e0d4c-2f1a-4c8e-8a3b-6d5e4f3a2b1c";

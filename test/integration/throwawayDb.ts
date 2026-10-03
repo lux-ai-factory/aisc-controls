@@ -1,12 +1,10 @@
 /**
  * A project database on a THROWAWAY Postgres, never the live one.
  *
- * The older integration tests run their superuser SQL with
- * `docker exec postgres ...`, which is the live stack's container. The tests
- * written for the 2026-09-23 pipeline use this helper instead: it runs the SQL
- * in the container named by CONTROLS_TEST_PG_CONTAINER and refuses to run at
- * all when that is unset or names the live container, or when
- * PROJECT_DATABASE_URL points at port 5432.
+ * Every integration test runs its superuser SQL through this helper. It runs
+ * the SQL in the container named by CONTROLS_TEST_PG_CONTAINER (which must
+ * start with aisc-t-), and refuses to run at all when that is unset or when
+ * PROJECT_DATABASE_URL points at port 5432, the live stack's Postgres.
  */
 import { execSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
@@ -40,11 +38,11 @@ export function su(sql: string, db = "platform"): string {
   ).toString();
 }
 
-// Isolation C1: a project database is made with EVERY platform template file, in order, as
-// platform_rw (the role projectdb.provision connects as), exactly as isolationDb.makeTemplatedProject
-// does. Controls' answer key refers to project.system (template 0006), so a database with only
-// 0001 can no longer be migrated. ISOLATION_TEMPLATE_DIR as in ./isolationDb.ts. The loop is
-// inline because isolationDb imports this file.
+// A project database is made with every platform template file, in order, as platform_rw (the
+// role projectdb.provision connects as), exactly as isolationDb.makeTemplatedProject does.
+// Controls' answer key refers to project.system (template 0006), so a database with only 0001
+// cannot be migrated. ISOLATION_TEMPLATE_DIR as in ./isolationDb.ts. The loop is inline because
+// isolationDb imports this file.
 const TEMPLATE_DIR =
   process.env.ISOLATION_TEMPLATE_DIR ??
   fileURLToPath(new URL("../../../../platform/project-template/", import.meta.url));

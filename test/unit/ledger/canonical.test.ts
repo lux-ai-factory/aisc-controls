@@ -1,5 +1,5 @@
-// Q2: the TypeScript canonical twin agrees with the platform's, byte for byte: on the shared vectors of
-// phase 1 (platform/tests/ledger/fixtures/canonical_vectors.json) and on 1,500 random values
+// The TypeScript canonical form agrees with the platform's, byte for byte: on the shared vectors
+// (platform/tests/ledger/fixtures/canonical_vectors.json in the aisc repo) and on 1,500 random values
 // (canonical_vectors_random.json), both made by the platform's code and copied here unchanged.
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
