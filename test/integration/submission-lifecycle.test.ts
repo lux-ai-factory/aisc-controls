@@ -24,7 +24,7 @@ vi.mock("@/lib/access/callerToken", () => ({
   callerToken: async () => "caller-token",
 }));
 
-import { execSync } from "node:child_process";
+import { hasThrowawayDb, makeProject, su } from "./throwawayDb";
 import { randomUUID } from "node:crypto";
 import { prismaFor, projectDatabaseName } from "@/lib/projectDb";
 import { submitForm } from "@/app/p/[project]/checklists/[id]/fill/actions";
@@ -38,18 +38,8 @@ import {
 // Integration tests need a project database, made the way the platform makes
 // one, and dropped afterwards. The SQL runs inside the postgres container,
 // using its own env for the superuser role, so no password is handled here.
-const hasDb = Boolean(process.env.PROJECT_DATABASE_URL);
-const su = (sql: string, db = "platform") =>
-  execSync(`docker exec postgres sh -c 'psql -U "$POSTGRES_USER" -d ${db} -v ON_ERROR_STOP=1 -Atc "${sql}"'`);
-
-function makeProject(): string {
-  const pid = randomUUID();
-  const db = projectDatabaseName(pid);
-  su(`create database ${db}`);
-  su(`grant connect on database ${db} to controls_rw`, db);
-  su(`create schema controls; grant usage, create on schema controls to controls_rw`, db);
-  return pid;
-}
+// The live container is never used: the SQL runs in the throwaway one (ledger phase 7 review M4).
+const hasDb = hasThrowawayDb;
 
 async function captureRedirect(fn: () => Promise<unknown>): Promise<string> {
   try {

@@ -46,7 +46,7 @@ vi.mock("next/navigation", () => ({
   },
 }));
 
-import { execSync } from "node:child_process";
+import { hasThrowawayDb, makeProject, su } from "./throwawayDb";
 import { randomUUID } from "node:crypto";
 import { countries, regulations } from "@/data";
 import { prismaFor, projectDatabaseName } from "@/lib/projectDb";
@@ -61,18 +61,8 @@ import {
   restoreSubmission,
 } from "@/app/p/[project]/submissions/[id]/actions";
 
-const hasDb = Boolean(process.env.PROJECT_DATABASE_URL);
-const su = (sql: string, db = "platform") =>
-  execSync(`docker exec postgres sh -c 'psql -U "$POSTGRES_USER" -d ${db} -v ON_ERROR_STOP=1 -Atc "${sql}"'`);
-
-function makeProject(): string {
-  const pid = randomUUID();
-  const db = projectDatabaseName(pid);
-  su(`create database ${db}`);
-  su(`grant connect on database ${db} to controls_rw`, db);
-  su(`create schema controls; grant usage, create on schema controls to controls_rw`, db);
-  return pid;
-}
+// The live container is never used: the SQL runs in the throwaway one (ledger phase 7 review M4).
+const hasDb = hasThrowawayDb;
 
 function field(entries: Record<string, string | string[]>): FormData {
   const fd = new FormData();

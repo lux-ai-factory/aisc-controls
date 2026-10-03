@@ -8,7 +8,8 @@ import {
   parseQuestions,
   type ActionState,
 } from "@/lib/checklistForm";
-import { emitEvent } from "@/lib/ledger/emit";
+import { emitEvent, ledgerOn } from "@/lib/ledger/emit";
+import { checklistState, questionsState } from "@/lib/ledger/state";
 
 export type SaveState = ActionState;
 
@@ -52,22 +53,54 @@ export async function saveReviewedQuestions(
     return { fieldErrors: { questions: "Keep at least one question." } };
   }
 
-  // The review, and its event, in one transaction (ledger phase 7). Replacing the questions removes the
-  // answers given to them (closed submissions' too; the database cascades): the event keeps the old
-  // questions and every answer removed, so the ledger holds what the review deleted.
+  const fields = {
+    title: meta.data.title,
+    sourceId: meta.data.sourceId,
+    controlTopic: meta.data.controlTopic,
+    description: meta.data.description?.length ? meta.data.description : null,
+    sourceUpdatedAt: meta.data.sourceUpdatedAt ? new Date(meta.data.sourceUpdatedAt) : null,
+    countryIds: tags.countryIds,
+    regulationIds: tags.regulationIds,
+  };
+
+  // The review, and its event, in one transaction (ledger phase 7), with the checklist locked first so two
+  // reviews at once take turns and an answer can't slip in between the reads and the delete (review m4).
   await prisma.$transaction(async (tx) => {
-    const was = await tx.checklist.findUnique({
+    await tx.$queryRaw`SELECT id FROM controls.checklist WHERE id = ${checklistId} FOR UPDATE`;
+    const was = await tx.checklist.findUniqueOrThrow({
       where: { id: checklistId },
-      select: { questionsVersion: true, questions: { orderBy: { order: "asc" } } },
+      include: { questions: { orderBy: { order: "asc" } } },
     });
-    const removed = await tx.submissionAnswer.findMany({
-      where: { question: { checklistId } },
-      select: { submissionId: true, questionId: true, answer: true, score: true,
-                submission: { select: { status: true, version: true } } },
-    });
-    const version = (was?.questionsVersion ?? 1) + 1;
+    const same = was.questions.length === questions.length && was.questions.every((q, idx) =>
+      q.text === questions[idx].text && q.article === questions[idx].article && q.category === questions[idx].category);
+
+    if (same) {
+      // The questions stay as they are (review M1, guard 1): only the checklist's own fields change, so no
+      // question is replaced and no answer goes with it.
+      await tx.checklist.update({ where: { id: checklistId }, data: fields });
+      await emitEvent(tx, {
+        action: "controls.checklist.edited",
+        itemType: "checklist",
+        itemId: checklistId,
+        before: checklistState(was),
+        after: checklistState(fields),
+      });
+      return;
+    }
+
+    // Replacing the questions removes the answers given to them (closed submissions' too; the database
+    // cascades): the event keeps the old questions and every answer removed, so the ledger holds what the
+    // review deleted. With the ledger off nothing reads them (review m8).
+    const removed = ledgerOn()
+      ? await tx.submissionAnswer.findMany({
+          where: { question: { checklistId } },
+          select: { submissionId: true, questionId: true, answer: true, score: true,
+                    submission: { select: { status: true, version: true } } },
+        })
+      : [];
+    const version = was.questionsVersion + 1;
     await tx.question.deleteMany({ where: { checklistId } });
-    await tx.question.createMany({
+    const made = await tx.question.createManyAndReturn({
       data: questions.map((q, idx) => ({
         checklistId,
         order: idx + 1,
@@ -76,6 +109,7 @@ export async function saveReviewedQuestions(
         category: q.category,
       })),
     });
+    await tx.checklist.update({ where: { id: checklistId }, data: { ...fields, questionsVersion: version } });
     await emitEvent(tx, {
       action: "controls.checklist.questions_revised",
       itemType: "checklist",
@@ -84,29 +118,15 @@ export async function saveReviewedQuestions(
       details: { version, questions: questions.length, answers_removed: removed.length,
                  closed_answers_removed: removed.filter((a) => a.submission.status === "Closed").length },
       content: {
-        before: (was?.questions ?? []).map((q) => ({ id: q.id, order: q.order, text: q.text, article: q.article, category: q.category })),
-        after: questions.map((q, idx) => ({ order: idx + 1, text: q.text, article: q.article, category: q.category })),
+        before: questionsState(was.questions),
+        after: questionsState(made),                                   // with the new ids (review m5)
+        checklist: { before: checklistState(was), after: checklistState(fields) },
         removed_answers: removed.map((a) => ({ submission: a.submissionId, status: a.submission.status,
                                                version: a.submission.version, question: a.questionId,
                                                answer: a.answer, score: a.score })),
       },
     });
-    await tx.checklist.update({
-      where: { id: checklistId },
-      data: {
-        questionsVersion: version,
-        title: meta.data.title,
-        sourceId: meta.data.sourceId,
-        controlTopic: meta.data.controlTopic,
-        description: meta.data.description?.length ? meta.data.description : null,
-        sourceUpdatedAt: meta.data.sourceUpdatedAt
-          ? new Date(meta.data.sourceUpdatedAt)
-          : null,
-        countryIds: tags.countryIds,
-        regulationIds: tags.regulationIds,
-      },
-    });
-  });
+  }, { timeout: 30_000 });                                              // a big checklist's review (review m8)
 
   redirect(`/p/${project}/checklists`);
 }

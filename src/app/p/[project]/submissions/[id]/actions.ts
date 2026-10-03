@@ -8,17 +8,7 @@ import { parseAnswers, type ParsedAnswer } from "@/lib/checklistForm";
 import { latestVersion } from "@/lib/systemVersion";
 import { callerToken } from "@/lib/access/callerToken";
 import { emitEvent } from "@/lib/ledger/emit";
-
-/** What a submission says, as its ledger events keep it: the whole of it, so the item's chain holds. */
-function stateOf(label: string, status: string, answers: { questionId: string; answer: string | null; score: number | null }[]) {
-  return {
-    label,
-    status,
-    answers: answers
-      .map((a) => ({ questionId: a.questionId, answer: a.answer, score: a.score }))
-      .sort((x, y) => x.questionId.localeCompare(y.questionId)),
-  };
-}
+import { submissionState } from "@/lib/ledger/state";
 
 export type ActionState = { error?: string } | undefined;
 
@@ -99,11 +89,15 @@ export async function saveDraft(
     return { submissionId, ...answer, ...stamp };
   });
 
-  // The draft, its answers and its event, in one transaction (ledger phase 7). The answers it replaces
-  // are its event's `before`: the ledger keeps what the form overwrites.
-  const before = stateOf(sub.label, sub.status, [...old.values()]);
-  const after = stateOf(label, shouldClose ? "Closed" : "Draft", rows);
-  await prisma.$transaction(async (tx) => {
+  // The draft, its answers and its event, in one transaction (ledger phase 7). The draft is locked and read
+  // again inside it (review m1): one closed in another tab since the reads above is refused, not rewritten,
+  // and the answers it replaces, read under the lock, are its event's `before`.
+  const after = submissionState(label, shouldClose ? "Closed" : "Draft", rows);
+  const saved = await prisma.$transaction(async (tx) => {
+    const [now] = await tx.$queryRaw<{ label: string; status: string }[]>`
+      SELECT label, status::text AS status FROM controls.submission WHERE id = ${submissionId} FOR UPDATE`;
+    if (!now || now.status !== "Draft") return false;
+    const replaced = await tx.submissionAnswer.findMany({ where: { submissionId } });
     await tx.submission.update({
       where: { id: submissionId },
       data: shouldClose
@@ -118,10 +112,12 @@ export async function saveDraft(
       itemId: submissionId,
       details: shouldClose ? { score: rows.reduce((n, r) => n + (r.score ?? 0), 0) } : {},
       content: after,
-      before,
+      before: submissionState(now.label, now.status, replaced),
       after,
     });
+    return true;
   });
+  if (!saved) return { error: "Only draft submissions can be edited. Reopen for amendment first." };
 
   const base = inProject(project);
   revalidatePath(`${base}/submissions/${submissionId}`);
@@ -172,12 +168,14 @@ export async function reopenForAmendment(project: string, submissionId: string):
     },
     select: { id: true },
     });
-    // the amendment is a new submission (its own item); this event is the closed one's
+    // The amendment is a new submission (its own item); this event is the closed one's. Its content is the
+    // amendment's first state, which the amendment's first save continues as its `before` (review m6).
     await emitEvent(tx, {
       action: "controls.submission.reopened",
       itemType: "submission",
       itemId: previous.id,
       details: { next: made.id, version: previous.version + 1 },
+      content: { next: submissionState(previous.label, "Draft", previous.answers) },
     });
     return made;
   });

@@ -4,6 +4,7 @@
 // `catalogueId`. Installing a control the project already has changes nothing.
 import type { Prisma, PrismaClient } from "@prisma/client";
 import { slugify } from "@/lib/slugify";
+import { packageDigest, questionsState } from "@/lib/ledger/state";
 
 export type InstallPackage = {
   meta: {
@@ -87,8 +88,26 @@ export type InstallResult = { checklistId: string; catalogueId: string; created:
 /** The caller's ledger event for a new install, written in the install's own transaction (ledger phase 7). */
 export type InstallRecorder = (
   tx: Prisma.TransactionClient,
-  installed: { checklistId: string; catalogueId: string; questions: number },
+  installed: { checklistId: string; catalogueId: string; questions: number; content: InstalledContent },
 ) => Promise<unknown>;
+
+/** What an install put in the project, as its event keeps it (review m5): the package's digest, the source
+ *  it filed the checklist under (made by this install when it was new), and the questions with their ids,
+ *  so every later answer's questionId can be tied to the question it answered. */
+export type InstalledContent = {
+  package_sha256: string | null;
+  source: { id: string; name: string; url: string | null };
+  questions: ReturnType<typeof questionsState>;
+};
+
+/** The package's digest; a package the ledger's canonical form can't hold has none (the install still runs). */
+function digestOf(pkg: unknown): string | null {
+  try {
+    return packageDigest(pkg);
+  } catch {
+    return null;
+  }
+}
 
 export async function installChecklist(prisma: PrismaClient, pkg: unknown, record?: InstallRecorder): Promise<InstallResult> {
   const data = parseInstallPackage(pkg);
@@ -101,9 +120,10 @@ export async function installChecklist(prisma: PrismaClient, pkg: unknown, recor
   const existing = await findInstalled();
   if (existing) return { checklistId: existing.id, catalogueId, created: false };
 
+  const digest = digestOf(pkg);
   let checklistId: string;
   try {
-    checklistId = await createChecklist(prisma, data, record);
+    checklistId = await createChecklist(prisma, data, digest, record);
   } catch (err) {
     // Two installs at once (a double click): both saw nothing, one created it,
     // and the other hit the unique catalogueId (or the source's unique name).
@@ -112,14 +132,15 @@ export async function installChecklist(prisma: PrismaClient, pkg: unknown, recor
     const raced = await findInstalled();
     if (raced) return { checklistId: raced.id, catalogueId, created: false };
     // Only the source collided: it exists now, so the upsert finds it.
-    checklistId = await createChecklist(prisma, data, record);
+    checklistId = await createChecklist(prisma, data, digest, record);
   }
 
   return { checklistId, catalogueId, created: true };
 }
 
 /** The checklist, its questions and (if new) its source, in one transaction. Returns the checklist's id. */
-function createChecklist(prisma: PrismaClient, data: NormalisedChecklist, record?: InstallRecorder): Promise<string> {
+function createChecklist(prisma: PrismaClient, data: NormalisedChecklist, digest: string | null,
+                         record?: InstallRecorder): Promise<string> {
   return prisma.$transaction(async (tx) => {
     const source = await tx.source.upsert({
       where: { name: data.source.name },
@@ -138,10 +159,19 @@ function createChecklist(prisma: PrismaClient, data: NormalisedChecklist, record
         sourceUpdatedAt: data.checklist.sourceUpdatedAt,
         questions: { create: data.questions },
       },
-      select: { id: true },
+      select: { id: true, questions: true },
     });
     if (record) {
-      await record(tx, { checklistId: created.id, catalogueId: data.checklist.catalogueId, questions: data.questions.length });
+      await record(tx, {
+        checklistId: created.id,
+        catalogueId: data.checklist.catalogueId,
+        questions: data.questions.length,
+        content: {
+          package_sha256: digest,
+          source: { id: source.id, name: source.name, url: source.url },
+          questions: questionsState(created.questions),
+        },
+      });
     }
     return created.id;
   });

@@ -10,6 +10,7 @@
 import { withoutTrailingSlash } from "@/lib/http";
 import { installForCaller, installOptions } from "@/lib/installControl";
 import { emitEvent } from "@/lib/ledger/emit";
+import { installedEvent } from "@/lib/ledger/install";
 
 export const dynamic = "force-dynamic";
 
@@ -43,13 +44,7 @@ export async function POST(request: Request): Promise<Response> {
   if (!ok) return reply({ error: "Only the catalogue may install." }, 403, null);
   const form = await request.formData();
   const result = await installForCaller(String(form.get("project") ?? ""), String(form.get("slug") ?? "").trim(),
-    (tx, installed) =>
-    emitEvent(tx, {
-      action: "control.installed",
-      itemType: "checklist",
-      itemId: installed.checklistId,
-      details: { package: installed.catalogueId, questions: installed.questions },
-    }));
+    (tx, installed) => emitEvent(tx, { action: "control.installed", ...installedEvent(installed) }));
   if (!result.ok) return reply({ error: result.error }, result.status, origin);
   const { ok: _ok, ...installed } = result;
   return reply(installed, 200, origin);

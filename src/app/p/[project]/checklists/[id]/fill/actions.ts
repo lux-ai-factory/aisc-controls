@@ -5,6 +5,7 @@ import { z } from "zod";
 import { writableProject } from "@/lib/projectDb";
 import { parseAnswers } from "@/lib/checklistForm";
 import { emitEvent } from "@/lib/ledger/emit";
+import { submissionState } from "@/lib/ledger/state";
 
 const schema = z.object({
   label: z.string().min(1, "Give this submission a name"),
@@ -42,7 +43,7 @@ export async function submitForm(
       },
       select: { id: true },
     });
-    const state = { label: parsed.data.label, status: "Draft", answers };
+    const state = submissionState(parsed.data.label, "Draft", answers);
     await emitEvent(tx, {
       action: "controls.submission.created",
       itemType: "submission",
