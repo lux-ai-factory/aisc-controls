@@ -61,9 +61,6 @@ export default async function LibraryPage({ params, searchParams }: PageProps) {
       </header>
 
       <div className="library-toolbar">
-        <Link className="btn" href={`/p/${project}/catalogue`}>
-          Add from catalogue
-        </Link>
         <Link className="btn ghost" href={`/p/${project}/submissions`}>
           Answered checklists
         </Link>
@@ -78,10 +75,10 @@ export default async function LibraryPage({ params, searchParams }: PageProps) {
 
       {allRows.length === 0 ? (
         <div className="empty-state">
-          <p>This project has no checklists yet. Install them from the catalogue.</p>
-          <Link className="btn" href={`/p/${project}/catalogue`}>
-            Add from catalogue
-          </Link>
+          <p>
+            This project has no checklists yet. Install them from the project&apos;s catalogue: on the
+            project page, Identify tests and controls, the Controls tab, Install into a project.
+          </p>
         </div>
       ) : rows.length === 0 ? (
         <div className="empty-state">

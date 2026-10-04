@@ -15,8 +15,8 @@ answers from the project's database.
 
 - **Next.js 15 app** (`src/`), served under `/controls` behind the AISC
   gateway (Caddy + oauth2-proxy + Keycloak). Every project page lives under
-  `/p/{project}/...`: the checklist library, the catalogue, the fill and
-  review pages, the sources, and the submissions with their PDF report.
+  `/p/{project}/...`: the checklist library, the fill and review pages, the
+  sources, and the submissions with their PDF report.
 - **One Postgres database per project.** The platform service makes a database
   `project_<project id without hyphens>` when a project is created. This app
   keeps its tables in that database's `controls` schema (Prisma, connected as
@@ -29,11 +29,16 @@ answers from the project's database.
   whether the person is in that project and may change it; every server action
   asks again for the project it was given. If the platform does not answer,
   the page answers 503: it never fails open.
-- **Catalogue.** Controls are fetched server-side from the hosted catalogue
-  (`{CATALOGUE_URL}/tool/` for the list, `{CATALOGUE_URL}/control/{slug}/export`
-  for one package) and installed into the project's database. The catalogue's
-  own install dialog can also call this app's `/api/install` from the browser,
-  only from `CATALOGUE_ORIGIN`.
+- **Installing a checklist.** A checklist is installed from the project's own
+  catalogue (public, or its private copy), opened from the launcher's project
+  page: the catalogue's Install button calls this app's `/api/install` from the
+  browser, only from `CATALOGUE_ORIGIN` or the launcher's origin (`LAUNCHER_URL`),
+  where the stack serves the catalogue's pages. This app then asks the platform
+  for the control's package (`GET {PLATFORM_URL}/projects/{pid}/catalogue/control/{slug}/export`,
+  with the person's sign-in): the platform answers from the project's catalogue,
+  so this app names no catalogue. The package is stored in the project's database.
+  `/install` is the same as a page, for when the dialog cannot reach this app.
+  This app has no catalogue page of its own since 2026-10-04.
 - **AI card version.** Each answer is stamped with the AI card version that
   was the latest when it was given (`GET {PLATFORM_URL}/projects/{pid}/system-versions/latest`).
 - **Ledger.** With `LEDGER_MODE` on, every write records an event with the
@@ -46,7 +51,7 @@ answers from the project's database.
 ```
 browser -> gateway (Caddy /controls*) -> controls-web (Next.js)
                                            |-> platform        (who may do what, card versions)
-                                           |-> catalogue       (control packages)
+                                           |   (also: the control packages, from the project's catalogue)
                                            |-> controls-pdf    (report PDF)
                                            '-> postgres: project_<pid>, schema controls
 ```
@@ -65,7 +70,7 @@ this repo:
 | `controls-pdf` | The PDF renderer (`services/pdf_renderer/Dockerfile`), internal only. |
 
 Both app services read `env.development` from this repo; the aisc compose file
-adds the rest (platform, catalogue, ledger, token). From the aisc repo root:
+adds the rest (platform, launcher, ledger, token). From the aisc repo root:
 
 ```bash
 ./scripts/secrets.sh      # once: writes env.secrets and env.runtime (CONTROLS_WEB_TO_PDF_TOKEN among them)
@@ -129,10 +134,8 @@ Environment variables read by the app (`src/`, `scripts/`, `next.config.ts`):
 | `PROJECT_DATABASE_URL` | Template of a project database's URL; `{database}` is replaced by `project_<pid without hyphens>`. Keep `schema=controls` and `connection_limit=2` (the app keeps at most 20 project databases open, so at most 40 connections). In the stack: `postgresql://controls_rw:<password>@postgres:5432/{database}?schema=controls&connection_limit=2` (`env.development`). | none: required |
 | `DATABASE_URL` | Read by the Prisma CLI only. The app sets it per project for `prisma migrate deploy`; set it yourself for `npm run db:studio`, `db:seed` or `examples:export` on one project database. | none |
 | `PLATFORM_URL` | The platform API: who is in which project, which projects a person may change, the latest AI card version. Empty means every project page answers 503. Stack: `http://platform:8000`. | empty |
-| `LAUNCHER_URL` | The launcher, where a project is chosen; the app sends people there when they arrive without a project. | `http://localhost:8100/` |
-| `CATALOGUE_URL` | The catalogue's API, from which controls are listed and fetched. Stack: `${CATALOGUE_API_URL}`, by default the hosted catalogue `https://sandboxconfigurator.aifactory.lu/api/api`. | empty |
-| `CATALOGUE_TOKEN` | Bearer token for a catalogue that asks for one. Empty for the public catalogue. | empty |
-| `CATALOGUE_ORIGIN` | The only browser origin allowed to call `/api/install` (the catalogue's own install dialog). Empty refuses every call. Stack default: `https://sandboxconfigurator.aifactory.lu`. | empty |
+| `LAUNCHER_URL` | The launcher, where a project is chosen; the app sends people there when they arrive without a project. Its origin may also call `/api/install`: the stack serves the catalogue's pages there. | `http://localhost:8100/` |
+| `CATALOGUE_ORIGIN` | The hosted catalogue's origin, also allowed to call `/api/install` (the catalogue's own install dialog). With it and `LAUNCHER_URL` empty, every call is refused. Stack default: `https://sandboxconfigurator.aifactory.lu`. | empty |
 | `PDF_RENDERER_URL` | The PDF renderer. Stack: `http://controls-pdf:8005`. | `http://localhost:8005` |
 | `CONTROLS_WEB_TO_PDF_TOKEN` | Token sent to the renderer in `X-AISC-Service-Token`; the renderer needs the same value. Made by the aisc repo's `scripts/secrets.sh`. | none |
 | `LEDGER_MODE` | `record` or `enforce` writes a ledger event with every change; anything else writes none. Stack: `${LEDGER_MODE:-off}`. | `off` |
@@ -194,12 +197,13 @@ GDK-Pixbuf installed on the system (see its `Dockerfile`).
 ## Layout
 
 ```
-src/app/p/[project]/   project pages: home, checklists (library, fill, review), catalogue,
+src/app/p/[project]/   project pages: home, checklists (library, fill, review),
                        sources, submissions (version history, archive, report/route.ts)
 src/app/install/       install one control into a chosen project (a page and its action)
 src/app/api/install/   the same, for the catalogue's own dialog
-src/lib/               project databases (projectDb.ts), access (access/), catalogue,
-                       install, scoring, report payload, ledger events (ledger/)
+src/lib/               project databases (projectDb.ts), access (access/), a control's
+                       package (cataloguePackage.ts), install, scoring, report payload,
+                       ledger events (ledger/)
 src/middleware.ts      asks the platform about every /p/... request
 prisma/                schema.prisma, migrations/, seed.ts and seed/ (sources and example checklists)
 scripts/               migrate-projects.mjs (every project database), setup-once.mjs (standalone setup)

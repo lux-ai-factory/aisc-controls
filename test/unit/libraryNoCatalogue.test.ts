@@ -1,8 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { existsSync } from "node:fs";
+import { join } from "node:path";
 import { isValidElement, type ReactNode } from "react";
 
-// The library leads to the catalogue, so installing needs no link pasted by hand.
+// Checklists are installed from the project's own catalogue (the project page's "Identify tests and
+// controls"), with the catalogue's Install button: this app has no catalogue page of its own any more
+// (aisc docs/superpowers/control-install-2026-10-04/01-plan.md P5). Its install page and API stay: the
+// catalogue's button uses them.
 const P1 = "3f2b8c1e-0d4a-4e7b-9a55-1c2d3e4f5a6b";
+const ROOT = join(__dirname, "..", "..");
 
 const h = vi.hoisted(() => ({ checklists: [] as unknown[] }));
 
@@ -29,15 +35,24 @@ function walk(node: ReactNode, out: { els: Array<{ props: Record<string, unknown
 async function library() {
   return walk(await LibraryPage({ params: Promise.resolve({ project: P1 }), searchParams: Promise.resolve({}) }));
 }
-const catalogueLinks = (tree: ReturnType<typeof walk>) =>
-  tree.els.filter((e) => e.props.href === `/p/${P1}/catalogue`);
 
-describe("the library's way to the catalogue", () => {
+describe("checklists come from the project's catalogue, not from this app", () => {
   beforeEach(() => {
     h.checklists = [];
   });
 
-  it("has an Add from catalogue button in its toolbar", async () => {
+  it("has no catalogue page of its own, and no list of the catalogue's controls", () => {
+    expect(existsSync(join(ROOT, "src/app/p/[project]/catalogue"))).toBe(false);
+    expect(existsSync(join(ROOT, "src/lib/catalogueControls.ts"))).toBe(false);
+  });
+
+  it("keeps the install page and API the catalogue's Install button uses", () => {
+    for (const kept of ["src/app/install/page.tsx", "src/app/api/install/route.ts", "src/app/p/[project]/install/actions.ts"]) {
+      expect(existsSync(join(ROOT, kept)), kept).toBe(true);
+    }
+  });
+
+  it("offers no Add from catalogue in the library", async () => {
     h.checklists = [
       {
         id: "c1", title: "Accuracy", controlTopic: "Accuracy", description: null, countryIds: [], regulationIds: [],
@@ -46,13 +61,13 @@ describe("the library's way to the catalogue", () => {
       },
     ];
     const tree = await library();
-    expect(catalogueLinks(tree)).toHaveLength(1);
-    expect(tree.text.join(" ")).toContain("Add from catalogue");
+    expect(tree.text.join(" ")).not.toContain("Add from catalogue");
+    expect(tree.els.filter((e) => String(e.props.href ?? "").includes("/catalogue"))).toEqual([]);
   });
 
-  it("points an empty project to the catalogue as well", async () => {
+  it("tells an empty project where checklists come from now", async () => {
     const tree = await library();
-    expect(catalogueLinks(tree).length).toBeGreaterThanOrEqual(2);
     expect(tree.text.join(" ")).toMatch(/no checklists yet/i);
+    expect(tree.text.join(" ")).toContain("Identify tests and controls");
   });
 });

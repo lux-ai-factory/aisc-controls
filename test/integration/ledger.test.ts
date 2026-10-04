@@ -64,7 +64,6 @@ import { submitForm } from "@/app/p/[project]/checklists/[id]/fill/actions";
 import { saveReviewedQuestions } from "@/app/p/[project]/checklists/[id]/review/actions";
 import { saveDraft, reopenForAmendment, archiveSubmission, restoreSubmission } from "@/app/p/[project]/submissions/[id]/actions";
 import { createSource } from "@/app/p/[project]/sources/new/actions";
-import { installHere } from "@/app/p/[project]/catalogue/actions";
 import { installFromCatalogue } from "@/app/p/[project]/install/actions";
 import { POST as installApi } from "@/app/api/install/route";
 import { hasThrowawayDb, makeProject, dropProject, rows, su } from "./throwawayDb";
@@ -92,6 +91,18 @@ async function redirected(fn: () => Promise<unknown>): Promise<string> {
 type Row = { action: string; item_id: string; db_role: string; request_id: string; details: Record<string, unknown>;
   content: Record<string, unknown> | null; before: Record<string, unknown> | null;
   after: Record<string, unknown> | null; item_version: string | null };
+
+/** An install as the catalogue's Install button makes it: a POST to the install API from the
+ *  catalogue's origin. Returns `{ installed }`, the checklist's id, when it worked. */
+async function installHere(project: string, slug: string, _prev?: undefined): Promise<{ installed?: string; error?: string }> {
+  vi.stubEnv("CATALOGUE_ORIGIN", "https://catalogue.test");
+  const body = new FormData();
+  body.set("project", project);
+  body.set("slug", slug);
+  const res = await installApi(new Request("https://controls.test/api/install", { method: "POST", body, headers: { origin: "https://catalogue.test" } }));
+  const answer = await res.json();
+  return res.ok ? { installed: answer.checklistId } : { error: answer.error };
+}
 
 describe.skipIf(!hasThrowawayDb)("ledger phase 7: every controls write records its event", () => {
   let project: string;
