@@ -1,6 +1,7 @@
 /**
  * Installing a control from the catalogue, whoever asks: the /install page,
- * its form action, and the API the catalogue's own dialog calls.
+ * its form action, and the API the catalogue's own dialog calls. The control
+ * comes from the catalogue of the project it goes into (fetchCataloguePackage).
  */
 import { callerToken } from "@/lib/access/callerToken";
 import { platformUrl } from "@/lib/appUrls";
@@ -27,13 +28,25 @@ export type InstallOptions = {
 /** A refusal, with the HTTP status that says what kind it is. */
 export type Refusal = { ok: false; status: number; error: string };
 
-/** What the dialog needs: the control, the projects this person may change,
- *  which one to preselect, and where the control already is. */
+const NO_PROJECT =
+  "You cannot change any project, so there is none to install into. An owner of a project can make you an editor of it.";
+
+/** What the dialog needs: the control as the preselected project's catalogue
+ *  has it, the projects this person may change, and where the control already is. */
 export async function installOptions(slug: string, wanted?: string | null): Promise<Refusal | ({ ok: true } & InstallOptions)> {
   if (!slug) return { ok: false, status: 400, error: "No control was named. Start from the catalogue." };
 
-  const fetched = await fetchCataloguePackage(slug);
-  if (!fetched.ok) return catalogueRefusal(fetched.reason);
+  const token = await callerToken();
+  const projects = await writableProjects(token, { platformUrl: platformUrl() });
+  if (projects === null) {
+    return { ok: false, status: 502, error: "The platform is not answering, so your projects cannot be listed. Nothing was installed." };
+  }
+  if (projects.length === 0) return { ok: false, status: 403, error: NO_PROJECT };
+  const preselect =
+    wanted && PROJECT_ID.test(wanted) && projects.some((p) => p.pid === wanted) ? wanted : projects[0].pid;
+
+  const fetched = await fetchCataloguePackage(preselect, slug, { token });
+  if (!fetched.ok) return { ok: false, status: fetched.status, error: fetched.reason };
   let parsed;
   try {
     parsed = parseInstallPackage(fetched.pkg);
@@ -41,13 +54,6 @@ export async function installOptions(slug: string, wanted?: string | null): Prom
     return unreadable(err);
   }
 
-  const projects = await writableProjects(await callerToken(), { platformUrl: platformUrl() });
-  if (projects === null) {
-    return { ok: false, status: 502, error: "The platform is not answering, so your projects cannot be listed. Nothing was installed." };
-  }
-
-  const preselect =
-    wanted && PROJECT_ID.test(wanted) && projects.some((p) => p.pid === wanted) ? wanted : (projects[0]?.pid ?? null);
   return {
     ok: true,
     control: {
@@ -72,8 +78,8 @@ export async function installForCaller(
   if (!PROJECT_ID.test(project)) return { ok: false, status: 400, error: "Choose a project." };
   const { prisma, refused } = await writableProject(project);
   if (refused) return { ok: false, status: 403, error: refused.error };
-  const fetched = await fetchCataloguePackage(slug);
-  if (!fetched.ok) return catalogueRefusal(fetched.reason);
+  const fetched = await fetchCataloguePackage(project, slug, { token: await callerToken() });
+  if (!fetched.ok) return { ok: false, status: fetched.status, error: fetched.reason };
   let result;
   try {
     result = await installChecklist(prisma, fetched.pkg, record);
@@ -82,16 +88,6 @@ export async function installForCaller(
   }
   const path = `/p/${encodeURIComponent(project)}/checklists/${result.checklistId}/fill?installed=${result.created ? "new" : "already"}`;
   return { ok: true, checklistId: result.checklistId, created: result.created, path };
-}
-
-/**
- * Why the catalogue could not give the control. A missing control is a 404;
- * everything else is the catalogue not answering properly. The reason is
- * matched by its wording because fetchCataloguePackage only returns the text.
- */
-function catalogueRefusal(reason: string): Refusal {
-  const missing = reason.startsWith("The catalogue has no control") || reason.startsWith("That is not the name");
-  return { ok: false, status: missing ? 404 : 502, error: reason };
 }
 
 /** Parsing or installing the package threw; either way it is reported as unreadable. */

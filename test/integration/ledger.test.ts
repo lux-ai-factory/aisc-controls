@@ -35,7 +35,7 @@ vi.mock("@/lib/systemVersion", () => ({
   },
 }));
 vi.mock("@/lib/cataloguePackage", () => ({
-  fetchCataloguePackage: async (slug: string) => ({
+  fetchCataloguePackage: async (_project: string, slug: string) => ({
     ok: true,
     pkg: { meta: { catalogueId: slug, title: `Control ${slug}`, sourceName: state.sourceName || `Src ${slug}`, controlTopic: "T" },
            questions: [{ text: "Is it logged?" }, { text: "Is it reviewed?" }] },

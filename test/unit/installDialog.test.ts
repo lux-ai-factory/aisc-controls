@@ -103,10 +103,10 @@ describe("the install page is one dialog", () => {
   });
 
   it("shows the catalogue's reason and no dialog when the control cannot be fetched", async () => {
-    h.fetched = { ok: false, reason: "The catalogue has no control called “nope”." };
+    h.fetched = { ok: false, status: 404, reason: "This project's catalogue has no control called “nope”." };
     const tree = await page({ slug: "nope" });
     expect(dialogProps(tree)).toBeUndefined();
-    expect(tree.text.join(" ")).toContain("The catalogue has no control called “nope”.");
+    expect(tree.text.join(" ")).toContain("This project's catalogue has no control called “nope”.");
   });
 
   it("says there is no project to install into when this person may change none", async () => {
