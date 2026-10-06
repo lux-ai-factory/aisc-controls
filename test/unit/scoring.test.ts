@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { parseScore, readinessPercent, SCORE_VALUES } from "@/lib/scoring";
+import { answeredCount, coverage, parseScore, readinessPercent, SCORE_VALUES } from "@/lib/scoring";
 
 describe("parseScore", () => {
   it("accepts the 1–5 scale", () => {
@@ -35,5 +35,29 @@ describe("readinessPercent", () => {
     expect(readinessPercent([3, 4])).toBe(70);
     // avg 2.5 → 50%
     expect(readinessPercent([2, 3])).toBe(50);
+  });
+});
+
+describe("coverage", () => {
+  it("is the share of questions answered, rounded to a percentage", () => {
+    expect(coverage(2, 3)).toEqual({ answered: 2, total: 3, percent: 67 });
+    expect(coverage(3, 3)).toEqual({ answered: 3, total: 3, percent: 100 });
+    expect(coverage(0, 4)).toEqual({ answered: 0, total: 4, percent: 0 });
+  });
+
+  it("has no percentage for a checklist without questions", () => {
+    expect(coverage(0, 0)).toEqual({ answered: 0, total: 0, percent: null });
+  });
+});
+
+describe("answeredCount", () => {
+  it("counts the questions with an answer or a score, once each, and only the checklist's", () => {
+    const answers = [
+      { questionId: "q1", answer: "Yes", score: null },
+      { questionId: "q2", answer: null, score: 4 },
+      { questionId: "q3", answer: null, score: null },
+      { questionId: "gone", answer: "old", score: 5 },
+    ];
+    expect(answeredCount(answers, ["q1", "q2", "q3", "q4"])).toBe(2);
   });
 });

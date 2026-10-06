@@ -49,6 +49,15 @@ describe("buildReportPayload", () => {
     expect(p.totalQuestions).toBe(3);
   });
 
+  it("gives coverage: the questions answered out of all of them", () => {
+    const p = buildReportPayload(
+      { ...base, answersByQ: { q1: "Yes, documented." }, scoresByQ: { q1: 5, q2: 3 } },
+      new Date(2026, 5, 3, 10, 0),
+    );
+    expect(p.answeredCount).toBe(2);
+    expect(p.coverage).toBe(67);
+  });
+
   it("formats dates as dd/mm/yyyy HH:MM and exposes the full 1–5 legend", () => {
     const p = buildReportPayload(base, new Date(2026, 5, 3, 10, 0));
     expect(p.createdAt).toBe("01/06/2026 14:30");

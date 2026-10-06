@@ -33,3 +33,33 @@ export function readinessPercent(scores: number[]): number | null {
   const average = scores.reduce((sum, n) => sum + n, 0) / scores.length;
   return Math.round((average / 5) * 100);
 }
+
+export type Coverage = { answered: number; total: number; percent: number | null };
+
+/**
+ * How much of a checklist has been answered: answered questions out of all of
+ * them, as a 0–100% figure. Readiness says how well the answered ones score;
+ * coverage says how many were answered.
+ *
+ * @returns the counts and the rounded percentage, `null` for no questions.
+ */
+export function coverage(answered: number, total: number): Coverage {
+  return { answered, total, percent: total > 0 ? Math.round((answered / total) * 100) : null };
+}
+
+/**
+ * The checklist's questions that carry an answer text or a score. A row of a
+ * question no longer in the checklist does not count.
+ */
+export function answeredCount(
+  answers: { questionId: string; answer: string | null; score: number | null }[],
+  questionIds: string[],
+): number {
+  const asked = new Set(questionIds);
+  const answered = new Set(
+    answers
+      .filter((a) => asked.has(a.questionId) && ((a.answer ?? "").trim().length > 0 || a.score != null))
+      .map((a) => a.questionId),
+  );
+  return answered.size;
+}

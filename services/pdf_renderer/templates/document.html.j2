@@ -25,9 +25,14 @@
           {% if data.readiness is not none %}{{ data.readiness }}%{% else %}—{% endif %}
         </div>
         <div class="readiness-caption">Readiness</div>
+        <div class="readiness-value">
+          {% if data.coverage is defined and data.coverage is not none %}{{ data.coverage }}%{% else %}—{% endif %}
+        </div>
+        <div class="readiness-caption">Coverage</div>
       </td>
       <td class="meta-cell">
         <table class="summary-meta">
+          {% if data.answeredCount is defined %}<tr><th>Controls answered</th><td>{{ data.answeredCount }} of {{ data.totalQuestions }}</td></tr>{% endif %}
           <tr><th>Controls scored</th><td>{{ data.scoredCount }} of {{ data.totalQuestions }}</td></tr>
           <tr><th>Status</th><td>{{ data.status }} (version {{ data.version }})</td></tr>
           <tr><th>Created</th><td>{{ data.createdAt }}</td></tr>

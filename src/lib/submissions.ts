@@ -13,9 +13,14 @@ export async function submissionsOfProject(project: string) {
     orderBy: { updatedAt: "desc" },
     include: {
       checklist: {
-        select: { title: true, controlTopic: true, source: { select: { id: true, name: true } } },
+        select: {
+          title: true,
+          controlTopic: true,
+          source: { select: { id: true, name: true } },
+          questions: { select: { id: true } },
+        },
       },
-      answers: { select: { score: true } },
+      answers: { select: { questionId: true, answer: true, score: true } },
       _count: { select: { answers: true } },
     },
   });

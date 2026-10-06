@@ -2,6 +2,8 @@ import Link from "next/link";
 import { projectDbFor } from "@/lib/projectDb";
 import { countries, regulations, findCountry, findRegulation } from "@/data";
 import SourceCitation from "@/components/SourceCitation";
+import Pager from "@/components/Pager";
+import { paginate } from "@/lib/pagination";
 import LibraryFilters from "./LibraryFilters";
 
 type PageProps = {
@@ -11,6 +13,7 @@ type PageProps = {
     regulation?: string;
     source?: string;
     q?: string;
+    page?: string;
   }>;
 };
 
@@ -49,6 +52,7 @@ export default async function LibraryPage({ params, searchParams }: PageProps) {
     }
     return true;
   });
+  const paged = paginate(rows, sp.page);
 
   return (
     <main className="page">
@@ -86,7 +90,7 @@ export default async function LibraryPage({ params, searchParams }: PageProps) {
         </div>
       ) : (
         <div className="library-grid">
-          {rows.map((r) => (
+          {paged.items.map((r) => (
             <article key={r.id} className="library-card">
               <div className="library-card-body">
                 <h3>{r.title}</h3>
@@ -138,6 +142,13 @@ export default async function LibraryPage({ params, searchParams }: PageProps) {
           ))}
         </div>
       )}
+
+      <Pager
+        base={`/p/${project}/checklists`}
+        params={{ country: sp.country, regulation: sp.regulation, source: sp.source, q: sp.q }}
+        page={paged.page}
+        totalPages={paged.totalPages}
+      />
     </main>
   );
 }

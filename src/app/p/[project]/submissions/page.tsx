@@ -1,20 +1,29 @@
 import Link from "next/link";
 import { formatDate } from "@/lib/formatDate";
-import { readinessPercent } from "@/lib/scoring";
+import { answeredCount, coverage, type Coverage, readinessPercent } from "@/lib/scoring";
 import { archivedCountOfProject, submissionsOfProject } from "@/lib/submissions";
+import Pager from "@/components/Pager";
+import { paginate } from "@/lib/pagination";
 
 export default async function SubmissionsPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ project: string }>;
+  searchParams?: Promise<{ page?: string }>;
 }) {
   const { project } = await params;
+  const sp = (await searchParams) ?? {};
   const rows = await submissionsOfProject(project);
+  const paged = paginate(rows, sp.page);
 
   const readinessById = new Map<string, number | null>();
-  for (const r of rows) {
+  const coverageById = new Map<string, Coverage>();
+  for (const r of paged.items) {
+    const questionIds = r.checklist.questions.map((q) => q.id);
     const scores = r.answers.map((a) => a.score).filter((s): s is number => s != null);
     readinessById.set(r.id, readinessPercent(scores));
+    coverageById.set(r.id, coverage(answeredCount(r.answers, questionIds), questionIds.length));
   }
 
   const archivedCount = await archivedCountOfProject(project);
@@ -47,7 +56,7 @@ export default async function SubmissionsPage({
         </div>
       ) : (
         <div className="library-grid">
-          {rows.map((r) => (
+          {paged.items.map((r) => (
             <article key={r.id} className="library-card">
               <div className="library-card-body">
                 <h3>
@@ -68,7 +77,9 @@ export default async function SubmissionsPage({
                   {formatDate(r.updatedAt)}
                 </p>
                 <p className="readiness-line">
-                  Readiness:{" "}
+                  Coverage:{" "}
+                  <strong>{formatCoverage(coverageById.get(r.id))}</strong>
+                  {" · "}Readiness:{" "}
                   <strong>
                     {readinessById.get(r.id) !== null
                       ? `${readinessById.get(r.id)}%`
@@ -85,6 +96,13 @@ export default async function SubmissionsPage({
           ))}
         </div>
       )}
+
+      <Pager base={`/p/${project}/submissions`} params={{}} page={paged.page} totalPages={paged.totalPages} />
     </main>
   );
+}
+
+function formatCoverage(c: Coverage | undefined): string {
+  if (!c || c.percent === null) return "—";
+  return `${c.answered}/${c.total} (${c.percent}%)`;
 }

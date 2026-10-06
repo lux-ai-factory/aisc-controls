@@ -4,7 +4,7 @@
 // `ReportInput` and POSTs the result to the renderer.
 
 import { groupByCategory } from "./questions";
-import { readinessPercent, SCORE_LABELS, SCORE_VALUES } from "./scoring";
+import { answeredCount, coverage, readinessPercent, SCORE_LABELS, SCORE_VALUES } from "./scoring";
 import { formatDateTime } from "./formatDate";
 
 export type ReportQuestion = {
@@ -55,6 +55,10 @@ export type ReportPayload = {
   regulations: string[];
   readiness: number | null;
   scoredCount: number;
+  /** Questions with an answer text or a score. */
+  answeredCount: number;
+  /** answeredCount out of totalQuestions, as a percentage; null without questions. */
+  coverage: number | null;
   totalQuestions: number;
   scoreScale: { value: number; label: string }[];
   // The field is `entries`, not `items`: in Jinja `group.items` resolves to the
@@ -84,6 +88,14 @@ export function buildReportPayload(
   const scoreValues = input.questions
     .map((q) => input.scoresByQ[q.id])
     .filter((s): s is number => s != null);
+  const answered = answeredCount(
+    input.questions.map((q) => ({
+      questionId: q.id,
+      answer: input.answersByQ[q.id] ?? null,
+      score: input.scoresByQ[q.id] ?? null,
+    })),
+    input.questions.map((q) => q.id),
+  );
 
   return {
     title: input.label,
@@ -98,6 +110,8 @@ export function buildReportPayload(
     regulations: input.regulations,
     readiness: readinessPercent(scoreValues),
     scoredCount: scoreValues.length,
+    answeredCount: answered,
+    coverage: coverage(answered, input.questions.length).percent,
     totalQuestions: input.questions.length,
     scoreScale: SCORE_VALUES.map((v) => ({ value: v, label: SCORE_LABELS[v] })),
     groups,

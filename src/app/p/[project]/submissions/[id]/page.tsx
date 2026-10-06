@@ -9,7 +9,7 @@ import {
 import DraftEditForm from "./DraftEditForm";
 import { submissionOfProject } from "@/lib/submissions";
 import { formatDateTime } from "@/lib/formatDate";
-import { readinessPercent } from "@/lib/scoring";
+import { answeredCount, coverage, readinessPercent } from "@/lib/scoring";
 
 type ChainEntry = {
   id: string;
@@ -111,6 +111,10 @@ export default async function SubmissionDetailPage({
   const scoreValues = Object.values(scoresByQ);
   const scoredCount = scoreValues.length;
   const readiness = readinessPercent(scoreValues);
+  const covered = coverage(
+    answeredCount(sub.answers, sub.checklist.questions.map((q) => q.id)),
+    totalQuestions,
+  );
 
   return (
     <main className="page">
@@ -137,7 +141,13 @@ export default async function SubmissionDetailPage({
         </p>
       </header>
 
-      <section className="readiness-summary" aria-label="Readiness summary">
+      <section className="readiness-summary" aria-label="Coverage and readiness summary">
+        <div className="readiness-headline">
+          <span className="readiness-value">
+            {covered.percent !== null ? `${covered.percent}%` : "—"}
+          </span>
+          <span className="readiness-caption">Coverage</span>
+        </div>
         <div className="readiness-headline">
           <span className="readiness-value">
             {readiness !== null ? `${readiness}%` : "—"}
@@ -145,9 +155,10 @@ export default async function SubmissionDetailPage({
           <span className="readiness-caption">Readiness</span>
         </div>
         <div className="readiness-meta">
-          <span>{scoredCount} of {totalQuestions} controls scored</span>
+          <span>{covered.answered} of {totalQuestions} controls answered · {scoredCount} scored</span>
           <span className="readiness-hint">
-            100% = every control rated 5 (Optimized)
+            Coverage = controls answered out of all of them; readiness = their average score,
+            100% = every scored control rated 5 (Optimized)
           </span>
         </div>
       </section>
