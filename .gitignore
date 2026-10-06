@@ -16,3 +16,7 @@ tsconfig.tsbuildinfo
 .vscode/
 .idea/
 .claude/
+
+# python (the PDF renderer and its tests)
+__pycache__/
+.pytest_cache/

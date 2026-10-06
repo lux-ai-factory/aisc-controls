@@ -74,19 +74,32 @@ export async function migrateProjectDatabase(url: string): Promise<void> {
  * How many project databases this process keeps a client open to.
  *
  * Each client holds up to connection_limit=2 connections, so this is the
- * connection budget: 2 × 20 = 40 at most. The least recently used client is
+ * connection budget: 2 × 20 = 40 at most. The least recently used idle client is
  * disconnected when a 21st project is opened, and reconnects if it is needed
- * again.
+ * again. A client with work in progress (its migration, a query, a transaction)
+ * is never disconnected: while every one is busy there may be more than 20 for a
+ * moment, and the oldest is let go when its work ends (code review 2026-10-06, F11).
  */
 export const MAX_OPEN_PROJECTS = 20;
 
-type Entry = { client: PrismaClient; ready: Promise<void> };
+/** `busy`: the work in progress on the client (its migration, queries, transactions). */
+type Entry = { client: PrismaClient; ready: Promise<void>; busy: number };
 const store = globalThis as unknown as { projectDatabases?: Map<string, Entry> };
 const open = (store.projectDatabases ??= new Map<string, Entry>());
 
 function forget(url: string, entry: Entry) {
   if (open.get(url) === entry) open.delete(url);
   entry.client.$disconnect().catch(() => {});
+}
+
+/** Over the budget, let go of the least recently used idle clients. A busy one stays, and so does
+ *  the most recently used: it is the one just handed to a request, even if every other is busy. */
+function evictIdle() {
+  const newest = [...open.keys()].pop();
+  for (const [url, entry] of open) {
+    if (open.size <= MAX_OPEN_PROJECTS) return;
+    if (entry.busy === 0 && url !== newest) forget(url, entry);
+  }
 }
 
 const MISSING = /database .* does not exist/i;
@@ -131,6 +144,45 @@ async function databaseExists(pid: string): Promise<boolean | null> {
   }
 }
 
+/** The schema a database URL names (`?schema=`, as Prisma reads it), Prisma's `public` otherwise. */
+function schemaOf(url: string): string {
+  try {
+    return new URL(url).searchParams.get("schema") || "public";
+  } catch {
+    return "public";
+  }
+}
+
+/**
+ * The id of the checklist installed from this catalogue entry in that project database, asked
+ * read-only: nothing is migrated or created. Null when there is none, when the database is not
+ * there, or when it was never migrated (no checklist table yet). The install dialog lists every
+ * project the person may write, and opening one through prismaFor migrates it (code review
+ * 2026-10-06, F10): only an install migrates the project it goes into.
+ */
+export async function lookupInstalledChecklist(url: string, catalogueId: string): Promise<string | null> {
+  const schema = `"${schemaOf(url).replace(/"/g, '""')}"`;
+  const client = new pg.Client({ connectionString: url.split("?")[0] });
+  try {
+    await client.connect();
+    const { rows } = await client.query(`SELECT id FROM ${schema}.checklist WHERE "catalogueId" = $1`, [catalogueId]);
+    return (rows[0]?.id as string | undefined) ?? null;
+  } catch {
+    // not there, not migrated, or not answering: not known to have it; the install checks
+    // again and says why if it cannot write either
+    return null;
+  } finally {
+    await client.end().catch(() => {});
+  }
+}
+
+/** lookupInstalledChecklist for a project the caller may read; null for any other. */
+export async function installedChecklistId(pid: string, catalogueId: string): Promise<string | null> {
+  if (!PROJECT_ID.test(pid)) return null;
+  if (decide("GET", await callerAccess(pid)) !== "allow") return null;
+  return lookupInstalledChecklist(projectDatabaseUrl(pid), catalogueId);
+}
+
 /** A dropped (or never made) project database is "not found" for that pid, never a 500. */
 async function notFoundIfGone(pid: string, err: unknown): Promise<void> {
   if (isMissingDatabase(err) || (await databaseExists(pid)) === false) notFound();
@@ -145,7 +197,9 @@ async function notFoundIfGone(pid: string, err: unknown): Promise<void> {
  */
 export async function prismaFor(
   pid: string,
-  deps: { migrate: (url: string) => Promise<void> } = { migrate: migrateProjectDatabase },
+  deps: { migrate: (url: string) => Promise<void>; newClient?: (url: string) => PrismaClient } = {
+    migrate: migrateProjectDatabase,
+  },
 ): Promise<PrismaClient> {
   const url = projectDatabaseUrl(pid);
   let entry = open.get(url);
@@ -155,8 +209,13 @@ export async function prismaFor(
     open.set(url, entry);
   } else {
     const ready = deps.migrate(url);
-    const client = new PrismaClient({ datasources: { db: { url } } });
-    const created: Entry = { client, ready };
+    const client = deps.newClient ? deps.newClient(url) : new PrismaClient({ datasources: { db: { url } } });
+    // busy from the start: its migration is work in progress
+    const created: Entry = { client, ready, busy: 1 };
+    const release = () => {
+      created.busy -= 1;
+      evictIdle();
+    };
     entry = created;
     open.set(url, created);
     // A database that went away (the project was deleted) is not kept open, and the
@@ -164,6 +223,7 @@ export async function prismaFor(
     // DROP DATABASE ... WITH (FORCE) sees its connection closed, not a missing database,
     // so a lost connection asks the cluster whether the database is still there.
     client.$use(async (params, next) => {
+      created.busy += 1;
       try {
         return await next(params);
       } catch (err) {
@@ -176,13 +236,21 @@ export async function prismaFor(
           if ((await databaseExists(pid)) === false) notFound();
         }
         throw err;
+      } finally {
+        release();
       }
     });
-    ready.catch(() => forget(url, created));
-    while (open.size > MAX_OPEN_PROJECTS) {
-      const [oldestUrl, oldest] = open.entries().next().value as [string, Entry];
-      forget(oldestUrl, oldest);
-    }
+    // An interactive transaction holds its connection between its queries: busy until it ends.
+    const transaction = client.$transaction.bind(client) as (...args: unknown[]) => Promise<unknown>;
+    (client as unknown as { $transaction: (...args: unknown[]) => Promise<unknown> }).$transaction = (...args) => {
+      created.busy += 1;
+      return Promise.resolve(transaction(...args)).finally(release);
+    };
+    ready.then(release, () => {
+      created.busy -= 1;
+      forget(url, created);
+    });
+    evictIdle();
   }
   await entry.ready;
   return entry.client;

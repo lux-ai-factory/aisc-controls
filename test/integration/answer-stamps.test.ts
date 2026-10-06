@@ -38,6 +38,7 @@ import { randomUUID } from "node:crypto";
 
 import { prismaFor, projectDatabaseName, projectDatabaseUrl, closeProjectDatabases } from "@/lib/projectDb";
 import { saveDraft, reopenForAmendment } from "@/app/p/[project]/submissions/[id]/actions";
+import { submitForm } from "@/app/p/[project]/checklists/[id]/fill/actions";
 import { hasThrowawayDb, makeProject, dropProject, rows, su } from "./throwawayDb";
 
 const V1 = "11111111-1111-4111-8111-111111111111";
@@ -215,6 +216,27 @@ describe.skipIf(!hasThrowawayDb)("answers carry the system version (WP10)", () =
     await new Promise((r) => setTimeout(r, 20));
     await saveDraft(project, id, undefined, form({ label: "Run renamed", [`a:${qA}`]: "Yes", [`s:${qA}`]: "4" }));
     expect(stamps(project, id)).toEqual(before);
+  }, 60_000);
+
+  it("S10.6: the first fill stamps its answers too, not only a later save", async () => {
+    platform.latest = { pid: V1, number: 1 };
+    const url = await captureRedirect(() =>
+      submitForm(project, checklistId, undefined, form({ label: "First", [`a:${qA}`]: "Yes", [`s:${qA}`]: "4" })));
+    const id = url.split("/").pop() as string;
+    const first = stamps(project, id)[qA];
+    expect([first.pid, first.number]).toEqual([V1, 1]);
+    expect(first.at).not.toBeNull();
+    // and an answer left as it was keeps that stamp through a save under a newer version
+    platform.latest = { pid: V2, number: 2 };
+    await saveDraft(project, id, undefined, form({ label: "First", [`a:${qA}`]: "Yes", [`s:${qA}`]: "4" }));
+    expect(stamps(project, id)[qA].pid).toBe(V1);
+  }, 60_000);
+
+  it("S10.6: a first fill with the platform down is saved, unstamped", async () => {
+    platform.latest = "down";
+    const url = await captureRedirect(() =>
+      submitForm(project, checklistId, undefined, form({ label: "Down", [`a:${qA}`]: "Yes", [`s:${qA}`]: "3" })));
+    expect(stamps(project, url.split("/").pop() as string)[qA].pid).toBeNull();
   }, 60_000);
 
   it("S10.5: amending a closed submission keeps each copied answer's stamp", async () => {

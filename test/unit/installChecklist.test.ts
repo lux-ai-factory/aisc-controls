@@ -22,6 +22,12 @@ const pkg = (overrides: Record<string, unknown> = {}, questions?: unknown[]) => 
 });
 
 describe("parseInstallPackage", () => {
+  it("keeps only the countries and regulations this app knows, so a later review can save (code review 2026-10-06)", () => {
+    const out = parseInstallPackage(pkg({ countryIds: ["ES", "XX", 3], regulationIds: ["ai-act", "nope", null] }));
+    expect(out.checklist.countryIds).toEqual(["ES"]);
+    expect(out.checklist.regulationIds).toEqual(["ai-act"]);
+  });
+
   it("normalises every field and numbers questions 1..N", () => {
     const out = parseInstallPackage(pkg());
     expect(out.source).toEqual({ name: "AESIA", url: "https://aesia.example/guides" });
@@ -56,6 +62,13 @@ describe("parseInstallPackage", () => {
 
   it("throws on a question with no text", () => {
     expect(() => parseInstallPackage(pkg({}, [{ text: "" }]))).toThrow(/text is required/);
+  });
+
+  it("keeps only an http(s) source URL, as the source form does: the page renders it as a link", () => {
+    for (const bad of ["javascript:alert(1)", "data:text/html,<script>x</script>", "vbscript:x", "//evil.example"]) {
+      expect(parseInstallPackage(pkg({ sourceUrl: bad })).source.url, bad).toBeNull();
+    }
+    expect(parseInstallPackage(pkg({ sourceUrl: " HTTP://ok.example/a " })).source.url).toBe("HTTP://ok.example/a");
   });
 
   it("throws when questions is not an array", () => {

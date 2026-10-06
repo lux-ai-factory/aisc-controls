@@ -11,6 +11,11 @@ through a Draft, Closed, reopened-as-new-version lifecycle, with a PDF report
 for each. The results dashboard (step 5) and the report (step 6) read the
 answers from the project's database.
 
+An answered checklist shows two figures: **coverage**, the questions answered out
+of all of them, and **readiness**, how far the scored ones are: each score on a
+0-100% scale, 1 "Not started" at 0% and 5 "Optimized" at 100% ((score - 1) / 4),
+averaged and rounded half up.
+
 ## How it works
 
 - **Next.js 15 app** (`src/`), served under `/controls` behind the AISC
@@ -168,6 +173,7 @@ npm test                     # everything; the integration and chain tests skip 
   . scripts/lib/throwaway-pg.sh
   tpg_start controls          # container aisc-t-controls-<hex> on a free 127.0.0.1 port, removed when the shell exits
   tpg_init_platform .         # the roles and grants the stack's Postgres has
+  tpg_su postgres -f - < init/report-roles.sql   # report_ro and dashboard_ro, which the grant tests check
   cd apps/controls
   CONTROLS_TEST_PG_CONTAINER=$TPG_NAME \
   PROJECT_DATABASE_URL="$(tpg_dsn controls_rw '{database}')?schema=controls&connection_limit=2" \

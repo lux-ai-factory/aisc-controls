@@ -20,20 +20,46 @@ from typing import Any, Dict
 
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import Response
-from jinja2 import Environment, FileSystemLoader, select_autoescape
+from jinja2 import Environment, FileSystemLoader
 from weasyprint import HTML
+from weasyprint.urls import URLFetcher, URLFetcherResponse
 
 from service_token import ServiceTokens
 
 ROOT = Path(__file__).resolve().parent
 TEMPLATES = ROOT / "templates"
 
+# Always on: select_autoescape decides by the last extension, and document.html.j2 ends in .j2, so it
+# escaped nothing and an answer's markup (a file:// attachment, an <img> to an internal service) reached
+# WeasyPrint (code review 2026-10-06). No value in the template is meant to be raw HTML.
 env = Environment(
     loader=FileSystemLoader(str(TEMPLATES)),
-    autoescape=select_autoescape(["html", "xml"]),
+    autoescape=True,
     trim_blocks=True,
     lstrip_blocks=True,
 )
+
+
+
+_FILES_ONLY = URLFetcher(allowed_protocols={"file"})
+
+
+def fetch_template_files(url: str, headers: Any = None) -> URLFetcherResponse:
+    """A file inside templates/ (the stylesheet), and nothing else: no other local file, no network.
+    Anything else raises, and WeasyPrint leaves that resource out."""
+    if url.startswith("file://"):
+        path = Path(url[len("file://"):].split("?")[0]).resolve()
+        if path.is_relative_to(TEMPLATES.resolve()) and path.is_file():
+            return _FILES_ONLY.fetch(url, headers)
+    raise ValueError(f"the report fetches only its own template files, not {url}")
+
+
+class TemplateFilesFetcher(URLFetcher):
+    """WeasyPrint's fetcher for the report: fetch_template_files, looked up at each call."""
+
+    def fetch(self, url, headers=None):
+        return fetch_template_files(url, headers)
+
 
 app = FastAPI(title="AISC Controls PDF Renderer", version="0.1.0")
 # Only controls-web calls this (the submission report route), with its own token.
@@ -58,7 +84,7 @@ def render_pdf(payload: Dict[str, Any]) -> Response:
     template = env.get_template("document.html.j2")
     html = template.render(data=payload)
     try:
-        pdf_bytes = HTML(string=html, base_url=str(TEMPLATES)).write_pdf()
+        pdf_bytes = HTML(string=html, base_url=str(TEMPLATES), url_fetcher=TemplateFilesFetcher()).write_pdf()
     except Exception as exc:  # pragma: no cover
         raise HTTPException(status_code=500, detail=f"WeasyPrint failed: {exc}")
     return Response(

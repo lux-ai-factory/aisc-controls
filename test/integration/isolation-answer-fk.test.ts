@@ -55,7 +55,7 @@ describe.skipIf(!hasThrowawayDb)("I6.2: answers point at a card version of their
     await prismaFor(project);
     expect(
       rows(
-        `SELECT conname || '|' || confrelid::regclass::text || '|' || confdeltype FROM pg_constraint
+        `SELECT conname || '|' || confrelid::regclass::text || '|' || confdeltype::text FROM pg_constraint
           WHERE conrelid = 'controls.submission_answer'::regclass AND contype = 'f'
             AND conname = 'submission_answer_system_version_pid_fkey'`,
         project,

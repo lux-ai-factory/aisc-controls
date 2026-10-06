@@ -143,6 +143,6 @@ describe("an answered checklist shows its coverage next to its readiness", () =>
     const text = walk(await SubmissionsPage({ params: Promise.resolve({ project: P1 }), searchParams: Promise.resolve({}) }))
       .text.join("");
     expect(text).toContain("Coverage: 2/4 (50%)");
-    expect(text).toContain("Readiness: 60%");
+    expect(text).toContain("Readiness: 50%");
   });
 });

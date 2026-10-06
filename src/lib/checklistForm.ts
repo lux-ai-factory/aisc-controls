@@ -96,6 +96,8 @@ export function parseTags(formData: FormData):
 }
 
 export type ParsedQuestion = {
+  /** The existing question this row edits, as the review form names it; null for a new row. */
+  id: string | null;
   text: string;
   article: string | null;
   category: string | null;
@@ -106,19 +108,20 @@ export type ParsedQuestion = {
 export function parseQuestions(formData: FormData): ParsedQuestion[] {
   const map = new Map<
     number,
-    { text?: string; article?: string; category?: string }
+    { id?: string; text?: string; article?: string; category?: string }
   >();
   for (const [field, value] of formData.entries()) {
-    const m = field.match(/^q\.(\d+)\.(text|article|category)$/);
+    const m = field.match(/^q\.(\d+)\.(id|text|article|category)$/);
     if (!m || typeof value !== "string") continue;
     const idx = parseInt(m[1], 10);
     const row = map.get(idx) ?? {};
-    row[m[2] as "text" | "article" | "category"] = value;
+    row[m[2] as "id" | "text" | "article" | "category"] = value;
     map.set(idx, row);
   }
   return [...map.entries()]
     .sort(([a], [b]) => a - b)
     .map(([, row]) => ({
+      id: (row.id ?? "").trim() || null,
       text: (row.text ?? "").trim(),
       article: (row.article ?? "").trim() || null,
       category: (row.category ?? "").trim() || null,
@@ -162,3 +165,6 @@ export function parseAnswers(
       score: v.score,
     }));
 }
+
+/** What a save or a new submission is told when a review replaced the checklist's questions meanwhile. */
+export const REVISED = "The checklist was revised while you were answering: reload the page to answer its current questions.";

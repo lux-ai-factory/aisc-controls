@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { writableProject } from "@/lib/projectDb";
-import { slugify } from "@/lib/slugify";
+import { freeSourceSlug } from "@/lib/sourceSlug";
 import { emitEvent } from "@/lib/ledger/emit";
 
 const schema = z.object({
@@ -36,22 +36,14 @@ export async function createSource(
   const name = parsed.data.name;
   const citation = parsed.data.citation?.length ? parsed.data.citation : null;
   const url = parsed.data.url?.length ? parsed.data.url : null;
-  const baseSlug = slugify(name) || name.toLowerCase();
+  const already = { error: `"${name}" is already registered.` };
 
-  const dupName = await prisma.source.findUnique({
-    where: { name },
-    select: { id: true },
-  });
-  if (dupName) return { error: `"${name}" is already registered.` };
-
-  // disambiguate slug if needed
-  let slug = baseSlug;
-  let n = 2;
-  while (await prisma.source.findUnique({ where: { slug }, select: { id: true } })) {
-    slug = `${baseSlug}-${n++}`;
-  }
-
-  await prisma.$transaction(async (tx) => {
+  // Checked and made in one transaction; two editors registering at once both pass the checks, and the
+  // unique name or slug stops the second: it is told the source is registered (a slug that only clashed is
+  // tried once more with the next free one).
+  const register = () => prisma.$transaction(async (tx) => {
+    if (await tx.source.findUnique({ where: { name }, select: { id: true } })) return false;
+    const slug = await freeSourceSlug(tx, name);
     const made = await tx.source.create({ data: { name, slug, citation, url } });
     await emitEvent(tx, {
       action: "controls.source.created",
@@ -59,6 +51,15 @@ export async function createSource(
       itemId: made.id,
       content: { name, slug, citation, url },
     });
+    return true;
   });
+  let registered: boolean;
+  try {
+    registered = await register();
+  } catch (err) {
+    if ((err as { code?: unknown } | null)?.code !== "P2002") throw err;
+    registered = await register();
+  }
+  if (!registered) return already;
   redirect(`/p/${project}/sources`);
 }

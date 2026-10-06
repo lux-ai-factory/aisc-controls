@@ -13,6 +13,9 @@ const h = vi.hoisted(() => ({
   projects: [] as Array<{ pid: string; name: string }> | null,
   installedIn: {} as Record<string, string>,
   redirects: [] as string[],
+  opened: vi.fn(async () => {
+    throw new Error("a project database was opened (and so migrated) to build the list");
+  }),
 }));
 
 vi.mock("@/lib/cataloguePackage", () => ({ fetchCataloguePackage: async () => h.fetched }));
@@ -20,9 +23,10 @@ vi.mock("@/lib/writableProjects", () => ({ writableProjects: async () => h.proje
 vi.mock("@/lib/access/callerToken", () => ({ callerToken: async () => "token" }));
 vi.mock("@/lib/projectDb", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/lib/projectDb")>()),
-  projectDbFor: async (pid: string) => ({
-    checklist: { findUnique: async () => (h.installedIn[pid] ? { id: h.installedIn[pid] } : null) },
-  }),
+  // Opening a project's database migrates it: the dialog's list must never do that (F10).
+  projectDbFor: h.opened,
+  prismaFor: h.opened,
+  installedChecklistId: async (pid: string) => h.installedIn[pid] ?? null,
 }));
 vi.mock("next/navigation", () => ({
   redirect: (url: string) => {
@@ -94,6 +98,15 @@ describe("the install page is one dialog", () => {
   it("preselects the first project when the catalogue named none, or one this person cannot change", async () => {
     expect(dialogProps(await page({ slug: "accuracy-checklist" }))?.preselect).toBe(P1);
     expect(dialogProps(await page({ slug: "accuracy-checklist", project: "not-a-pid" }))?.preselect).toBe(P1);
+  });
+
+  it("lists the projects without opening, and so migrating, any project database (F10)", async () => {
+    h.projects = [P1, P2, "0b1c2d3e-4f5a-4b6c-8d7e-9f0a1b2c3d4e"].map((pid) => ({ pid, name: pid.slice(0, 4) }));
+    h.installedIn = { [P2]: "chk_42" };
+    h.opened.mockClear();
+    const props = dialogProps(await page({ slug: "accuracy-checklist" }));
+    expect(props?.installed).toEqual({ [P2]: "chk_42" });
+    expect(h.opened).not.toHaveBeenCalled();
   });
 
   it("tells the dialog in which projects the control is already installed", async () => {

@@ -104,6 +104,81 @@ describe("the open project databases", () => {
 
   const pid = (n: number) => `${n.toString(16).padStart(8, "0")}-0000-4000-8000-000000000000`;
 
+  // A client whose queries run through the middleware prismaFor installs, and finish when the test says.
+  function fakeClient() {
+    type Middleware = (params: unknown, next: (params: unknown) => Promise<unknown>) => Promise<unknown>;
+    const middlewares: Middleware[] = [];
+    const client = {
+      $use: (mw: Middleware) => { middlewares.push(mw); },
+      $disconnect: vi.fn(async () => {}),
+      $transaction: async (work: (tx: unknown) => Promise<unknown>) => work(client),
+      query(work: () => Promise<unknown>) {
+        const run = (i: number, params: unknown): Promise<unknown> =>
+          i < middlewares.length ? middlewares[i](params, (next) => run(i + 1, next)) : work();
+        return run(0, { model: "Checklist", action: "findMany" });
+      },
+    };
+    return client;
+  }
+  function pending() {
+    let finish!: () => void;
+    const done = new Promise<void>((resolve) => { finish = resolve; });
+    return { done, finish };
+  }
+  async function openFakes(count: number, migrate: () => Promise<void>) {
+    const fakes = [];
+    for (let i = 0; i < count; i++) {
+      const fake = fakeClient();
+      await prismaFor(pid(i), { migrate, newClient: () => fake as never });
+      fakes.push(fake);
+    }
+    return fakes;
+  }
+
+  it("never disconnects a client in the middle of a query to make room (F11)", async () => {
+    const migrate = vi.fn(async () => {});
+    const fakes = await openFakes(MAX_OPEN_PROJECTS, migrate);
+    const query = pending();
+    const running = fakes[0].query(() => query.done); // the least recently used, busy
+    await prismaFor(pid(MAX_OPEN_PROJECTS), { migrate, newClient: () => fakeClient() as never }); // the 21st
+    expect(fakes[0].$disconnect).not.toHaveBeenCalled();
+    expect(fakes[1].$disconnect).toHaveBeenCalledTimes(1); // the oldest idle one made room
+    query.finish();
+    await running;
+    expect(fakes[0].$disconnect).not.toHaveBeenCalled(); // back to 20: nothing more to evict
+  });
+
+  it("with every client busy, goes past 20 and comes back as queries end (F11)", async () => {
+    const migrate = vi.fn(async () => {});
+    const fakes = await openFakes(MAX_OPEN_PROJECTS, migrate);
+    const queries = fakes.map(() => pending());
+    const running = fakes.map((f, i) => f.query(() => queries[i].done));
+    const newest = fakeClient();
+    await prismaFor(pid(MAX_OPEN_PROJECTS), { migrate, newClient: () => newest as never });
+    expect(fakes.every((f) => f.$disconnect.mock.calls.length === 0)).toBe(true);
+    expect(newest.$disconnect).not.toHaveBeenCalled(); // the one just handed out, though it is the only idle one
+    queries[0].finish();
+    await running[0];
+    expect(fakes[0].$disconnect).toHaveBeenCalledTimes(1); // idle now, and one too many open
+    expect(fakes.slice(1).every((f) => f.$disconnect.mock.calls.length === 0)).toBe(true);
+    queries.slice(1).forEach((q) => q.finish());
+    await Promise.all(running);
+  });
+
+  it("keeps a client while a transaction on it is open, between its queries (F11)", async () => {
+    const migrate = vi.fn(async () => {});
+    const fakes = await openFakes(MAX_OPEN_PROJECTS, migrate);
+    const tx = pending();
+    const client = await prismaFor(pid(0), { migrate });
+    const open = (client as unknown as { $transaction: (w: () => Promise<void>) => Promise<void> }).$transaction(() => tx.done);
+    // the others used after it, so pid(0)'s client is the least recently used, and between two queries
+    for (let i = 1; i < MAX_OPEN_PROJECTS; i++) await prismaFor(pid(i), { migrate });
+    await prismaFor(pid(MAX_OPEN_PROJECTS), { migrate, newClient: () => fakeClient() as never });
+    expect(fakes[0].$disconnect).not.toHaveBeenCalled();
+    tx.finish();
+    await open;
+  });
+
   it("are at most 20, and the least recently used one is disconnected to make room", async () => {
     expect(MAX_OPEN_PROJECTS).toBe(20);
     const migrate = vi.fn(async () => {});

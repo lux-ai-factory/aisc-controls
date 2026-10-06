@@ -23,15 +23,16 @@ export function parseScore(raw: string): number | null {
 }
 
 /**
- * Average score expressed as a 0–100% readiness figure (every control at 5/5 =
- * 100%).
+ * The scored questions' readiness as a 0–100% figure: each score is placed on the
+ * scale with 1 "Not started" at 0% and 5 "Optimized" at 100% ((score - 1) / 4),
+ * then averaged and rounded half up. (Average / 5 counted "Not started" as 20%.)
  *
  * @returns the rounded percentage, or `null` when nothing has been scored yet.
  */
 export function readinessPercent(scores: number[]): number | null {
   if (scores.length === 0) return null;
-  const average = scores.reduce((sum, n) => sum + n, 0) / scores.length;
-  return Math.round((average / 5) * 100);
+  const average = scores.reduce((sum, n) => sum + (n - 1) / 4, 0) / scores.length;
+  return Math.round(average * 100);
 }
 
 export type Coverage = { answered: number; total: number; percent: number | null };

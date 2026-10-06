@@ -3,7 +3,8 @@
 // (unit-tested, no database) and one insert keyed on `catalogueId`. Installing
 // a control the project already has changes nothing.
 import type { Prisma, PrismaClient } from "@prisma/client";
-import { slugify } from "@/lib/slugify";
+import { freeSourceSlug } from "@/lib/sourceSlug";
+import { countries as countryList, regulations as regulationList } from "@/data";
 import { packageDigest, questionsState } from "@/lib/ledger/state";
 
 export type InstallPackage = {
@@ -35,6 +36,20 @@ export type NormalisedChecklist = {
   questions: Array<{ order: number; text: string; article: string | null; category: string | null }>;
 };
 
+/** The source's address when it is an http(s) URL, else null: the pages render it as a link, so a
+ *  javascript: or data: address from a package must not reach them (the source form refuses those too). */
+function webUrl(value: unknown): string | null {
+  const url = typeof value === "string" ? value.trim() : "";
+  return /^https?:\/\//i.test(url) ? url : null;
+}
+
+/** The ids among `ids` this app knows. A catalogue may tag a control with a country or regulation this
+ *  app has no entry for; kept, it would make every later review of the checklist fail ("Unknown country"),
+ *  so it is left out (code review 2026-10-06). */
+function known(ids: unknown, list: { id: string }[]): string[] {
+  return Array.isArray(ids) ? ids.filter((id): id is string => typeof id === "string" && list.some((x) => x.id === id)) : [];
+}
+
 /** Validate and normalise a raw package into DB-shaped data. Throws on bad input. */
 export function parseInstallPackage(pkg: unknown): NormalisedChecklist {
   if (!pkg || typeof pkg !== "object") throw new Error("package must be an object");
@@ -54,14 +69,14 @@ export function parseInstallPackage(pkg: unknown): NormalisedChecklist {
   }
 
   return {
-    source: { name: req(meta.sourceName, "sourceName"), url: meta.sourceUrl?.trim() || null },
+    source: { name: req(meta.sourceName, "sourceName"), url: webUrl(meta.sourceUrl) },
     checklist: {
       catalogueId: req(meta.catalogueId, "catalogueId"),
       title: req(meta.title, "title"),
       controlTopic: req(meta.controlTopic, "controlTopic"),
       description: meta.description?.trim() || null,
-      countryIds: Array.isArray(meta.countryIds) ? meta.countryIds : [],
-      regulationIds: Array.isArray(meta.regulationIds) ? meta.regulationIds : [],
+      countryIds: known(meta.countryIds, countryList),
+      regulationIds: known(meta.regulationIds, regulationList),
       sourceUpdatedAt,
     },
     // order is regenerated 1..N so the catalogue never has to manage it.
@@ -142,11 +157,17 @@ export async function installChecklist(prisma: PrismaClient, pkg: unknown, recor
 function createChecklist(prisma: PrismaClient, data: NormalisedChecklist, digest: string | null,
                          record?: InstallRecorder): Promise<string> {
   return prisma.$transaction(async (tx) => {
-    const source = await tx.source.upsert({
-      where: { name: data.source.name },
-      update: { url: data.source.url ?? undefined },
-      create: { name: data.source.name, slug: slugify(data.source.name), url: data.source.url },
-    });
+    // An existing source of that name keeps its link (a person may have set it, and every checklist citing
+    // the source shows it); the package's link only fills one that is empty. A new source gets a slug no
+    // source has.
+    const known = await tx.source.findUnique({ where: { name: data.source.name } });
+    const source = known
+      ? (known.url || !data.source.url
+          ? known
+          : await tx.source.update({ where: { id: known.id }, data: { url: data.source.url } }))
+      : await tx.source.create({
+          data: { name: data.source.name, slug: await freeSourceSlug(tx, data.source.name), url: data.source.url },
+        });
     const created = await tx.checklist.create({
       data: {
         catalogueId: data.checklist.catalogueId,

@@ -27,9 +27,8 @@ vi.mock("@/lib/writableProjects", () => ({ writableProjects: async () => h.proje
 vi.mock("@/lib/access/callerToken", () => ({ callerToken: async () => "token" }));
 vi.mock("@/lib/projectDb", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/lib/projectDb")>()),
-  projectDbFor: async (pid: string) => ({
-    checklist: { findUnique: async () => (h.installedIn[pid] ? { id: h.installedIn[pid] } : null) },
-  }),
+  // where the control is installed is asked read-only, without opening (migrating) the database (F10)
+  installedChecklistId: async (pid: string) => h.installedIn[pid] ?? null,
   writableProject: async (pid: string) => (h.refused ? { refused: h.refused } : { prisma: { pid } }),
 }));
 vi.mock("@/lib/installChecklist", async (importOriginal) => ({

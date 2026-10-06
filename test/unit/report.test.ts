@@ -43,8 +43,8 @@ describe("buildReportPayload", () => {
 
   it("computes readiness from scored questions only", () => {
     const p = buildReportPayload(base, new Date(2026, 5, 3, 10, 0));
-    // (5 + 3) / 2 = 4 → 80%
-    expect(p.readiness).toBe(80);
+    // 5 → 100%, 3 → 50%: 75%
+    expect(p.readiness).toBe(75);
     expect(p.scoredCount).toBe(2);
     expect(p.totalQuestions).toBe(3);
   });

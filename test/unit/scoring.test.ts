@@ -26,15 +26,16 @@ describe("readinessPercent", () => {
     expect(readinessPercent([5, 5, 5])).toBe(100);
   });
 
-  it("treats all-1 as 20%", () => {
-    expect(readinessPercent([1, 1])).toBe(20);
+  it("treats all-1, Not started, as 0%", () => {
+    expect(readinessPercent([1, 1])).toBe(0);
   });
 
-  it("averages and rounds to a percentage", () => {
-    // avg 3.5 → 70%
-    expect(readinessPercent([3, 4])).toBe(70);
-    // avg 2.5 → 50%
-    expect(readinessPercent([2, 3])).toBe(50);
+  it("puts each score on a 0-100 scale, 1 = 0% and 5 = 100%, then averages and rounds", () => {
+    // (3 - 1) / 4 = 50%, (4 - 1) / 4 = 75% → 62.5 → 63%
+    expect(readinessPercent([3, 4])).toBe(63);
+    // 25% and 50% → 37.5 → 38%
+    expect(readinessPercent([2, 3])).toBe(38);
+    expect(readinessPercent([3])).toBe(50);
   });
 });
 

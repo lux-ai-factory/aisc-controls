@@ -121,6 +121,8 @@ export default function ReviewForm({
               </div>
               <div className="field">
                 <label>Question text</label>
+                {/* which question this row edits: a kept question keeps its answers; a new row has none */}
+                <input type="hidden" name={`q.${idx}.id`} value={q.id} />
                 <textarea
                   rows={2}
                   name={`q.${idx}.text`}

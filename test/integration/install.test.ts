@@ -62,4 +62,44 @@ describe.skipIf(!hasDb)("installing a control into a project", () => {
     expect(results.filter((r) => r.created)).toHaveLength(1);
     expect(await db.checklist.count({ where: { catalogueId: "raced-checklist" } })).toBe(1);
   }, 60_000);
+
+  it("a source whose slug is taken, or comes out empty, is filed under a free slug (code review 2026-10-06)", async () => {
+    const db = await prismaFor(a);
+    await db.source.create({ data: { name: "EU AI Act", slug: "eu-ai-act" } });
+    const control = (id: string, sourceName: string) => ({
+      meta: { catalogueId: id, title: id, sourceName, controlTopic: "T" }, questions: [{ text: "q" }],
+    });
+    expect((await installChecklist(db, control("slug-taken", "EU-AI-Act"))).created).toBe(true);
+    expect((await installChecklist(db, control("no-latin-1", "日本語の規則"))).created).toBe(true);
+    expect((await installChecklist(db, control("no-latin-2", "中文规则"))).created).toBe(true);
+    const slugs = Object.fromEntries((await db.source.findMany()).map((s) => [s.name, s.slug]));
+    expect(slugs["EU-AI-Act"]).toBe("eu-ai-act-2");
+    expect(slugs["日本語の規則"]).toBe("source");
+    expect(slugs["中文规则"]).toBe("source-2");
+  }, 60_000);
+});
+
+describe.skipIf(!hasDb)("an install and a source that already exists (2026-10-06)", () => {
+  let p: string;
+  beforeAll(() => { p = makeProject(); }, 60_000);
+  afterAll(() => { su(`drop database if exists ${projectDatabaseName(p)} with (force)`); });
+
+  const withSource = (catalogueId: string, sourceName: string, sourceUrl: string) => ({
+    meta: { catalogueId, title: catalogueId, sourceName, sourceUrl, controlTopic: "T" },
+    questions: [{ text: "q" }],
+  });
+
+  it("keeps the link a person set on the source, which every checklist citing it shows", async () => {
+    const db = await prismaFor(p);
+    await db.source.create({ data: { name: "Kept source", slug: "kept-source", url: "https://set.by.hand/" } });
+    expect((await installChecklist(db, withSource("keeps-url", "Kept source", "https://from.the.package/"))).created).toBe(true);
+    expect((await db.source.findUniqueOrThrow({ where: { name: "Kept source" } })).url).toBe("https://set.by.hand/");
+  }, 60_000);
+
+  it("fills the link in when the source has none", async () => {
+    const db = await prismaFor(p);
+    await db.source.create({ data: { name: "Bare source", slug: "bare-source" } });
+    await installChecklist(db, withSource("fills-url", "Bare source", "https://from.the.package/"));
+    expect((await db.source.findUniqueOrThrow({ where: { name: "Bare source" } })).url).toBe("https://from.the.package/");
+  }, 60_000);
 });

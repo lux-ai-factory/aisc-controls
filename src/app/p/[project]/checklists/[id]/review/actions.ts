@@ -64,19 +64,38 @@ export async function saveReviewedQuestions(
   };
 
   // The review and its ledger event, in one transaction. The checklist is locked first, so two reviews at
-  // once take turns and an answer cannot slip in between the reads and the delete.
+  // once take turns, and an answer cannot slip in between the reads and the delete: a save or a new
+  // submission takes FOR SHARE on the checklist before it writes answers, so it waits for this lock.
   await prisma.$transaction(async (tx) => {
     await tx.$queryRaw`SELECT id FROM controls.checklist WHERE id = ${checklistId} FOR UPDATE`;
     const was = await tx.checklist.findUniqueOrThrow({
       where: { id: checklistId },
       include: { questions: { orderBy: { order: "asc" } } },
     });
-    const same = was.questions.length === questions.length && was.questions.every((q, idx) =>
-      q.text === questions[idx].text && q.article === questions[idx].article && q.category === questions[idx].category);
+    // Each row names the question it edits (the form sends its id): a kept question keeps its id and its
+    // answers, a reworded one too; a question no row names is removed with its own answers only; a row with
+    // no id, or an id that is not one of this checklist's questions, is a new question. Replacing every
+    // question as soon as one changed cascaded every answer away, closed submissions' too (2026-10-06).
+    const existing = new Map(was.questions.map((q) => [q.id, q]));
+    const seen = new Set<string>();
+    const plan = questions.map((q, idx) => {
+      // a row without an id (a form from before the ids) is the question at its place when its text is the same
+      const atPlace = was.questions[idx];
+      const named = q.id && existing.has(q.id) ? existing.get(q.id)! : null;
+      const unnamed = !q.id && atPlace && atPlace.text === q.text ? atPlace : null;
+      const candidate = named ?? unnamed;
+      const kept = candidate && !seen.has(candidate.id) ? candidate : null;
+      if (kept) seen.add(kept.id);
+      return { row: q, order: idx + 1, kept };
+    });
+    const removedQuestions = was.questions.filter((q) => !seen.has(q.id));
+    const added = plan.filter((p) => !p.kept);
+    const reworded = plan.filter((p) => p.kept && (p.kept.text !== p.row.text || p.kept.article !== p.row.article
+                                                    || p.kept.category !== p.row.category));
+    const moved = plan.filter((p) => p.kept && p.kept.order !== p.order);
 
-    if (same) {
-      // The questions are unchanged: only the checklist's own fields change, so no question is replaced and
-      // no answer goes with it.
+    if (!removedQuestions.length && !added.length && !reworded.length && !moved.length) {
+      // The questions are unchanged: only the checklist's own fields change, and no answer is touched.
       await tx.checklist.update({ where: { id: checklistId }, data: fields });
       await emitEvent(tx, {
         action: "controls.checklist.edited",
@@ -88,38 +107,44 @@ export async function saveReviewedQuestions(
       return;
     }
 
-    // Replacing the questions removes the answers given to them (closed submissions' too; the database
-    // cascades): the event keeps the old questions and every answer removed, so the ledger holds what the
-    // review deleted. With the ledger off they are not read.
-    const removed = ledgerOn()
+    // Only the removed questions' answers go (the database cascades them); the event keeps them, so the
+    // ledger holds what the review deleted. With the ledger off they are not read.
+    const removedIds = removedQuestions.map((q) => q.id);
+    const removed = ledgerOn() && removedIds.length
       ? await tx.submissionAnswer.findMany({
-          where: { question: { checklistId } },
+          where: { questionId: { in: removedIds } },
           select: { submissionId: true, questionId: true, answer: true, score: true,
                     submission: { select: { status: true, version: true } } },
         })
       : [];
     const version = was.questionsVersion + 1;
-    await tx.question.deleteMany({ where: { checklistId } });
-    const made = await tx.question.createManyAndReturn({
-      data: questions.map((q, idx) => ({
-        checklistId,
-        order: idx + 1,
-        text: q.text,
-        article: q.article,
-        category: q.category,
-      })),
-    });
+    if (removedIds.length) await tx.question.deleteMany({ where: { id: { in: removedIds } } });
+    // (checklistId, order) is unique: the kept questions step aside first, then take their places.
+    for (const [i, p] of plan.entries()) {
+      if (p.kept) await tx.question.update({ where: { id: p.kept.id }, data: { order: -(i + 1) } });
+    }
+    for (const p of plan) {
+      if (p.kept) {
+        await tx.question.update({ where: { id: p.kept.id },
+                                   data: { order: p.order, text: p.row.text, article: p.row.article, category: p.row.category } });
+      } else {
+        await tx.question.create({ data: { checklistId, order: p.order, text: p.row.text, article: p.row.article,
+                                           category: p.row.category } });
+      }
+    }
+    const made = await tx.question.findMany({ where: { checklistId }, orderBy: { order: "asc" } });
     await tx.checklist.update({ where: { id: checklistId }, data: { ...fields, questionsVersion: version } });
     await emitEvent(tx, {
       action: "controls.checklist.questions_revised",
       itemType: "checklist",
       itemId: checklistId,
       itemVersion: version,
-      details: { version, questions: questions.length, answers_removed: removed.length,
+      details: { version, questions: questions.length, added: added.length, reworded: reworded.length,
+                 removed: removedIds.length, moved: moved.length, answers_removed: removed.length,
                  closed_answers_removed: removed.filter((a) => a.submission.status === "Closed").length },
       content: {
         before: questionsState(was.questions),
-        after: questionsState(made),                                   // with the new ids
+        after: questionsState(made),                                   // the kept ids, and the new ones
         checklist: { before: checklistState(was), after: checklistState(fields) },
         removed_answers: removed.map((a) => ({ submission: a.submissionId, status: a.submission.status,
                                                version: a.submission.version, question: a.questionId,

@@ -7,7 +7,7 @@ import { callerToken } from "@/lib/access/callerToken";
 import { platformUrl } from "@/lib/appUrls";
 import { fetchCataloguePackage } from "@/lib/cataloguePackage";
 import { installChecklist, parseInstallPackage, type InstallRecorder } from "@/lib/installChecklist";
-import { PROJECT_ID, projectDbFor, writableProject } from "@/lib/projectDb";
+import { PROJECT_ID, installedChecklistId, writableProject } from "@/lib/projectDb";
 import { writableProjects, type ProjectChoice } from "@/lib/writableProjects";
 
 export type ControlSummary = {
@@ -80,33 +80,31 @@ export async function installForCaller(
   if (refused) return { ok: false, status: 403, error: refused.error };
   const fetched = await fetchCataloguePackage(project, slug, { token: await callerToken() });
   if (!fetched.ok) return { ok: false, status: fetched.status, error: fetched.reason };
-  let result;
+  // Only a package this app cannot read is the catalogue's fault (502). The install's own errors (a
+  // database that is down, a project database that is gone: notFound) go on as they are.
   try {
-    result = await installChecklist(prisma, fetched.pkg, record);
+    parseInstallPackage(fetched.pkg);
   } catch (err) {
     return unreadable(err);
   }
+  const result = await installChecklist(prisma, fetched.pkg, record);
   const path = `/p/${encodeURIComponent(project)}/checklists/${result.checklistId}/fill?installed=${result.created ? "new" : "already"}`;
   return { ok: true, checklistId: result.checklistId, created: result.created, path };
 }
 
-/** Parsing or installing the package threw; either way it is reported as unreadable. */
+/** The package could not be parsed: the catalogue sent something this app cannot read. */
 function unreadable(err: unknown): Refusal {
   return { ok: false, status: 502, error: `The catalogue sent a control this app cannot read: ${(err as Error).message}` };
 }
 
+/** Where the control is already installed, asked of each project read-only: listing the projects
+ *  migrates none of them (F10); the install migrates the one it goes into. */
 async function installedIn(projects: ProjectChoice[], catalogueId: string): Promise<Record<string, string>> {
   const found: Record<string, string> = {};
   await Promise.all(
     projects.map(async (p) => {
-      try {
-        const prisma = await projectDbFor(p.pid, { write: false });
-        const row = await prisma.checklist.findUnique({ where: { catalogueId }, select: { id: true } });
-        if (row) found[p.pid] = row.id;
-      } catch {
-        // A project whose database cannot be read is not known to have it; the
-        // install checks again and says why if it cannot write either.
-      }
+      const id = await installedChecklistId(p.pid, catalogueId);
+      if (id) found[p.pid] = id;
     }),
   );
   return found;
