@@ -1,0 +1,12 @@
+{
+  "title": "Transparency Evaluation Tool - Article 13 AI Act",
+  "sourceName": "EUSAiR",
+  "controlTopic": "Transparency",
+  "description": "EUSAiR — European AI Sandbox compliance evaluation tools.",
+  "countryIds": [
+    "EU"
+  ],
+  "regulationIds": [
+    "ai-act"
+  ]
+}

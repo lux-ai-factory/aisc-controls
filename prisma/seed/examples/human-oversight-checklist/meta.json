@@ -1,0 +1,12 @@
+{
+  "title": "Human Oversight_Checklist",
+  "sourceName": "AESIA",
+  "controlTopic": "Human Oversight",
+  "description": "Source: https://aesia.digital.gob.es/en/guides",
+  "countryIds": [
+    "ES"
+  ],
+  "regulationIds": [
+    "ai-act"
+  ]
+}

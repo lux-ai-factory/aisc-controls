@@ -1,0 +1,12 @@
+{
+  "title": "Human Oversight Evaluation Tool - Article 14 AI Act",
+  "sourceName": "EUSAiR",
+  "controlTopic": "Human Oversight",
+  "description": "EUSAiR — European AI Sandbox compliance evaluation tools.",
+  "countryIds": [
+    "EU"
+  ],
+  "regulationIds": [
+    "ai-act"
+  ]
+}

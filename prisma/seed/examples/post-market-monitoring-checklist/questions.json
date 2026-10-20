@@ -1,0 +1,149 @@
+{
+  "questions": [
+    {
+      "text": "Have all relevant risks associated with the production environment and the use of the system been identified and thoroughly documented?",
+      "article": "Article 72",
+      "category": "MG01 - Design the post-market surveillance system considering all the highlighted risks"
+    },
+    {
+      "text": "Does the design of the surveillance system integrate specific measures that address each of the identified risks?",
+      "article": "Article 72",
+      "category": "MG01 - Design the post-market surveillance system considering all the highlighted risks"
+    },
+    {
+      "text": "Have key indicators been defined that comprehensively cover the critical aspects of the operational environment (intelligent system, infrastructure, cybersecurity, users)?",
+      "article": "Article 72",
+      "category": "MG02 - Create indicators on all aspects of the environment"
+    },
+    {
+      "text": "Is the selection of indicators based on criteria of relevance and the criticality of the environment, with due documented justification?",
+      "article": "Article 72",
+      "category": "MG02 - Create indicators on all aspects of the environment"
+    },
+    {
+      "text": "Have the effectiveness and relevance of these indicators been validated in tests in real or simulated scenarios?",
+      "article": "Article 72",
+      "category": "MG02 - Create indicators on all aspects of the environment"
+    },
+    {
+      "text": "Have normal scales or ranges of acceptable values been set for each indicator, based on historical analysis and expected scenarios?",
+      "article": "Article 72",
+      "category": "MG03 - Establish the normality scales for each indicator"
+    },
+    {
+      "text": "Is the determination of these scales adequately justified and aligned with the real operating conditions of the environment?",
+      "article": "Article 72",
+      "category": "MG03 - Establish the normality scales for each indicator"
+    },
+    {
+      "text": "Is there a mechanism in place to regularly update the scales based on the evolution of the environment or new data collected?",
+      "article": "Article 72",
+      "category": "MG03 - Establish the normality scales for each indicator"
+    },
+    {
+      "text": "Does the system incorporate a real-time alerting mechanism that continuously monitors key indicators?",
+      "article": "Article 72",
+      "category": "MG04 - Integrate a real-time alert system"
+    },
+    {
+      "text": "Have critical thresholds been set up that, when exceeded by default or excess, trigger immediate alerts to those responsible?",
+      "article": "Article 72",
+      "category": "MG04 - Integrate a real-time alert system"
+    },
+    {
+      "text": "Have tests been carried out in both simulated and real environments to ensure reliability and speed in activating alerts?",
+      "article": "Article 72",
+      "category": "MG04 - Integrate a real-time alert system"
+    },
+    {
+      "text": "Has a controlled process for implementing the surveillance system in the production environment been planned and documented?",
+      "article": "Article 72",
+      "category": "MG05 - Implement the post-marketing surveillance system in production"
+    },
+    {
+      "text": "Has the surveillance system been implemented in production?",
+      "article": "Article 72",
+      "category": "MG05 - Implement the post-marketing surveillance system in production"
+    },
+    {
+      "text": "Have tests been carried out in the production environment to validate the operability and robustness of the surveillance system?",
+      "article": "Article 72",
+      "category": "MG06 - Conduct production testing of the post-market surveillance system"
+    },
+    {
+      "text": "Is there a formal policy that contemplates both continuous monitoring and periodic reviews of the surveillance system?",
+      "article": "Article 72",
+      "category": "MG07 - Establish the policy of continuous and periodic surveillance"
+    },
+    {
+      "text": "Are the roles and responsibilities related to oversight clearly defined and supported by management?",
+      "article": "Article 72",
+      "category": "MG07 - Establish the policy of continuous and periodic surveillance"
+    },
+    {
+      "text": "Is the policy reviewed and updated on a regular basis to adapt to changes in the environment or the emergence of new risks?",
+      "article": "Article 72",
+      "category": "MG07 - Establish the policy of continuous and periodic surveillance"
+    },
+    {
+      "text": "Have potential anomalous scenarios that may compromise the performance of the surveillance system been identified and documented?",
+      "article": "Article 72",
+      "category": "MG08 - Consider anomalous scenarios that may affect the performance of the surveillance system itself"
+    },
+    {
+      "text": "Are there contingency plans and specific measures to manage each of these scenarios?",
+      "article": "Article 72",
+      "category": "MG08 - Consider anomalous scenarios that may affect the performance of the surveillance system itself"
+    },
+    {
+      "text": "Has a leader or person responsible for the management of the post-market surveillance system been appointed, with the necessary authority?",
+      "article": "Article 72",
+      "category": "MG09 - Formalize leadership and commitment to the management of the surveillance system in the organization"
+    },
+    {
+      "text": "Is the commitment of senior management in the management of the system reflected in the allocation of resources and internal communication?",
+      "article": "Article 72",
+      "category": "MG09 - Formalize leadership and commitment to the management of the surveillance system in the organization"
+    },
+    {
+      "text": "Is there documentation of the monitoring plan that evidences the leadership and coordination of surveillance activities in the organization?",
+      "article": "Article 72",
+      "category": "MG09 - Formalize leadership and commitment to the management of the surveillance system in the organization"
+    },
+    {
+      "text": "Has a specific team, duly trained, been formed to respond to alerts and incidents detected by the surveillance system?",
+      "article": "Article 72",
+      "category": "MG10 - Assign a response team"
+    },
+    {
+      "text": "Are the roles and responsibilities of the response team clearly defined and communicated?",
+      "article": "Article 72",
+      "category": "MG10 - Assign a response team"
+    },
+    {
+      "text": "Is there a formal and documented response protocol that details the actions to be taken in the event of incident detection?",
+      "article": "Article 72",
+      "category": "MG11 - Define the response protocol"
+    },
+    {
+      "text": "Has the incident report template been generated?",
+      "article": "Article 72",
+      "category": "MG11 - Define the response protocol"
+    },
+    {
+      "text": "Have training needs been identified for all staff involved in post-market surveillance?",
+      "article": "Article 72",
+      "category": "MG12 - Carry out the necessary training tasks"
+    },
+    {
+      "text": "Are there training and response drills to evaluate the effectiveness and improve the coordination of the team?",
+      "article": "Article 72",
+      "category": "MG12 - Carry out the necessary training tasks"
+    },
+    {
+      "text": "Have regular periods been defined and documented for the review of the operation and effectiveness of the surveillance system?",
+      "article": "Article 72",
+      "category": "MG13 - Establish review and follow-up periods"
+    }
+  ]
+}

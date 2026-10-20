@@ -1,0 +1,12 @@
+{
+  "title": "Robustness_Checklist",
+  "sourceName": "AESIA",
+  "controlTopic": "Robustness",
+  "description": "Source: https://aesia.digital.gob.es/en/guides",
+  "countryIds": [
+    "ES"
+  ],
+  "regulationIds": [
+    "ai-act"
+  ]
+}

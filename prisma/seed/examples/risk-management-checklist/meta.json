@@ -1,0 +1,12 @@
+{
+  "title": "Risk Management_Checklist",
+  "sourceName": "AESIA",
+  "controlTopic": "Risk Management",
+  "description": "Source: https://aesia.digital.gob.es/en/guides",
+  "countryIds": [
+    "ES"
+  ],
+  "regulationIds": [
+    "ai-act"
+  ]
+}

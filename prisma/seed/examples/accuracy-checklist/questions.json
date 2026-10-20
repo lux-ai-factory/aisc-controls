@@ -1,0 +1,204 @@
+{
+  "questions": [
+    {
+      "text": "In the selection of the accuracy metrics and their values, has the intended purpose of the system been taken into account, has it been indicated in what aspects?",
+      "article": "Article 15",
+      "category": "MG01 - Selection of accuracy metrics and their values taking into account the intended purpose of the system"
+    },
+    {
+      "text": "Has the correspondence between each selected metric and the intended use of the system been documented in a traceable way?",
+      "article": "Article 15",
+      "category": "MG01 - Selection of accuracy metrics and their values taking into account the intended purpose of the system"
+    },
+    {
+      "text": "Has it been validated that the chosen metrics correctly reflect the expected performance in the actual application contexts of the system?",
+      "article": "Article 15",
+      "category": "MG01 - Selection of accuracy metrics and their values taking into account the intended purpose of the system"
+    },
+    {
+      "text": "Is the selection of accuracy metrics motivated by the mitigation of the risks identified in the risk plan and has such motivation been documented?",
+      "article": "Article 15",
+      "category": "MG02 - Establish accuracy metrics motivated by risk mitigation"
+    },
+    {
+      "text": "Have tests been conducted to study the correlation between the risks detected and the selected metrics that specifically address them?",
+      "article": "Article 15",
+      "category": "MG02 - Establish accuracy metrics motivated by risk mitigation"
+    },
+    {
+      "text": "Have you prioritized metrics that help control the risks with the greatest impact on health, safety, and fundamental rights?",
+      "article": "Article 15",
+      "category": "MG02 - Establish accuracy metrics motivated by risk mitigation"
+    },
+    {
+      "text": "Has the impact of preprocessing the data been considered, making records of the preprocessing operations and their relationship with the results of the accuracy metrics?",
+      "article": "Article 15",
+      "category": "MG03 - Impact of preprocessing data"
+    },
+    {
+      "text": "Has the impact of improving data quality on system accuracy been considered?",
+      "article": "Article 15",
+      "category": "MG03 - Impact of preprocessing data"
+    },
+    {
+      "text": "Has the impact of feature engineering operations on system accuracy been documented and considered?",
+      "article": "Article 15",
+      "category": "MG03 - Impact of preprocessing data"
+    },
+    {
+      "text": "Have you considered the impact of overlearning on accuracy and taken to prevent it?",
+      "article": "Article 15",
+      "category": "MG04 - Impact of overlearning on accuracy"
+    },
+    {
+      "text": "Have cross-validation mechanisms or other methods been implemented to prevent overlearning?",
+      "article": "Article 15",
+      "category": "MG04 - Impact of overlearning on accuracy"
+    },
+    {
+      "text": "Have key indicators been recorded to detect signs of overlearning during training and assessment?",
+      "article": "Article 15",
+      "category": "MG04 - Impact of overlearning on accuracy"
+    },
+    {
+      "text": "Have criteria been defined for the choice of base models and their relevance in each phase of the life cycle?",
+      "article": "Article 15",
+      "category": "MG05 - Establish base models for systematic comparison"
+    },
+    {
+      "text": "Is the accuracy of the model systematically compared during the life cycle with those base models associated with it?",
+      "article": "Article 15",
+      "category": "MG05 - Establish base models for systematic comparison"
+    },
+    {
+      "text": "Does the AI result have a measure of the level of certainty or confidence of the results, which accompanies the outputs of the model?",
+      "article": "Article 15",
+      "category": "MG06 - Measure of certainty/confidence of results"
+    },
+    {
+      "text": "Is the end-user provided with understandable information about the level of certainty in critical contexts?",
+      "article": "Article 15",
+      "category": "MG06 - Measure of certainty/confidence of results"
+    },
+    {
+      "text": "Have confidence thresholds been defined that trigger specific alerts or recommendations, especially for those systems in which a malfunction of the models could lead to serious incidents?",
+      "article": "Article 15",
+      "category": "MG06 - Measure of certainty/confidence of results"
+    },
+    {
+      "text": "Have unit, stress, and integration tests been performed, cumulative during the AI system development process, in relation to accuracy measurement?",
+      "article": "Article 15",
+      "category": "MG07 - Cumulative unit, stress, and integration tests"
+    },
+    {
+      "text": "Are the results of these tests and the actions derived from the results of the tests documented on the evolution of the accuracy metrics?",
+      "article": "Article 15",
+      "category": "MG07 - Cumulative unit, stress, and integration tests"
+    },
+    {
+      "text": "Have limit or failure conditions been defined for these tests where accuracy metrics are no longer acceptable?",
+      "article": "Article 15",
+      "category": "MG07 - Cumulative unit, stress, and integration tests"
+    },
+    {
+      "text": "Is the information related to accuracy metrics updated and centralized, with access to all the actors involved?",
+      "article": "Article 15",
+      "category": "MG08 - Update and centralize information on accuracy metrics"
+    },
+    {
+      "text": "Has a system of versioning or traceability of changes in the documentation related to the metrics been implemented?",
+      "article": "Article 15",
+      "category": "MG08 - Update and centralize information on accuracy metrics"
+    },
+    {
+      "text": "Is there a formal procedure for communicating metric updates to relevant deployment managers?",
+      "article": "Article 15",
+      "category": "MG08 - Update and centralize information on accuracy metrics"
+    },
+    {
+      "text": "Has the target function of the system been selected according to the intended purpose?",
+      "article": "Article 15",
+      "category": "MG09 - Establish the objective function of the system"
+    },
+    {
+      "text": "Have the risks found in the risk analysis been taken into account and how the accuracy of the system influences them?",
+      "article": "Article 15",
+      "category": "MG09 - Establish the objective function of the system"
+    },
+    {
+      "text": "Does the system have a mechanism (graphical interface, alarm, etc.) that allows the user to track the accuracy status, to detect potential malfunctions in line with human surveillance obligations?",
+      "article": "Article 15",
+      "category": "MG10 - Mechanism for user to track accuracy status"
+    },
+    {
+      "text": "Is the operation of such a mechanism properly documented, with explanations of the metrics associated with the accuracy status that allow users to take appropriate readings of the results?",
+      "article": "Article 15",
+      "category": "MG10 - Mechanism for user to track accuracy status"
+    },
+    {
+      "text": "Have users been trained to correctly interpret accuracy tracking information in line with the literacy obligations of relevant personnel in AI systems?",
+      "article": "Article 15",
+      "category": "MG10 - Mechanism for user to track accuracy status"
+    },
+    {
+      "text": "Does the system have a mechanism that stores all the accuracies reported to the user in a history format?",
+      "article": "Article 15",
+      "category": "MG11 - Mechanism storing accuracy history"
+    },
+    {
+      "text": "Can the historical accuracy be consulted by date, version of the model or context of use?",
+      "article": "Article 15",
+      "category": "MG11 - Mechanism storing accuracy history"
+    },
+    {
+      "text": "Is the accuracy history used to improve the model or adjust the confidence threshold?",
+      "article": "Article 15",
+      "category": "MG11 - Mechanism storing accuracy history"
+    },
+    {
+      "text": "During the process of selecting the precision and objective function metric(s), have statistical significance tests been carried out to justify the choices?",
+      "article": "Article 15",
+      "category": "MG12 - Statistical significance tests"
+    },
+    {
+      "text": "Have the results of the significance tests been recorded and documented?",
+      "article": "Article 15",
+      "category": "MG12 - Statistical significance tests"
+    },
+    {
+      "text": "Have minimum significance criteria been defined to accept a metric as valid?",
+      "article": "Article 15",
+      "category": "MG12 - Statistical significance tests"
+    },
+    {
+      "text": "Have comparisons (benchmarks) been made during the design process considering the intended purpose and in relation to the model or family of models used?",
+      "article": "Article 15",
+      "category": "MG13 - Establish comparisons (benchmarks)"
+    },
+    {
+      "text": "Is the use of benchmarks justified, prioritizing those publicly recognized in those cases where relevant?",
+      "article": "Article 15",
+      "category": "MG13 - Establish comparisons (benchmarks)"
+    },
+    {
+      "text": "In the case of using benchmarks with respect to manual measurements or historical data, is the internal benchmark justified and documented, explaining its significance?",
+      "article": "Article 15",
+      "category": "MG13 - Establish comparisons (benchmarks)"
+    },
+    {
+      "text": "Is it documented how the comparisons were made and the results of the comparisons?",
+      "article": "Article 15",
+      "category": "MG13 - Establish comparisons (benchmarks)"
+    },
+    {
+      "text": "Do the system instructions for the user include all relevant accuracy levels and accuracy metrics?",
+      "article": "Article 15.3",
+      "category": "MG14 - Include accuracy levels and metrics in user instructions"
+    },
+    {
+      "text": "Are the metrics presented in an accessible and understandable format for non-technical users?",
+      "article": "Article 15.3",
+      "category": "MG14 - Include accuracy levels and metrics in user instructions"
+    }
+  ]
+}

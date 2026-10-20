@@ -1,0 +1,139 @@
+{
+  "questions": [
+    {
+      "text": "Is the system accompanied by a channel that allows the management of requests and incidents online?",
+      "article": "Article 13",
+      "category": "MG01 - Provide provider contact"
+    },
+    {
+      "text": "Does the governance model associated with the system have within its organizational structure a clear point of contact for the supplier available to those deployers?",
+      "article": "Article 13",
+      "category": "MG01 - Provide provider contact"
+    },
+    {
+      "text": "Does the system meet the transparency-related requirements that apply to the use cases supported by the system?",
+      "article": "Article 13",
+      "category": "MG02 - Catering to the business domain"
+    },
+    {
+      "text": "Does the system provide detailed information on its functional scope, also specifying the possible risks due to unforeseen uses of it?",
+      "article": "Article 13",
+      "category": "MG02 - Catering to the business domain"
+    },
+    {
+      "text": "Does the system provide information about foreseeable circumstances where it could be used for purposes other than the one for which it was designed?",
+      "article": "Article 13",
+      "category": "MG03 - Ensure the functional objective of the system"
+    },
+    {
+      "text": "Is the system accompanied by a risk plan for such uses?",
+      "article": "Article 13",
+      "category": "MG03 - Ensure the functional objective of the system"
+    },
+    {
+      "text": "Does the system have an associated procedure to be able to monitor that such uses do not occur during the operation of the system?",
+      "article": "Article 13",
+      "category": "MG03 - Ensure the functional objective of the system"
+    },
+    {
+      "text": "Does the system identify the data sources used both in its learning and in its use, also providing the meaning of these sources and data, their usefulness and the implication in their use?",
+      "article": "Article 13",
+      "category": "MG04 - Transparency about the data used"
+    },
+    {
+      "text": "Is the system accompanied by tools that allow a detailed exploratory analysis of data (EDA) of these sources, to know their essence, their associated meta-information, their critical or atypical values, etc.?",
+      "article": "Article 13",
+      "category": "MG04 - Transparency about the data used"
+    },
+    {
+      "text": "Does the system provide technical mechanisms that facilitate the understanding of its global reasoning mechanism?",
+      "article": "Article 13",
+      "category": "MG05 - Detailing from the most global to the most particular"
+    },
+    {
+      "text": "Does the system provide technical mechanisms that facilitate the understanding of its actions on a subset of information with similar characteristics to ensure the homogeneity of its operation?",
+      "article": "Article 13",
+      "category": "MG05 - Detailing from the most global to the most particular"
+    },
+    {
+      "text": "Does the system provide technical mechanisms that facilitate the understanding of each of these actions?",
+      "article": "Article 13",
+      "category": "MG05 - Detailing from the most global to the most particular"
+    },
+    {
+      "text": "Does the system provide mechanisms that facilitate the understanding of its global reasoning under a language understandable by all the actors that interact with the system throughout its life cycle?",
+      "article": "Article 13",
+      "category": "MG06 - Adapting the language"
+    },
+    {
+      "text": "Does the system provide technical mechanisms that facilitate the understanding of its actions on a subset of information with similar characteristics to ensure the homogeneity of its operation, in a language understandable by all the actors that interact with the system throughout its life cycle?",
+      "article": "Article 13",
+      "category": "MG06 - Adapting the language"
+    },
+    {
+      "text": "Does the system provide technical mechanisms that facilitate the understanding of your individual actions of the AI system in a language understandable by all actors interacting with the system throughout its entire life cycle?",
+      "article": "Article 13",
+      "category": "MG06 - Adapting the language"
+    },
+    {
+      "text": "Can the technical complexity of the AI system become a barrier to the needs of Transparency in any circumstance?",
+      "article": "Article 13",
+      "category": "MG07 - Manage complexity"
+    },
+    {
+      "text": "In case of using black box models, does the Provider provide tools that allow transparency about the system?",
+      "article": "Article 13",
+      "category": "MG07 - Manage complexity"
+    },
+    {
+      "text": "Does the system provide the metrics to be used on data, the model, the quality of the results and the performance of the AI system, specifying the minimum acceptable values for these metrics from which it is necessary to retrain the system or even stop its execution?",
+      "article": "Article 13",
+      "category": "MG08 - Use built-in metrics in the system lifecycle"
+    },
+    {
+      "text": "Is the system accompanied by a continuous integration system (MLOps) that allows identifying how changes in these metrics affect the different versions/releases of the system?",
+      "article": "Article 13",
+      "category": "MG08 - Use built-in metrics in the system lifecycle"
+    },
+    {
+      "text": "Does the system have the relevant technical mechanisms so that it does not provide sensitive information, either because, for example, it is confidential information, or because it even reveals relevant information about the supported business process, putting its operation at risk?",
+      "article": "Article 13",
+      "category": "MG09 - Apply prudence"
+    },
+    {
+      "text": "Does the system provide tools that allow identifying and analyzing correlations, as well as explicitly unwanted ones that could lead to difficulty for the transparency of the system or impact its accuracy?",
+      "article": "Article 13",
+      "category": "MG10 - Use causation, minimize correlations"
+    },
+    {
+      "text": "Does the system provide technical mechanisms that allow obtaining counterfactualities that facilitate their understanding?",
+      "article": "Article 13",
+      "category": "MG11 - Use counterfactuality"
+    },
+    {
+      "text": "Is the system accompanied by a medium (web/wiki/doc page) that collects information about it and that is aimed at facilitating transparency about its operation, being accessible among people who have some level of responsibility for it?",
+      "article": "Article 13",
+      "category": "MG12 - Enable a channel with system usage information"
+    },
+    {
+      "text": "Does the system have an associated risk management plan?",
+      "article": "Article 13",
+      "category": "MG13 - Article 09. Risk Management System"
+    },
+    {
+      "text": "Does the system comply with Human Supervision measures?",
+      "article": "Article 13",
+      "category": "MG14 - Article 14. Human oversight"
+    },
+    {
+      "text": "Does the system comply with the Precision, robustness and cybersecurity measures aimed at providing Transparency on its operation?",
+      "article": "Article 13",
+      "category": "MG15 - Article 15. Accuracy, robustness and cybersecurity"
+    },
+    {
+      "text": "Does the system comply with the measures of Registries aimed at providing Transparency on its operation?",
+      "article": "Article 13",
+      "category": "MG16 - Article 12. Records"
+    }
+  ]
+}

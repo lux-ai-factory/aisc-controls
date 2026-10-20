@@ -1,0 +1,419 @@
+{
+  "questions": [
+    {
+      "text": "Has a documentation strategy been defined from the early stages of the AI system design to provide appropriate coverage?",
+      "article": "Article 11",
+      "category": "Plan from design and conception, to commissioning, preparation of technical documentation"
+    },
+    {
+      "text": "Does the planning include clear milestones and responsible parties to guarantee the traceability of the technical documentation process?",
+      "article": "Article 11",
+      "category": "Plan from design and conception, to commissioning, preparation of technical documentation"
+    },
+    {
+      "text": "¿Existe un calendario establecido para revisar y actualizar la documentación técnica?",
+      "article": "Article 11",
+      "category": "Have a periodic update plan for updating technical documentation"
+    },
+    {
+      "text": "¿El plan de actualización tiene en cuenta cambios regulatorios, técnicos o de contexto operativo del sistema que producirán adicionales actualizaciones cuando surjan?",
+      "article": "Article 11",
+      "category": "Have a periodic update plan for updating technical documentation"
+    },
+    {
+      "text": "Is there a set schedule for reviewing and updating the technical documentation?",
+      "article": "Article 11",
+      "category": "Establish a procedure for tracking AI system changes that allows documentation to be updated continuously and consistently"
+    },
+    {
+      "text": "Does the upgrade plan take into account regulatory, technical, or operational context changes to the system that will result in additional updates when they arise?",
+      "article": "Article 11",
+      "category": "Establish a procedure for tracking AI system changes that allows documentation to be updated continuously and consistently"
+    },
+    {
+      "text": "Has an internal communication plan been designed to share the key content of the technical documentation between the different areas involved?",
+      "article": "Article 11",
+      "category": "Plan the communication to the different areas, and in a transversal way, of the content and objective of the technical documentation"
+    },
+    {
+      "text": "Has it been verified that all areas understand the purpose of the technical documentation in relation to their functions?",
+      "article": "Article 11",
+      "category": "Plan the communication to the different areas, and in a transversal way, of the content and objective of the technical documentation"
+    },
+    {
+      "text": "Has a person in charge of technical documentation been formally appointed with cross-cutting authority to coordinate its preparation and supervision?",
+      "article": "Article 11",
+      "category": "Designate a person responsible for the technical documentation"
+    },
+    {
+      "text": "Does the manager have the resources and knowledge to carry out this task effectively?",
+      "article": "Article 11",
+      "category": "Designate a person responsible for the technical documentation"
+    },
+    {
+      "text": "Have specific documentation managers been assigned for each key area (data, security, risks, etc.)?",
+      "article": "Article 11",
+      "category": "Define specific responsible persons for each relevant area"
+    },
+    {
+      "text": "Do the designated managers have the technical skills to correctly document their scope?",
+      "article": "Article 11",
+      "category": "Define specific responsible persons for each relevant area"
+    },
+    {
+      "text": "Is there a single, secure, and accessible repository to store the system's technical documentation?",
+      "article": "Article 11",
+      "category": "Implement a document management system or centralized repository for technical documentation"
+    },
+    {
+      "text": "Does the document management system allow version control, access permissions and audits?",
+      "article": "Article 11",
+      "category": "Implement a document management system or centralized repository for technical documentation"
+    },
+    {
+      "text": "Has it been verified that all managers have adequate access to the document management system?",
+      "article": "Article 11",
+      "category": "Ensure that those responsible for technical documentation have access to the document management system"
+    },
+    {
+      "text": "Are there differentiated access policies according to roles and responsibilities?",
+      "article": "Article 11",
+      "category": "Ensure that those responsible for technical documentation have access to the document management system"
+    },
+    {
+      "text": "Have security and backup measures (backups, redundancy, etc.) been implemented to preserve the integrity of the technical documentation?",
+      "article": "Article 11",
+      "category": "Ensure that the document management system has mechanisms that guarantee the conservation of documentation"
+    },
+    {
+      "text": "Are periodic audits carried out to verify that these mechanisms are active and functioning correctly?",
+      "article": "Article 11",
+      "category": "Ensure that the document management system has mechanisms that guarantee the conservation of documentation"
+    },
+    {
+      "text": "Do those responsible for the deployment have clear and direct access to the instructions and documentation necessary for their task?",
+      "article": "Article 11",
+      "category": "Ensure that instructions for those responsible for system deployment are accessible to them"
+    },
+    {
+      "text": "Is it regularly validated that this documentation is up-to-date, understandable and complete from an operational point of view?",
+      "article": "Article 11",
+      "category": "Ensure that instructions for those responsible for system deployment are accessible to them"
+    },
+    {
+      "text": "Is there a procedure for regularly updating the deployment instructions for the AI system?",
+      "article": "Article 11",
+      "category": "Keep system deployment instructions up to date"
+    },
+    {
+      "text": "Are those responsible for deployment notified when instructions have been modified or updated?",
+      "article": "Article 11",
+      "category": "Keep system deployment instructions up to date"
+    },
+    {
+      "text": "Have you defined a frequency and evaluation criteria for auditing the system's technical documentation?",
+      "article": "Article 11",
+      "category": "Plan and execute regular audits on the status of technical documentation"
+    },
+    {
+      "text": "Do the audits include verifications on the traceability, updating and accessibility of the documentation?",
+      "article": "Article 11",
+      "category": "Plan and execute regular audits on the status of technical documentation"
+    },
+    {
+      "text": "Has an identification of relevant harmonised standards (CEN/CENELEC, ISO, NIST, etc.) applicable to the system been carried out?",
+      "article": "Article 11",
+      "category": "Identify the available and relevant approved harmonised standards"
+    },
+    {
+      "text": "Is there regular monitoring of regulatory changes that may affect compliance with the system?",
+      "article": "Article 11",
+      "category": "Identify the available and relevant approved harmonised standards"
+    },
+    {
+      "text": "Has the possibility of applying recognized quality seals or certifications for the type of AI system developed been evaluated?",
+      "article": "Article 11",
+      "category": "Apply existing quality seals that are relevant to the system"
+    },
+    {
+      "text": "Is there evidence of compliance with the criteria required by these quality seals?",
+      "article": "Article 11",
+      "category": "Apply existing quality seals that are relevant to the system"
+    },
+    {
+      "text": "Does the repository used ensure the secure and durable storage of the technical documentation for at least 10 years?",
+      "article": "Article 18",
+      "category": "Keep the technical documentation in a repository for at least 10 years"
+    },
+    {
+      "text": "Does the system allow immediate access by the competent national authorities to such documentation when required?",
+      "article": "Article 18",
+      "category": "Keep the technical documentation in a repository for at least 10 years"
+    },
+    {
+      "text": "Has the quality management system documentation been included in the official conservation repository?",
+      "article": "Article 18",
+      "category": "Keep the documentation relating to the quality management system in a repository"
+    },
+    {
+      "text": "Is it guaranteed to be available for at least 10 years and to be accessible to competent authorities?",
+      "article": "Article 18",
+      "category": "Keep the documentation relating to the quality management system in a repository"
+    },
+    {
+      "text": "Are approvals and evidence of changes by notified bodies retained in a centralized, secure repository?",
+      "article": "Article 18",
+      "category": "Establish a conservation plan for documentation relating to changes approved by notified bodies"
+    },
+    {
+      "text": "Does the plan contemplate conservation for at least 10 years, guaranteeing the solidity of the solution (technological or not) that is decided to be used for such conservation?",
+      "article": "Article 18",
+      "category": "Establish a conservation plan for documentation relating to changes approved by notified bodies"
+    },
+    {
+      "text": "Does the system provide for the retention of decisions and documents issued by notified bodies?",
+      "article": "Article 18",
+      "category": "Establish a conservation plan for decisions and other documents issued by notified bodies"
+    },
+    {
+      "text": "Is its conservation and access for at least 10 years in a suitable repository ensured?",
+      "article": "Article 18",
+      "category": "Establish a conservation plan for decisions and other documents issued by notified bodies"
+    },
+    {
+      "text": "Is the declaration of conformity archived in a repository that ensures the availability and retention of the declaration of conformity for at least 10 years?",
+      "article": "Article 18",
+      "category": "Conservation plan for declaration of conformity"
+    },
+    {
+      "text": "Have regular audits of the Documentation Retention Mechanism been established?",
+      "article": "Article 18",
+      "category": "Regularly audit the retention mechanism and repository"
+    },
+    {
+      "text": "Is its correct functioning and compliance with conservation obligations checked?",
+      "article": "Article 18",
+      "category": "Regularly audit the retention mechanism and repository"
+    },
+    {
+      "text": "Does the retention mechanism ensure continued access to technical documentation even if the supplier ceases operations?",
+      "article": "Article 18",
+      "category": "Ensure that the retention mechanism and repository ensure access even if the provider disappears"
+    },
+    {
+      "text": "Have legal and technical measures been taken to ensure this future availability?",
+      "article": "Article 18",
+      "category": "Ensure that the retention mechanism and repository ensure access even if the provider disappears"
+    },
+    {
+      "text": "Does the technical documentation clearly include the purpose of the system, the name of the supplier and the corresponding version?",
+      "article": "Annex IV.1.a",
+      "category": "Minimum documentary content of purpose and version of the system"
+    },
+    {
+      "text": "Is traceability indicated between previous versions and the current version of the documented system?",
+      "article": "Annex IV.1.a",
+      "category": "Minimum documentary content of purpose and version of the system"
+    },
+    {
+      "text": "Has it been properly documented how the system communicates or can interoperate with other external systems?",
+      "article": "Annex IV.1.b",
+      "category": "Minimum documentary content of interaction with other systems"
+    },
+    {
+      "text": "Have the compatibility requirements necessary to ensure such interoperability also been documented?",
+      "article": "Annex IV.1.b",
+      "category": "Minimum documentary content of interaction with other systems"
+    },
+    {
+      "text": "Does the documentation include the versions used and the procedures required for updates or patches?",
+      "article": "Annex IV.1.c",
+      "category": "Minimum documentary content of versions and updates"
+    },
+    {
+      "text": "Is the planned upgrade policy indicated to maintain the security and functionality of the system?",
+      "article": "Annex IV.1.c",
+      "category": "Minimum documentary content of versions and updates"
+    },
+    {
+      "text": "Is the way the system is distributed and deployed (e.g., API, download, embedded software) detailed?",
+      "article": "Annex IV.1.d",
+      "category": "Minimum documentary content of forms of distribution"
+    },
+    {
+      "text": "Is clear documentation provided for each mode of commissioning of the system?",
+      "article": "Annex IV.1.d",
+      "category": "Minimum documentary content of forms of distribution"
+    },
+    {
+      "text": "Has the type of hardware required or recommended for the proper operation of the system been documented?",
+      "article": "Annex IV.1.e",
+      "category": "Minimum documentary content of hardware foreseen"
+    },
+    {
+      "text": "Are possible limitations or incompatibilities of the system specified with certain hardware (power requirements, need for refueling, etc.)?",
+      "article": "Annex IV.1.e",
+      "category": "Minimum documentary content of hardware foreseen"
+    },
+    {
+      "text": "Are visual elements such as product images, markup, or internal settings included, if applicable?",
+      "article": "Annex IV.1.f",
+      "category": "Minimum documentary content of appearance and physical integration"
+    },
+    {
+      "text": "Are the illustrations correctly associated with relevant technical descriptions within the documentation?",
+      "article": "Annex IV.1.f",
+      "category": "Minimum documentary content of appearance and physical integration"
+    },
+    {
+      "text": "Does the documentation contain a comprehensible and sufficient description of the user interface for the system operator?",
+      "article": "Annex IV.1.g",
+      "category": "Minimum documentary content of the interface for deployment"
+    },
+    {
+      "text": "Have visual examples or diagrams been included that allow the deployment manager to familiarize themselves with the interface before use?",
+      "article": "Annex IV.1.g",
+      "category": "Minimum documentary content of the interface for deployment"
+    },
+    {
+      "text": "Have the third-party tools and models used in the development of the system been documented, as well as their integration or modification?",
+      "article": "Annex IV.1.h",
+      "category": "Minimum documentary content of use and interface for deployment"
+    },
+    {
+      "text": "Have the risks arising from the use of third-party tools or models been assessed and documented?",
+      "article": "Annex IV.2.a",
+      "category": "Minimum documentary content of methods and tools used"
+    },
+    {
+      "text": "Have all the technical design elements of the system, including the algorithms used, been clearly and accessibly documented?",
+      "article": "Annex IV.2.b",
+      "category": "Minimum documentary content of design, logic and objectives"
+    },
+    {
+      "text": "Does the documentation include the technical concessions made and how they affect the performance or security of the system?",
+      "article": "Annex IV.2.b",
+      "category": "Minimum documentary content of design, logic and objectives"
+    },
+    {
+      "text": "Does the documentation include a comprehensive schematic of the system's architecture and the interaction between its components?",
+      "article": "Annex IV.2.c",
+      "category": "Minimum documentary content of architecture and resources used"
+    },
+    {
+      "text": "Are the computational resources used and the platforms used in each phase of the development cycle described?",
+      "article": "Annex IV.2.c",
+      "category": "Minimum documentary content of architecture and resources used"
+    },
+    {
+      "text": "Have the data and methodologies used in the training, testing and validation of the system been documented?",
+      "article": "Annex IV.2.d",
+      "category": "Minimum documentary content of data and training"
+    },
+    {
+      "text": "Is there evidence of data quality control and labelling and cleaning processes carried out?",
+      "article": "Annex IV.2.d",
+      "category": "Minimum documentary content of data and training"
+    },
+    {
+      "text": "Have the measures that allow human supervision of the system during its use been evaluated?",
+      "article": "Annex IV.2.e",
+      "category": "Minimum documentary content of human supervision and interpretation"
+    },
+    {
+      "text": "Does the documentation include tools or mechanisms designed for users to correctly interpret the results?",
+      "article": "Annex IV.2.e",
+      "category": "Minimum documentary content of human supervision and interpretation"
+    },
+    {
+      "text": "Have the planned changes that could be applied to the system and their technical impact been documented?",
+      "article": "Annex IV.2.f",
+      "category": "Minimum documentary content of predetermined changes and compliance"
+    },
+    {
+      "text": "Are validation procedures specified to ensure that these changes do not compromise the conformity of the system?",
+      "article": "Annex IV.2.f",
+      "category": "Minimum documentary content of predetermined changes and compliance"
+    },
+    {
+      "text": "Are the protection measures applied to guarantee the cybersecurity of the AI system detailed?",
+      "article": "Annex IV.2.h",
+      "category": "Minimum cybersecurity documentary content"
+    },
+    {
+      "text": "Does the documentation include vulnerability assessments and mechanisms for managing security incidents?",
+      "article": "Annex IV.2.h",
+      "category": "Minimum cybersecurity documentary content"
+    },
+    {
+      "text": "Are potential adverse outcomes and risks associated with the system adequately identified and documented?",
+      "article": "Annex IV.3",
+      "category": "Minimum documentary content of human operation and supervision"
+    },
+    {
+      "text": "Does the documentation include mechanisms to mitigate and monitor these risks throughout the system lifecycle?",
+      "article": "Annex IV.3",
+      "category": "Minimum documentary content of human operation and supervision"
+    },
+    {
+      "text": "Have the roles and responsibilities of the deployment manager been clearly specified with respect to monitoring the system?",
+      "article": "Annex IV.3",
+      "category": "Human oversight measures"
+    },
+    {
+      "text": "Has the training or training necessary for this profile to understand and correctly interpret the results been described?",
+      "article": "Annex IV.3",
+      "category": "Human oversight measures"
+    },
+    {
+      "text": "Does the documentation justify the established performance parameters and their alignment with the purpose of the system?",
+      "article": "Annex IV.4",
+      "category": "Minimum documentary content of performance parameters"
+    },
+    {
+      "text": "Have these parameters been validated in documented tests?",
+      "article": "Annex IV.4",
+      "category": "Minimum documentary content of performance parameters"
+    },
+    {
+      "text": "Has a risk management system been documented that complies with the provisions of Article 9 of the regulation?",
+      "article": "Annex IV.5",
+      "category": "Minimum documentary content of risk management system"
+    },
+    {
+      "text": "Is it specified how this system is updated in the face of relevant changes in the life cycle of the AI system?",
+      "article": "Annex IV.5",
+      "category": "Minimum documentary content of risk management system"
+    },
+    {
+      "text": "Does the documentation clearly specify which harmonized norms or technical standards have been followed for the development of the system?",
+      "article": "Annex IV.7",
+      "category": "Minimum documentary content of applied and alternative standards"
+    },
+    {
+      "text": "Have the solutions adopted in cases where harmonised standards have not been applied adequately justified?",
+      "article": "Annex IV.7",
+      "category": "Minimum documentary content of applied and alternative standards"
+    },
+    {
+      "text": "Has a valid copy of the system's declaration of conformity with the applicable regulation been included in the documentation?",
+      "article": "Annex IV.8",
+      "category": "Minimum documentary content of the EU declaration of conformity"
+    },
+    {
+      "text": "Is it verified that this declaration is signed by the authorised supplier and makes explicit reference to Article 47?",
+      "article": "Annex IV.8",
+      "category": "Minimum documentary content of the EU declaration of conformity"
+    },
+    {
+      "text": "Has an AI system been defined for evaluating the performance of the AI system after commercial deployment?",
+      "article": "Annex IV.9",
+      "category": "Minimum documentary content of post-market surveillance"
+    },
+    {
+      "text": "Does the post-marketing surveillance plan include mechanisms for collecting information, audits and continuous improvements?",
+      "article": "Annex IV.9",
+      "category": "Minimum documentary content of post-market surveillance"
+    }
+  ]
+}

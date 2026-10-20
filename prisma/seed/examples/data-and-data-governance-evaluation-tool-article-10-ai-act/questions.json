@@ -1,0 +1,484 @@
+{
+  "questions": [
+    {
+      "text": "What is the source of the dataset? (e.g. Proprietary vs open source, primary vs secondary source)",
+      "article": "Article 10.2.b",
+      "category": "Data Source"
+    },
+    {
+      "text": "What are the legal ramifications of the dataset source?",
+      "article": "Article 10.2.b",
+      "category": "Data Source"
+    },
+    {
+      "text": "What is the data repository? (public repository where the dataset can be found)",
+      "article": "Article 10.2.b",
+      "category": "Data Source"
+    },
+    {
+      "text": "Who owns the dataset?",
+      "article": "Article 10.2.b",
+      "category": "Data Source"
+    },
+    {
+      "text": "Which institutes/organisations are the dataset owners affiliated with? If so, are there any data (sharing) agreements that are or should be consolidated?",
+      "article": "Article 10.2.b",
+      "category": "Data Source"
+    },
+    {
+      "text": "Who has access to the data/ the datasets? (internally & externally)",
+      "article": "Article 10.2.b",
+      "category": "Data Source"
+    },
+    {
+      "text": "Was the dataset split? If so, how?",
+      "article": "Article 10.2.b",
+      "category": "Data Source"
+    },
+    {
+      "text": "Which dataset did you use for validation?",
+      "article": "Article 10.2.b",
+      "category": "Data Source"
+    },
+    {
+      "text": "What is the purpose this data will be used for (use cases)?",
+      "article": "Annex IV.1.a",
+      "category": "Purpose of Data collection"
+    },
+    {
+      "text": "Is the volume of data collected proportional to the scope of the intended purpose?",
+      "article": "Annex IV.1.a",
+      "category": "Purpose of Data collection"
+    },
+    {
+      "text": "What are suitable use cases for this dataset?",
+      "article": "Annex IV.1.a",
+      "category": "Purpose of Data collection"
+    },
+    {
+      "text": "What are unsuitable use-cases for this dataset?",
+      "article": "Annex IV.1.a",
+      "category": "Purpose of Data collection"
+    },
+    {
+      "text": "What form is this data in? (e.g. structured, unstructured, semi-structured, etc)",
+      "article": "Article 10.3 & 10.4",
+      "category": "Data Type"
+    },
+    {
+      "text": "What are the data types present in the dataset? (e.g. image, audio, text, video, etc.)",
+      "article": "Article 10.3 & 10.4",
+      "category": "Data Type"
+    },
+    {
+      "text": "Does the dataset contain any special categories of personal data under GDPR? If yes, what kind?",
+      "article": "Article 10.3 & 10.4",
+      "category": "Data Type"
+    },
+    {
+      "text": "Is the dataset free of errors?",
+      "article": "Article 10.2.h & 10.3",
+      "category": "Free of Errors and Complete"
+    },
+    {
+      "text": "Who has taken responsibility to evaluate and check the dataset? What methodologies were used?",
+      "article": "Article 10.2.h & 10.3",
+      "category": "Free of Errors and Complete"
+    },
+    {
+      "text": "Are there any inconsistencies in the dataset?",
+      "article": "Article 10.2.h & 10.3",
+      "category": "Free of Errors and Complete"
+    },
+    {
+      "text": "Are there any duplicate entries?",
+      "article": "Article 10.2.h & 10.3",
+      "category": "Free of Errors and Complete"
+    },
+    {
+      "text": "Are there any missing values?",
+      "article": "Article 10.2.h & 10.3",
+      "category": "Free of Errors and Complete"
+    },
+    {
+      "text": "Are there any significant outliers or anomalies?",
+      "article": "Article 10.2.h & 10.3",
+      "category": "Free of Errors and Complete"
+    },
+    {
+      "text": "Is there version consistency?",
+      "article": "Article 10.2.h & 10.3",
+      "category": "Free of Errors and Complete"
+    },
+    {
+      "text": "Are the units of measurement consistent throughout the dataset?",
+      "article": "Article 10.2.h & 10.3",
+      "category": "Free of Errors and Complete"
+    },
+    {
+      "text": "Are the data formats consistent throughout the dataset?",
+      "article": "Article 10.2.h & 10.3",
+      "category": "Free of Errors and Complete"
+    },
+    {
+      "text": "What demographic information and domain is the dataset aiming to represent?",
+      "article": "Article 10.2.f, 10.3 & 10.4",
+      "category": "Sufficiently Representative"
+    },
+    {
+      "text": "What is the minimum sample size to represent the population sufficiently and significantly?",
+      "article": "Article 10.2.f, 10.3 & 10.4",
+      "category": "Sufficiently Representative"
+    },
+    {
+      "text": "Is the dataset sufficiently large to capture the variability and complexity of the underlying phenomena? Is the dataset representative of the target population or domain?",
+      "article": "Article 10.2.f, 10.3 & 10.4",
+      "category": "Sufficiently Representative"
+    },
+    {
+      "text": "Are there enough samples from minority or underrepresented groups to avoid biases and ensure fairness?",
+      "article": "Article 10.2.f, 10.3 & 10.4",
+      "category": "Sufficiently Representative"
+    },
+    {
+      "text": "Does the dataset reflect temporal changes, and are those changes relevant?",
+      "article": "Article 10.2.f, 10.3 & 10.4",
+      "category": "Sufficiently Representative"
+    },
+    {
+      "text": "Is the dataset being updated to reflect evolving trends and changes?",
+      "article": "Article 10.2.f, 10.3 & 10.4",
+      "category": "Sufficiently Representative"
+    },
+    {
+      "text": "Has the dataset been checked for harmful biases?",
+      "article": "Article 10.2.f, 10.3 & 10.4",
+      "category": "Sufficiently Representative"
+    },
+    {
+      "text": "Is the dataset sufficiently representative in view of the intended purpose?",
+      "article": "Article 10.2.f, 10.3 & 10.4",
+      "category": "Sufficiently Representative"
+    },
+    {
+      "text": "Does the dataset cover the full scope of scenarios the AI system will encounter?",
+      "article": "Article 10.2.d",
+      "category": "Suitability"
+    },
+    {
+      "text": "If the dataset contained personal data, how was the data features anonymised or pseudonymised?",
+      "article": "Article 10.3 & 10.4",
+      "category": "Data Type"
+    },
+    {
+      "text": "How was this data collected? What collection methods were used?",
+      "article": "Article 10.2.b",
+      "category": "Data Collection"
+    },
+    {
+      "text": "What were the sampling methods used?",
+      "article": "Article 10.2.b",
+      "category": "Data Collection"
+    },
+    {
+      "text": "Could any of the sampling methods biased towards a particular group? If yes, is this bias necessary to fulfil the intended purpose?",
+      "article": "Article 10.2.b",
+      "category": "Data Collection"
+    },
+    {
+      "text": "What are specific and appropriate measures that address the identified bias?",
+      "article": "Article 10.2.b",
+      "category": "Data Collection"
+    },
+    {
+      "text": "When was this data collected?",
+      "article": "Article 10.2.b",
+      "category": "Data Collection"
+    },
+    {
+      "text": "What were the general criteria for including the selected data features/data points?",
+      "article": "Article 10.2.b",
+      "category": "Data Collection"
+    },
+    {
+      "text": "What data features/data points were excluded? Based on what criteria?",
+      "article": "Article 10.2.b",
+      "category": "Data Collection"
+    },
+    {
+      "text": "Has the dataset been checked for the individual data features? Are those correct and complete?",
+      "article": "Article 10.2.b",
+      "category": "Data Collection"
+    },
+    {
+      "text": "Volume: What is the volume of the data?",
+      "article": "Article 10.2.e & 10.3",
+      "category": "Data Characteristics"
+    },
+    {
+      "text": "What volume of data is necessary for the development of the AI system, keeping in mind the data minimisation principle?",
+      "article": "Article 10.2.e & 10.3",
+      "category": "Data Characteristics"
+    },
+    {
+      "text": "Velocity: What is the speed at which the data arrives?",
+      "article": "Article 10.2.e & 10.3",
+      "category": "Data Characteristics"
+    },
+    {
+      "text": "Variety: How varied are the data types and sources?",
+      "article": "Article 10.2.e & 10.3",
+      "category": "Data Characteristics"
+    },
+    {
+      "text": "What is the data sample size?",
+      "article": "Article 10.2.e & 10.3",
+      "category": "Data Characteristics"
+    },
+    {
+      "text": "Were (parts of) the dataset(s) unavailable?",
+      "article": "Article 10.2.e & 10.3",
+      "category": "Data Characteristics"
+    },
+    {
+      "text": "What data processing techniques were used? (e.g. cleaning, normalisation, standardization)",
+      "article": "Article 10.2.c, 10.2.f & 10.2.g",
+      "category": "Data Processing"
+    },
+    {
+      "text": "Was data labelling used? Was the labelling manual or automatic? What are the ground truths attached to each label?",
+      "article": "Article 10.2.c, 10.2.f & 10.2.g",
+      "category": "Data Processing"
+    },
+    {
+      "text": "Are the data processing techniques appropriate, given the intended purposes? If no, which data processing elements are inappropriate and why?",
+      "article": "Article 10.2.c, 10.2.f & 10.2.g",
+      "category": "Data Processing"
+    },
+    {
+      "text": "What data processing tools were used?",
+      "article": "Article 10.2.c, 10.2.f & 10.2.g",
+      "category": "Data Processing"
+    },
+    {
+      "text": "Are there any inconsistencies in the data processing that might affect the completeness of the dataset?",
+      "article": "Article 10.2.c, 10.2.f & 10.2.g",
+      "category": "Data Processing"
+    },
+    {
+      "text": "Have any possible biases been identified at the level of data preparation processing operations that may impact the datasets?",
+      "article": "Article 10.2.c, 10.2.f & 10.2.g",
+      "category": "Data Processing"
+    },
+    {
+      "text": "What are specific and appropriate measures that address the identified bias?",
+      "article": "Article 10.2.c, 10.2.f & 10.2.g",
+      "category": "Data Processing"
+    },
+    {
+      "text": "What are the measures of central tendency? Do these measures accurately represent the dataset?",
+      "article": "Article 10.3",
+      "category": "Statistical properties"
+    },
+    {
+      "text": "What is the variability of the dataset around the central tendency? Are there any outliers or extreme values present?",
+      "article": "Article 10.3",
+      "category": "Statistical properties"
+    },
+    {
+      "text": "Are there significant differences in statistical properties within the dataset?",
+      "article": "Article 10.3",
+      "category": "Statistical properties"
+    },
+    {
+      "text": "What are the assumptions that are formulated with respect to the information the dataset is supposed to represent and measure? Are these assumptions appropriate, reasonable and fair in light of the AI system's intended purpose?",
+      "article": "Article 10.2.d and 10.3",
+      "category": "Relevance and suitability"
+    },
+    {
+      "text": "What is the rationale behind these assumptions if you look at the people that the system is going to be used for? (ANNEX IV 2(b))",
+      "article": "Article 10.2.d and 10.3",
+      "category": "Relevance and suitability"
+    },
+    {
+      "text": "Do the relevant formulated assumptions target a specific vulnerable group? And are those formulations likely to harm that group? If so, how can the formulations be adjusted?",
+      "article": "Article 10.2.d and 10.3",
+      "category": "Relevance and suitability"
+    },
+    {
+      "text": "Will the dataset provide meaningful insights or outcomes? If so, what are they?",
+      "article": "Article 10.2.d and 10.3",
+      "category": "Relevance and suitability"
+    },
+    {
+      "text": "Are there any outlier cases that need to be included in the dataset?",
+      "article": "Article 10.2.d and 10.3",
+      "category": "Relevance and suitability"
+    },
+    {
+      "text": "Have any possible biases that are likely to affect the health of persons been identified as a result of this examination?",
+      "article": "Article 10.2.f & 10.3",
+      "category": "Data Fairness"
+    },
+    {
+      "text": "Have any possible biases that are likely to affect the safety of persons been identified as a result of this examination?",
+      "article": "Article 10.2.f & 10.3",
+      "category": "Data Fairness"
+    },
+    {
+      "text": "What is the scale of the data feature?",
+      "article": "Article 10.2.f, 10.2.h & 10.3",
+      "category": "Scale"
+    },
+    {
+      "text": "Can the scale introduce errors/bias/unfairness/unsafety into the system? If so, how?",
+      "article": "Article 10.2.f, 10.2.h & 10.3",
+      "category": "Scale"
+    },
+    {
+      "text": "What is the volume of the data feature?",
+      "article": "Article 10.2.f, 10.2.h & 10.3",
+      "category": "Volume"
+    },
+    {
+      "text": "Can the volume introduce errors/bias/unfairness/unsafety into the system? If so, how?",
+      "article": "Article 10.2.f, 10.2.h & 10.3",
+      "category": "Volume"
+    },
+    {
+      "text": "What is the distribution of the data feature? Is the distribution representative in view of the intended purpose?",
+      "article": "Article 10.2.f & 10.3",
+      "category": "Distribution"
+    },
+    {
+      "text": "Is the information provided by the data feature necessary and proportionate for the intended purpose?",
+      "article": "Article 10.2.d and 10.3",
+      "category": "Relevance"
+    },
+    {
+      "text": "What is the information in the data feature supposed to measure and represent?",
+      "article": "Article 10.2.d and 10.3",
+      "category": "Relevance"
+    },
+    {
+      "text": "What are the assumptions that are formulated with respect to the information the data feature is supposed to represent and measure?",
+      "article": "Article 10.2.d and 10.3",
+      "category": "Relevance"
+    },
+    {
+      "text": "Where do these assumptions come from? Are there any historical, social, or cultural biases that underpin these assumptions?",
+      "article": "Article 10.2.d and 10.3",
+      "category": "Relevance"
+    },
+    {
+      "text": "Are there any missing elements re. the data feature?",
+      "article": "Article 10.2.f, 10.2.h & 10.3",
+      "category": "Free of errors"
+    },
+    {
+      "text": "Does the data feature, considering its scale, provide a complete view/ representation of the group(s) it aims to represent?",
+      "article": "Article 10.2.b, 10.2.h & 10.3",
+      "category": "Complete"
+    },
+    {
+      "text": "Does the data feature, considering its volume provide a complete view/representation of the group(s) it aims to represent?",
+      "article": "Article 10.2.b, 10.2.h & 10.3",
+      "category": "Complete"
+    },
+    {
+      "text": "Is the feature a characteristic that is relevant for the geographical setting of the system",
+      "article": "Article 10.2.b, 10.2.h & 10.3",
+      "category": "Complete"
+    },
+    {
+      "text": "In light of the system's intended purpose, are there geographical elements that should be taken into account re. the data feature?",
+      "article": "Article 10.4",
+      "category": "Geographical elements"
+    },
+    {
+      "text": "In light of the system's intended purpose, are there contextual elements that should be taken into account re. the data feature?",
+      "article": "Article 10.4",
+      "category": "Contextual elements"
+    },
+    {
+      "text": "In light of the system's intended purpose, are there behavioral elements that should be taken into account re. the data feature?",
+      "article": "Article 10.4",
+      "category": "Behavioural elements"
+    },
+    {
+      "text": "In light of the system's intended purpose, are there functional elements that should be taken into account re. the data feature?",
+      "article": "Article 10.4",
+      "category": "Functional elements"
+    },
+    {
+      "text": "Are there any interactions with other features that could collectively introduce or amplify any biases or unfair outcomes that may not be apparent when considering a data feature in isolation?",
+      "article": "Article 10.2.f & 10.3",
+      "category": "Data Feature Interaction"
+    },
+    {
+      "text": "Within the context of the data point, is the information provided by the data feature necessary and proportionate for the intended purposes? Could interactions with other features negate this?",
+      "article": "Article 10.2.f & 10.3",
+      "category": "Data Feature Interaction"
+    },
+    {
+      "text": "Can the combination of multiple sensitive data features increase the discrimination potential?",
+      "article": "Article 10.2.f & 10.3",
+      "category": "Data Feature Interaction"
+    },
+    {
+      "text": "Is the data variable/feature considered personal data under the GDPR?",
+      "article": "Article 10.5",
+      "category": "Type of data feature"
+    },
+    {
+      "text": "Is the data variable/feature considered a special category of personal data under the GDPR?",
+      "article": "Article 10.5",
+      "category": "Type of data feature"
+    },
+    {
+      "text": "Is the processing of the special category personal data variable/feature strictly necessary for bias detection / correction? Could other data (including synthetic / anonymised) fulfil it?",
+      "article": "Article 10.5",
+      "category": "Type of data feature"
+    },
+    {
+      "text": "Do the processing activity records adequately document and reflect the reasons for processing this data feature, including why the alternatives are insufficient?",
+      "article": "Article 10.5",
+      "category": "Type of data feature"
+    },
+    {
+      "text": "Are there technical limitations on reuse, and privacy‑preserving measures (pseudonymisation etc.) in place? For example, has personal data been non-reversibly anonymized?",
+      "article": "Article 10.5",
+      "category": "Type of data feature"
+    },
+    {
+      "text": "Are access controls, documentation of access, and confidentiality obligations in place for this special category personal data feature?",
+      "article": "Article 10.5",
+      "category": "Type of data feature"
+    },
+    {
+      "text": "Is there a deletion or retention plan for this special category personal data feature, to ensure it is removed once bias has been corrected or the retention period has expired?",
+      "article": "Article 10.5",
+      "category": "Type of data feature"
+    },
+    {
+      "text": "Are there safeguards to ensure the data will not be transmitted or otherwise accessed by unauthorised parties?",
+      "article": "Article 10.5",
+      "category": "Type of data feature"
+    },
+    {
+      "text": "Is the data variable/feature prohibited ground for discrimination (Art. 21 European Charter of Fundamental Rights)?",
+      "article": "Article 10.5",
+      "category": "Type of data feature"
+    },
+    {
+      "text": "Could the data variable/feature infringe upon other equality, non-discrimination, fair treatment rights?",
+      "article": "Article 10.5",
+      "category": "Type of data feature"
+    },
+    {
+      "text": "Could the data variable/feature be a proxy for a prohibited ground of discrimination, or lead to infringement of other equality, non-discrimination, and fair treatment rights? (Art. 21 European Charter of Fundamental Rights)",
+      "article": "Article 10.5",
+      "category": "Type of data feature"
+    }
+  ]
+}

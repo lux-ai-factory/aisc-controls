@@ -1,0 +1,124 @@
+{
+  "questions": [
+    {
+      "text": "Has a risk management system associated with high-risk AI systems been defined throughout the entire lifecycle?",
+      "article": "Article 9",
+      "category": "MG01 - Analysis and definition of the internal and external context"
+    },
+    {
+      "text": "Have elements of the organization's internal and external context around high-risk AI systems been identified and documented?",
+      "article": "Article 9",
+      "category": "MG01 - Analysis and definition of the internal and external context"
+    },
+    {
+      "text": "Has leadership and commitment to risk management been formalized in the organization (publication of policies, procedures, ensuring that there are sufficient resources, assignment of authority, responsibility and accountability, etc.)?",
+      "article": "Article 9",
+      "category": "MG01 - Analysis and definition of the internal and external context"
+    },
+    {
+      "text": "Has risk appetite been defined and constantly updated (in relation to the risk that the AI system may pose to people's health, safety and fundamental rights)?",
+      "article": "Article 9",
+      "category": "MG02 - Definition and updating of risk appetite"
+    },
+    {
+      "text": "Have all components of the AI system (key actors, data, tools, etc.) been identified, inventoried, and documented?",
+      "article": "Article 9",
+      "category": "MG03 - Inventory of AI system components"
+    },
+    {
+      "text": "Have all risks associated with AI systems (especially those risks that may affect the health, safety and fundamental rights of individuals) been identified, inventoried and documented?",
+      "article": "Article 9",
+      "category": "MG04 - Identification of the main sources of risk"
+    },
+    {
+      "text": "Have all the identified risks been analysed and evaluated (assigning a probability of occurrence and an impact)?",
+      "article": "Article 9",
+      "category": "MG05 - Assessment of sources of risk"
+    },
+    {
+      "text": "Have the possible risks related to the use or impact of the AI system on children under 18 years of age been taken into account (identification of these risks, analysis, evaluation and implementation of treatment measures)?",
+      "article": "Article 9",
+      "category": "MG06 - Identification and analysis of the impact of the effects and their probability of occurrence"
+    },
+    {
+      "text": "Have mechanisms been defined and implemented for communication and consultation around the risk management system of high-risk AI systems?",
+      "article": "Article 9",
+      "category": "MG07 - Reporting of the results"
+    },
+    {
+      "text": "Have the potential risks related to the post-market surveillance system (identification of these risks, analysis, evaluation and implementation of treatment measures) been taken into account?",
+      "article": "Article 9",
+      "category": "MG08 - Analysis of data collected post-marketing"
+    },
+    {
+      "text": "Have risk treatment options been defined and prioritized based on efficacy and feasibility criteria?",
+      "article": "Article 9",
+      "category": "MG09 - Identification of new possible risks"
+    },
+    {
+      "text": "Have appropriate mitigation measures and safeguards been assessed for each identified risk?",
+      "article": "Article 9",
+      "category": "MG09 - Identification of new possible risks"
+    },
+    {
+      "text": "Have all risk management options identified, analysed and assessed been identified?",
+      "article": "Article 9",
+      "category": "MG10 - Definition and selection of risk management options"
+    },
+    {
+      "text": "If defined, has the risk management system associated with high-risk AI systems been implemented throughout the lifecycle?",
+      "article": "Article 9",
+      "category": "MG11 - Plan and implement risk treatment"
+    },
+    {
+      "text": "If implemented, is the risk management system associated with high-risk AI systems maintained continuously throughout the lifecycle?",
+      "article": "Article 9",
+      "category": "MG11 - Plan and implement risk treatment"
+    },
+    {
+      "text": "Have the implementation of the defined treatment measures been planned?",
+      "article": "Article 9",
+      "category": "MG11 - Plan and implement risk treatment"
+    },
+    {
+      "text": "Has a monitoring and continuous improvement process been defined and implemented around the risk management system of high-risk AI systems?",
+      "article": "Article 9",
+      "category": "MG12 - Evaluate the effectiveness of each treatment"
+    },
+    {
+      "text": "Are test procedures in place to ensure that the system serves its purpose (intended purpose)?",
+      "article": "Article 9",
+      "category": "MG12 - Evaluate the effectiveness of each treatment"
+    },
+    {
+      "text": "Are testing procedures in place to ensure that the requirements set out for HRAIS are met?",
+      "article": "Article 9",
+      "category": "MG12 - Evaluate the effectiveness of each treatment"
+    },
+    {
+      "text": "Have real-world tests been defined and implemented?",
+      "article": "Article 9",
+      "category": "MG12 - Evaluate the effectiveness of each treatment"
+    },
+    {
+      "text": "Have the risk management system review and monitoring periods been established?",
+      "article": "Article 9",
+      "category": "MG13 - Determine if the residual risk is acceptable"
+    },
+    {
+      "text": "If defined, has the risk management system associated with high-risk AI systems been documented throughout the lifecycle?",
+      "article": "Article 9",
+      "category": "MG14 - Document and report residual risks"
+    },
+    {
+      "text": "Have the residual risks after the implementation of the treatment measures been documented for communication to those responsible for deploying the AI system?",
+      "article": "Article 9",
+      "category": "MG14 - Document and report residual risks"
+    },
+    {
+      "text": "Has the entire risk management process been documented?",
+      "article": "Article 9",
+      "category": "MG14 - Document and report residual risks"
+    }
+  ]
+}

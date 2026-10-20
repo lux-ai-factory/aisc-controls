@@ -1,0 +1,159 @@
+{
+  "questions": [
+    {
+      "text": "Has a process of analysis of the needs that motivate the generation of records and establish the information to be collected been developed?",
+      "article": "Article 12",
+      "category": "MG01 - Identification, analysis and evaluation of needs that motivate the generation of records and information to be included"
+    },
+    {
+      "text": "Has a needs assessment process been developed that motivates the generation of records and establishes the information to be collected?",
+      "article": "Article 12",
+      "category": "MG01 - Identification, analysis and evaluation of needs that motivate the generation of records and information to be included"
+    },
+    {
+      "text": "Have the needs that motivate the generation of the records been adequately identified?",
+      "article": "Article 12",
+      "category": "MG01 - Identification, analysis and evaluation of needs that motivate the generation of records and information to be included"
+    },
+    {
+      "text": "Have the specific objectives of the registry been identified?",
+      "article": "Article 12",
+      "category": "MG02 - Identification of specific registration objectives"
+    },
+    {
+      "text": "Has it been clearly identified what is expected to be achieved with its collection?",
+      "article": "Article 12",
+      "category": "MG02 - Identification of specific registration objectives"
+    },
+    {
+      "text": "Has the scope of the record been defined, understood as the information to be recorded and the time for which the record will be maintained?",
+      "article": "Article 12.3",
+      "category": "MG03 - Identify the scope of the records, with the information to be recorded and the time to be kept in the system"
+    },
+    {
+      "text": "Have the retention and deletion periods of the records been determined taking into account the defined information disposition needs and applicable regulations, such as data protection regulations (GDPR)?",
+      "article": "Article 12.3",
+      "category": "MG03 - Identify the scope of the records, with the information to be recorded and the time to be kept in the system"
+    },
+    {
+      "text": "Have the pre-existing special needs of the specific regulations aimed at the financial sector that need to be met been taken into account?",
+      "article": "Article 12.3",
+      "category": "MG03 - Identify the scope of the records, with the information to be recorded and the time to be kept in the system"
+    },
+    {
+      "text": "Have the necessary records been generated to ensure that the information determined in the process of implementing the risk management system is collected?",
+      "article": "Article 9",
+      "category": "MG04 - Identify the records necessary to evidence that the information determined in Article 9: Risk management systems is collected"
+    },
+    {
+      "text": "Have the controls of the risk management system been taken into account with its associated evidence in order to obtain records where appropriate?",
+      "article": "Article 9",
+      "category": "MG04 - Identify the records necessary to evidence that the information determined in Article 9: Risk management systems is collected"
+    },
+    {
+      "text": "Have the necessary records been generated to ensure that the information determined in the process of implementing the post-market surveillance system is collected?",
+      "article": "Article 72",
+      "category": "MG05 - Identify the records necessary to evidence that the information determined in Article 72 necessary for the post-market surveillance system is collected"
+    },
+    {
+      "text": "Have the frequencies with which these records should be collected been properly documented and implemented?",
+      "article": "Article 72",
+      "category": "MG05 - Identify the records necessary to evidence that the information determined in Article 72 necessary for the post-market surveillance system is collected"
+    },
+    {
+      "text": "Have the necessary records been generated to ensure that the information determined to implement the defined human oversight mechanisms is collected?",
+      "article": "Article 14",
+      "category": "MG06 - Identify the records necessary to evidence that the information determined in Article 14 necessary for an effective human oversight is collected"
+    },
+    {
+      "text": "Has the need for these records been adequately documented and how to interpret their results for their contribution to the human oversight process?",
+      "article": "Article 14",
+      "category": "MG06 - Identify the records necessary to evidence that the information determined in Article 14 necessary for an effective human oversight is collected"
+    },
+    {
+      "text": "Has a log capture process been implemented to ensure that information is collected according to the criteria set out in the design phase?",
+      "article": "Article 19",
+      "category": "MG07 - Implement the record capture process"
+    },
+    {
+      "text": "Have tests been carried out to validate these procedures?",
+      "article": "Article 19",
+      "category": "MG07 - Implement the record capture process"
+    },
+    {
+      "text": "Have stress tests been carried out on the record capture system to ensure its smooth operation even in times of high demand?",
+      "article": "Article 19",
+      "category": "MG07 - Implement the record capture process"
+    },
+    {
+      "text": "Have the appropriate storage media and protective materials been selected and implemented to ensure the security and availability of the records?",
+      "article": "Article 19",
+      "category": "MG08 - Implement storage media to ensure availability of records"
+    },
+    {
+      "text": "Have storage media monitoring and review periods been established?",
+      "article": "Article 19",
+      "category": "MG08 - Implement storage media to ensure availability of records"
+    },
+    {
+      "text": "Have appropriate cybersecurity measures been selected and implemented to ensure the security and availability of records?",
+      "article": "Article 19",
+      "category": "MG09 - Implement security and cybersecurity means to ensure the protection of records"
+    },
+    {
+      "text": "Have periods of supervision and review of the cybersecurity and access control measures implemented been established?",
+      "article": "Article 19",
+      "category": "MG09 - Implement security and cybersecurity means to ensure the protection of records"
+    },
+    {
+      "text": "Are training and training processes developed for the personnel involved in the management of the registries?",
+      "article": "Article 12.3.d",
+      "category": "MG10 - Development of training and training of personnel involved in the management of registrations"
+    },
+    {
+      "text": "Are these training needs contemplated in the response to Article 4 of Literacy around AI?",
+      "article": "Article 4",
+      "category": "MG10 - Development of training and training of personnel involved in the management of registrations"
+    },
+    {
+      "text": "Has the impact of other applicable regulations or laws that may affect the registration process been analyzed and evaluated?",
+      "article": "Article 19",
+      "category": "MG11 - Analysis of the impact of other applicable regulations or laws such as GDPR data protection regulations that need to be considered in the generation of logs"
+    },
+    {
+      "text": "Specifically, has the impact of data protection regulations (GDPR) on the log generation process been analyzed and evaluated?",
+      "article": "Article 19",
+      "category": "MG11 - Analysis of the impact of other applicable regulations or laws such as GDPR data protection regulations that need to be considered in the generation of logs"
+    },
+    {
+      "text": "Have monitoring periods been established for storage media and the cybersecurity and access control measures implemented?",
+      "article": "Article 19",
+      "category": "MG12 - Establish periods of supervision and review of storage media and its cybersecurity"
+    },
+    {
+      "text": "Have review periods been established for the storage media and the cybersecurity and access control measures implemented?",
+      "article": "Article 19",
+      "category": "MG12 - Establish periods of supervision and review of storage media and its cybersecurity"
+    },
+    {
+      "text": "Have monitoring periods been established for storage media and the cybersecurity and access control measures implemented?",
+      "article": "Article 19",
+      "category": "MG13 - Establish a process for monitoring and continuous improvement of the records management system"
+    },
+    {
+      "text": "Have review periods been established for the storage media and the cybersecurity and access control measures implemented?",
+      "article": "Article 19",
+      "category": "MG13 - Establish a process for monitoring and continuous improvement of the records management system"
+    },
+    {
+      "text": "Has a process for monitoring and continuous improvement of the records management system been established?",
+      "article": "Article 19",
+      "category": "MG14 - Implement a process that ensures proper technical documentation of the records management system"
+    },
+    {
+      "text": "In the established monitoring and continuous improvement process, are possible errors monitored and identified and the data recorded for the implementation and continuous improvement of the proposed solutions evaluated?",
+      "article": "Article 19",
+      "category": "MG14 - Implement a process that ensures proper technical documentation of the records management system"
+    }
+  ]
+}
