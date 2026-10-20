@@ -1,0 +1,32 @@
+import type { Metadata } from "next";
+import "./globals.css";
+
+export const metadata: Metadata = {
+  title: "Checklists",
+  description: "Compliance checklists: install, answer, track.",
+};
+
+// Every page reads from the database per request, so render dynamically. This
+// also keeps `next build` (run for the Docker image) from prerendering pages,
+// and so reaching for the database, at build time.
+export const dynamic = "force-dynamic";
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=MuseoModerno:wght@500;600;700&family=Raleway:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+          rel="stylesheet"
+        />
+      </head>
+      <body>
+        {/* The header is rendered by each page's own layout, because inside a
+            project its links stay inside it and lead back to that project. */}
+        {children}
+      </body>
+    </html>
+  );
+}
