@@ -1,0 +1,48 @@
+# Standalone development only: Postgres and the PDF renderer for `npm run dev`.
+# The aisc stack does not use this file. The project name fixes the container
+# and volume names (aisc-controls-db-1, ...) whatever the directory is called.
+name: aisc-controls
+
+services:
+  db:
+    image: postgres:16-alpine
+    # No container_name: Compose names it per project (aisc-controls-db-1), so it
+    # never collides with a container of the aisc stack.
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: aisc
+      POSTGRES_PASSWORD: aisc
+      POSTGRES_DB: aisc
+    ports:
+      # Host port 5444, so it never clashes with a Postgres on 5432 (such as the
+      # aisc stack's). The container side stays 5432.
+      - "5444:5432"
+    volumes:
+      # A named volume: the data survives `docker compose down`, a recreated
+      # container and a reboot. Only `docker compose down -v` deletes it.
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aisc -d aisc"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  # The PDF report renderer behind a submission's "Download report (PDF)": the
+  # app POSTs report JSON to /render/pdf on host port 8005. The app does not
+  # depend on it: when it is down, only report downloads fail. It refuses every
+  # call (503) unless CONTROLS_WEB_TO_PDF_TOKEN is set in its environment, which
+  # this file does not do.
+  pdf:
+    build: ./services/pdf_renderer
+    restart: unless-stopped
+    ports:
+      # Matches the PDF_RENDERER_URL default.
+      - "8005:8005"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8005/health')"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  postgres-data:

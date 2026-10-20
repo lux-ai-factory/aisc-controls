@@ -1,0 +1,33 @@
+# The tests that need nothing outside this repository. The integration tests run in the aisc
+# repository's CI (scripts/lib/controls-tests.sh), which has the project template they build from.
+name: ci
+
+on:
+  push:
+    branches: [feat/unified-modules, main, master]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - run: npx tsc --noEmit -p .
+      - run: npx vitest run test/unit test/vendor
+
+  pdf-renderer:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - working-directory: services/pdf_renderer
+        run: >-
+          uv run --no-project --python 3.12 --with-requirements requirements.txt
+          --with pytest --with httpx python -m pytest -q -p no:cacheprovider -p no:warnings
