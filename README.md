@@ -109,7 +109,8 @@ stack, and keeps port 443 answering on an https install.
 Then open <http://localhost:8100>, sign in, open a project and its step 4
 controls page: the app is at `http://localhost:8100/controls/p/{project}/checklists`.
 To rebuild only this app after a change, run `uv run scripts/aisc.py secrets` in the aisc folder. It prints
-this install's exact compose command. Add `up -d --build controls-migrate controls-web` to it.
+this install's exact compose command, which ends in `up -d`. Append `--build controls-migrate controls-web`
+to it.
 
 ### Standalone, for development
 
