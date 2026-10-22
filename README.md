@@ -97,18 +97,19 @@ this repo:
 | `controls-pdf` | The PDF renderer (`services/pdf_renderer/Dockerfile`), internal only. |
 
 Both app services read `env.development` from this repo; the aisc compose file
-adds the rest (platform, launcher, ledger, token). From the aisc repo root:
+adds the rest (platform, launcher, ledger, token). From the aisc folder:
 
 ```bash
-./scripts/secrets.sh      # once: writes env.secrets and env.runtime (CONTROLS_WEB_TO_PDF_TOKEN among them)
-docker compose -p aisc --env-file env.runtime -f docker-compose.plugin_downloader.yml \
-  -f docker-compose-infra.development.yml -f docker-compose.development.yml up -d --build
+uv run scripts/aisc.py start
 ```
+
+It makes the secrets if they are missing (`CONTROLS_WEB_TO_PDF_TOKEN` among them), builds and starts the
+stack, and keeps port 443 answering on an https install.
 
 Then open <http://localhost:8100>, sign in, open a project and its step 4
 controls page: the app is at `http://localhost:8100/controls/p/{project}/checklists`.
-To rebuild only this app after a change:
-`docker compose -p aisc --env-file env.runtime -f docker-compose-infra.development.yml -f docker-compose.development.yml up -d --build controls-migrate controls-web`.
+To rebuild only this app after a change, run `uv run scripts/aisc.py secrets` in the aisc folder. It prints
+this install's exact compose command. Add `up -d --build controls-migrate controls-web` to it.
 
 ### Standalone, for development
 
