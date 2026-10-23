@@ -3,7 +3,7 @@ import { describe, it, expect, afterAll, vi } from "vitest";
 // Controls' steps of the aisc pipeline chain (the aisc repo's scripts/test-pipeline-chain.sh).
 // Skipped unless CHAIN_JSON names the chain's shared state. Only PROJECT_DATABASE_URL
 // (the throwaway server, set by the driver) and CHAIN_* are used: never
-// `docker exec postgres`.
+// the stack's postgres container.
 //   chain_step5: a control installed from the catalogue into the project's database.
 //   chain_step7: an answer saved while v2 is the latest carries v2.
 
