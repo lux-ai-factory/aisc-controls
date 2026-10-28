@@ -82,7 +82,7 @@ export async function GET(
   } catch (err) {
     return new Response(
       `PDF renderer unreachable at ${RENDERER_URL}. ` +
-        "Start it with `docker compose up -d pdf`.\n\n" +
+        "Start it with `docker compose up -d pdf` (in AISC the service is controls-pdf).\n\n" +
         String(err),
       { status: 502, headers: { "content-type": "text/plain; charset=utf-8" } },
     );

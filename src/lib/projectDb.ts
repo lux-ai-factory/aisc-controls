@@ -257,7 +257,7 @@ export async function prismaFor(
   return entry.client;
 }
 
-/** Every open client, disconnected. For tests and shutdown. */
+/** Every open client, disconnected. For tests. */
 export async function closeProjectDatabases(): Promise<void> {
   const entries = [...open.values()];
   open.clear();
