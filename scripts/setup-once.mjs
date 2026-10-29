@@ -14,6 +14,7 @@ import {
 } from "node:fs";
 import { spawnSync } from "node:child_process";
 import path from "node:path";
+import { ensureWebToPdfToken } from "./setup-env-lib.mjs";
 
 const MARKER_DIR = path.resolve("node_modules/.cache/aisc-controls");
 const MARKER = path.join(MARKER_DIR, "setup-done");
@@ -28,7 +29,9 @@ if (process.env.AISC_PLATFORM === "1") {
   process.exit(0);
 }
 
-// 1. Make .env from .env.example if it is missing.
+// 1. Make .env from .env.example if it is missing, and give it a random
+// CONTROLS_WEB_TO_PDF_TOKEN when it has none: the app and the bundled PDF
+// renderer both read it from .env, so report PDFs work standalone.
 const envFile = path.resolve(".env");
 const envExample = path.resolve(".env.example");
 let envWasCreated = false;
@@ -36,6 +39,9 @@ if (!existsSync(envFile) && existsSync(envExample)) {
   copyFileSync(envExample, envFile);
   envWasCreated = true;
   console.log("[setup] created .env from .env.example");
+}
+if (ensureWebToPdfToken(envFile)) {
+  console.log("[setup] wrote a random CONTROLS_WEB_TO_PDF_TOKEN into .env");
 }
 
 // 2. Load .env so PROJECT_DATABASE_URL is visible here and to spawned commands.

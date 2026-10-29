@@ -30,11 +30,13 @@ services:
   # The PDF report renderer behind a submission's "Download report (PDF)": the
   # app POSTs report JSON to /render/pdf on host port 8005. The app does not
   # depend on it: when it is down, only report downloads fail. It refuses every
-  # call (503) unless CONTROLS_WEB_TO_PDF_TOKEN is set in its environment, which
-  # this file does not do.
+  # call (503) without CONTROLS_WEB_TO_PDF_TOKEN; it gets the one in .env, which
+  # the app reads too and scripts/setup-once.mjs writes when there is none.
   pdf:
     build: ./services/pdf_renderer
     restart: unless-stopped
+    environment:
+      CONTROLS_WEB_TO_PDF_TOKEN: ${CONTROLS_WEB_TO_PDF_TOKEN:-}
     ports:
       # Matches the PDF_RENDERER_URL default.
       - "8005:8005"
