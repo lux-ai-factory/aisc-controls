@@ -1,10 +1,20 @@
 # Example checklists
 
-Seventeen checklists (AESIA and EUSAiR), with their sources in
-`../sources.json`. `prisma db seed` (`prisma/seed.ts`) loads them into the
-database `DATABASE_URL` names. Nothing runs it automatically: in AISC a
-project's checklists are the ones installed into it from the catalogue, so
-these are for trying the app on one project database.
+Seventeen example checklists, twelve from AESIA and five from EUSAiR, with
+their sources in `../sources.json`. They are for trying the controls app on one
+project database. In AISC a project's checklists are the ones installed into it
+from the project's catalogue in step 3 (Choose tests and checklists), so nothing
+loads these examples automatically.
+
+`npm run db:seed` (`prisma db seed`, which runs `prisma/seed.ts`) loads them into
+the database that `DATABASE_URL` names:
+
+```bash
+DATABASE_URL='postgresql://.../project_<hex>?schema=controls' npm run db:seed
+```
+
+It first adds or updates the sources listed in `../sources.json`, then creates
+one checklist per folder here, with its questions in file order.
 
 ## Layout
 
@@ -17,40 +27,47 @@ prisma/seed/examples/
     questions.json
 ```
 
+A folder without both files is skipped.
+
 `meta.json`:
 
 ```json
 {
-  "title": "AEPD: RGPD operational controls",
-  "sourceName": "AEPD",
-  "controlTopic": "Data protection",
-  "description": "Spanish DPA reference checklist for RGPD operational controls.",
+  "title": "Accuracy_Checklist",
+  "sourceName": "AESIA",
+  "controlTopic": "Accuracy",
+  "description": "Source: https://aesia.digital.gob.es/en/guides",
   "countryIds": ["ES"],
-  "regulationIds": ["GDPR"]
+  "regulationIds": ["ai-act"]
 }
 ```
 
 `sourceName` names the source (from `../sources.json`, or made by the seed if
-it is not there yet); `sourceUpdatedAt` (YYYY-MM-DD) is optional.
+it is not there yet); `description` and `sourceUpdatedAt` (YYYY-MM-DD) are
+optional.
 
 `questions.json`:
 
 ```json
 {
   "questions": [
-    { "text": "...", "article": "Art. 5.1.a", "category": "Lawfulness" }
+    { "text": "...", "article": "Article 15", "category": "MG01 - Selection of accuracy metrics" }
   ]
 }
 ```
+
+`article` and `category` are optional.
 
 ## Exporting a checklist into a new example
 
 ```bash
 DATABASE_URL='postgresql://.../project_<hex>?schema=controls' \
-  npx tsx prisma/seed/export.ts <checklistId> [folderSlug]
+  npm run examples:export -- <checklistId> [folderSlug]
 ```
 
-It writes `meta.json` and `questions.json` into a new folder here.
+This runs `prisma/seed/export.ts`. It writes `meta.json` and `questions.json`
+into a folder here, named `folderSlug` or, by default, after the checklist's
+title.
 
 ## Seeding again
 

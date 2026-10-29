@@ -1,29 +1,38 @@
 # AISC Controls
 
-The controls checklists of AISC, the AI Assessment Sandbox Configurator. AISC
-walks a project through four steps: 1 Qualify the AI system, 2 Set control
-objectives, 3 Choose tests and checklists, 4 Collect evidence. This app is
-"Answer checklists" in step 4. A project installs compliance checklists (controls)
-from the AISC catalogue, answers each one against its AI system with a 1 to 5
-maturity score per question, and keeps the answered sheets (submissions)
-through a Draft, Closed, reopened-as-new-version lifecycle, with a PDF report
-for each. The results dashboard and the report (both in step 4) read the
-answers from the project's database.
+The checklists of AISC, the AI Assessment Sandbox Configurator: the compose
+services `controls-web` and `controls-pdf`. AISC walks a project through four
+steps: 1 Qualify the AI system, 2 Set control objectives, 3 Choose tests and
+checklists, 4 Collect evidence. A checklist is installed in step 3, from the
+project's catalogue; this app is where people answer it, the "Answer
+checklists" column of step 4.
 
-An answered checklist shows two figures: **coverage**, the questions answered out
-of all of them, and **maturity**, how far the scored ones are: each score on a
-0-100% scale, 1 "Not started" at 0% and 5 "Optimized" at 100% ((score - 1) / 4),
-averaged and rounded half up.
+Each question is answered with a score from 1 to 5 ("Not started" to
+"Optimized"), with a written answer, or both; it counts as answered when it
+has either. A set of answers (a submission) is a draft until it is closed;
+reopening a closed submission makes a new version, and the closed one stays as
+it was. Each submission can be downloaded as a PDF report. The platform (the
+Collect evidence tiles and the Evidence map), the results dashboard and the
+report read the answers from the project's database.
+
+An answered checklist shows two figures: **coverage**, the questions answered
+out of all of them, and **readiness** (labelled Maturity on this app's pages),
+the mean of the scored questions on a 0-100% scale: each score counts
+(score - 1) / 4, so 1 is 0% and 5 is 100%, averaged and rounded half up
+(`src/lib/scoring.ts`).
+
+What step 4 looks like as a whole is in the aisc repo's
+`docs/appendices/4-collect-evidence.md`; how the services fit together is in
+the aisc repo's `docs/architecture.md`.
 
 ## How it works
 
 - **Next.js 15 app** (`src/`), served under `/controls` behind the AISC
   gateway (Caddy + oauth2-proxy + Keycloak). Every project page lives under
-  `/p/{project}/...`: the checklist library, the fill and review pages, and
-  the submissions with their PDF report. A left menu leads to Available
-  checklists, Compiled checklists and (at its bottom) Archived; `/p/{project}`
-  itself opens Installed checklists. There are no Sources pages and no
-  statistics home page.
+  `/p/{project}/...`: the installed checklists, the fill and review pages, and
+  the submissions with their PDF report. A left menu leads to Installed
+  checklists, Submissions and (at its bottom) Archived submissions;
+  `/p/{project}` itself opens Installed checklists.
 - **One Postgres database per project.** The platform service makes a database
   `project_<project id without hyphens>` when a project is created. This app
   keeps its tables in that database's `controls` schema (Prisma, connected as
@@ -42,9 +51,9 @@ averaged and rounded half up.
   was given. If the platform does not answer, the page answers 503: it never
   fails open. The client is `src/vendor/aisc-access/`, a copy of the aisc repo's
   `shared/access-ts/` that a test keeps identical.
-- **Installing a checklist.** A checklist is installed from the project's own
-  catalogue (public, or its private copy), opened from the launcher's project
-  page: the catalogue's Install button calls this app's `/api/install` from the
+- **Installing a checklist.** A checklist is installed in step 3 from the
+  project's own catalogue (public, or its private copy), opened from the
+  launcher's project page: the catalogue's Install button calls this app's `/api/install` from the
   browser, only from `CATALOGUE_ORIGIN` or the launcher's origin (`LAUNCHER_URL`),
   where the stack serves the catalogue's pages. This app then asks the platform
   for the control's package (`GET {PLATFORM_URL}/projects/{pid}/catalogue/control/{slug}/export`,
@@ -60,7 +69,7 @@ averaged and rounded half up.
   This app has no catalogue page of its own.
 - **AI card version.** Each answer is stamped with the AI card version that
   was the latest when it was given (`GET {PLATFORM_URL}/projects/{pid}/system-versions/latest`).
-- **Ledger.** With `LEDGER_MODE` on, every write records an event with the
+- **The ledger.** With `LEDGER_MODE` on (the stack sets `record`), every write records an event with the
   project database's `ledger.emit()` in the same transaction as the change;
   the platform relays it to the immudb ledger. An event cites the gateway's
   `X-AISC-Request-Id` only when the request came through the gateway: it
@@ -97,7 +106,8 @@ this repo:
 | `controls-pdf` | The PDF renderer (`services/pdf_renderer/Dockerfile`), internal only. |
 
 Both app services read `env.development` from this repo; the aisc compose file
-adds the rest (platform, launcher, ledger, token). From the aisc folder:
+adds the rest (the database password, platform, launcher, ledger, token). From
+the aisc folder:
 
 ```bash
 uv run scripts/aisc.py start
@@ -124,11 +134,12 @@ npm run dev
 
 `npm run dev` runs `scripts/setup-once.mjs` first, which:
 
-1. copies `.env.example` to `.env` if there is none;
+1. copies `.env.example` to `.env` if there is none, and writes a random
+   `CONTROLS_WEB_TO_PDF_TOKEN` into it when it has none;
 2. starts the bundled Postgres (`docker compose up -d db`, host port 5444) when
    `PROJECT_DATABASE_URL` points at it, on every run;
-3. tries to start the PDF renderer (`docker compose up -d pdf`, host port 8005),
-   without stopping on failure;
+3. tries to start the PDF renderer (`docker compose up -d pdf`, host port 8005,
+   with the same token from `.env`), without stopping on failure;
 4. on the first run only, migrates the project databases that exist
    (marker: `node_modules/.cache/aisc-controls/setup-done`; `npm run setup`
    runs it all again);
@@ -144,11 +155,8 @@ platform (its template creates schemas such as `project`, which the
 and check pages in the AISC stack. Nothing is seeded: a project's checklists
 are the ones installed into it from the catalogue.
 
-The bundled PDF renderer started by `docker-compose.yml` has no
-`CONTROLS_WEB_TO_PDF_TOKEN`, so it refuses every report (503, shown as a 502
-"PDF renderer" error). To try reports standalone, run the renderer by hand
-with the token set (see [PDF renderer](#pdf-renderer)) and set the same
-variable for `npm run dev`.
+The app and the bundled PDF renderer read the same `CONTROLS_WEB_TO_PDF_TOKEN`
+from `.env`, so report PDFs work standalone too.
 
 ## Configuration
 
@@ -156,14 +164,14 @@ Environment variables read by the app (`src/`, `scripts/`, `next.config.ts`):
 
 | Variable | Meaning | Default |
 | --- | --- | --- |
-| `PROJECT_DATABASE_URL` | Template of a project database's URL; `{database}` is replaced by `project_<pid without hyphens>`. Keep `schema=controls` and `connection_limit=2` (the app keeps at most 20 project databases open, so at most 40 connections). In the stack: `postgresql://controls_rw:<password>@postgres:5432/{database}?schema=controls&connection_limit=2` (`env.development`). | none: required |
+| `PROJECT_DATABASE_URL` | Template of a project database's URL; `{database}` is replaced by `project_<pid without hyphens>`. Keep `schema=controls` and `connection_limit=2` (the app keeps at most 20 project databases open, so at most 40 connections). In the stack, compose sets `postgresql://controls_rw:<password>@postgres:5432/{database}?schema=controls&connection_limit=2` with the generated `controls_rw` password, or `CONTROLS_PROJECT_DATABASE_URL` when set. | none: required |
 | `DATABASE_URL` | Read by the Prisma CLI only. The app sets it per project for `prisma migrate deploy`; set it yourself for `npm run db:studio`, `db:seed` or `examples:export` on one project database. | none |
 | `PLATFORM_URL` | The platform API: who is in which project, which projects a person may change, the latest AI card version. Empty means every project page answers 503. Stack: `http://platform:8000`. | empty |
 | `LAUNCHER_URL` | The launcher, where a project is chosen; the app sends people there when they arrive without a project. Its origin may also call `/api/install`: the stack serves the catalogue's pages there. | `http://localhost:8100/` |
 | `CATALOGUE_ORIGIN` | The hosted catalogue's origin, also allowed to call `/api/install` (the catalogue's own install dialog). With it and `LAUNCHER_URL` empty, every call is refused. Stack default: `https://sandboxconfigurator.aifactory.lu`. | empty |
 | `PDF_RENDERER_URL` | The PDF renderer. Stack: `http://controls-pdf:8005`. | `http://localhost:8005` |
-| `CONTROLS_WEB_TO_PDF_TOKEN` | Token sent to the renderer in `X-AISC-Service-Token`; the renderer needs the same value. Made by the aisc repo's `scripts/secrets.sh`. | none |
-| `LEDGER_MODE` | `record` or `enforce` writes a ledger event with every change; anything else writes none. Stack: `${LEDGER_MODE:-off}`. | `off` |
+| `CONTROLS_WEB_TO_PDF_TOKEN` | Token sent to the renderer in `X-AISC-Service-Token`; the renderer needs the same value. In the stack it is made by the aisc repo's `scripts/secrets.sh`; standalone, `scripts/setup-once.mjs` writes one into `.env`. | none |
+| `LEDGER_MODE` | `record` or `enforce` writes a ledger event with every change; anything else writes none. Stack: `record` (`${LEDGER_MODE:-record}`). | `off` |
 | `NEXT_BASE_PATH` | Path prefix the app is served under, read at build time and by `next start`. Stack: `/controls`. | empty (served at the root) |
 | `AISC_ENABLE_TEMPLATE_EDITOR` | `true` turns on each checklist's "Edit questions" action (the review page), for administrators only (the platform's admin flag; no answer from the platform counts as no). Off, or for anybody else, the link is hidden, the page is not found and its save is refused ("Only an administrator can edit a checklist's template."). | off |
 | `AUTH_ENABLED` | `false` keeps the presented `X-AISC-Request-Id` in ledger events without checking it (local work only). On, it is kept only when the gateway token verifies. | `true` |
@@ -240,12 +248,12 @@ src/middleware.ts      asks the platform about every /p/... request
 prisma/                schema.prisma, migrations/, seed.ts and seed/ (sources and example checklists)
 scripts/               migrate-projects.mjs (every project database), setup-once.mjs (standalone setup)
 services/pdf_renderer/ the PDF renderer
-test/                  unit/, integration/, chain/, fixtures/
+test/                  unit/, integration/, chain/, fixtures/, vendor/ (the vendored copies' tests)
 ```
 
 `prisma/seed/` holds 17 example checklists from AESIA and EUSAiR
-(`prisma/seed/examples/`, see its README) and their sources. Nothing seeds
-them automatically; `DATABASE_URL='postgresql://.../project_<hex>?schema=controls' npm run db:seed`
+(`prisma/seed/examples/`, see [its README](prisma/seed/examples/README.md))
+and their sources. Nothing seeds them automatically; `DATABASE_URL='postgresql://.../project_<hex>?schema=controls' npm run db:seed`
 loads them into one project database.
 
 ## Contributing
