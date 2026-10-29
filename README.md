@@ -250,7 +250,7 @@ loads them into one project database.
 
 ## Contributing
 
-- Branch: `feat/unified-modules` is the only AISC branch to work on.
+- Branch: `pilot` is the only AISC branch to work on.
 - Schema changes are Prisma migrations in `prisma/migrations/`
   (`npx prisma migrate dev` against a throwaway database). They run on every
   project database, at start (`controls-migrate`) and when a project is first
