@@ -11,9 +11,9 @@ export function templateEditorEnabled(): boolean {
 export const TEMPLATE_EDITOR_OFF = "The question editor is turned off on this installation.";
 
 /**
- * Who may use the editor when it is on: administrators only. A removed question takes its answers with it,
- * closed submissions' too, so a project editor does not get it. A refusal, the platform's silence included,
- * is no.
+ * Who may use the editor when it is on: administrators only. A removed question deletes the drafts' answers
+ * to it (closed submissions keep theirs, unlinked from the question), so a project editor does not get it.
+ * A refusal, the platform's silence included, is no.
  */
 export function mayEditTemplate(access: { ok: boolean; admin?: boolean }): boolean {
   return access.ok && access.admin === true;
