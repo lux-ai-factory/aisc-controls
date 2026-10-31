@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import "./fonts/fonts.css";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -14,14 +15,6 @@ export const dynamic = "force-dynamic";
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=MuseoModerno:wght@500;600;700&family=Raleway:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
-          rel="stylesheet"
-        />
-      </head>
       <body>
         {/* The header is rendered by each page's own layout, because inside a
             project its links stay inside it and lead back to that project. */}

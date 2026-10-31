@@ -31,6 +31,9 @@ const BRAND: Record<string, string> = {
 const read = (rel: string) => readFileSync(fileURLToPath(new URL(rel, import.meta.url)), "utf8");
 const css = read("../../src/app/globals.css");
 const layout = read("../../src/app/layout.tsx");
+const fonts = existsSync(fileURLToPath(new URL("../../src/app/fonts/fonts.css", import.meta.url)))
+  ? read("../../src/app/fonts/fonts.css")
+  : "";
 
 const rootBlock = css.match(/:root\s*\{([^}]*)\}/)![1];
 const rootVars = Object.fromEntries(
@@ -90,12 +93,24 @@ describe("the brand theme", () => {
     expect(rule(".version-chip")).toMatch(/font-family:\s*var\(--mono\)/);
   });
 
-  it("loads the three families from Google Fonts with the brand weights", () => {
-    const href = layout.match(/href="(https:\/\/fonts\.googleapis\.com\/css2\?[^"]+)"/)![1];
-    expect(href).toContain("family=MuseoModerno:wght@500;600;700");
-    expect(href).toContain("family=Raleway:wght@400;500;600;700");
-    expect(href).toContain("family=IBM+Plex+Mono:wght@400;500;600");
-    expect(href).toContain("display=swap");
+  it("ships the three families with the app in the brand weights, and asks Google Fonts for none", () => {
+    expect(layout).not.toMatch(/fonts\.(googleapis|gstatic)\.com/);
+    expect(layout).toMatch(/import "\.\/fonts\/fonts\.css";/);
+    const faces = [...fonts.matchAll(/@font-face\s*\{([^}]*)\}/g)].map((m) => m[1]);
+    const weightsOf = (family: string) => {
+      const covered = new Set<number>();
+      for (const face of faces.filter((f) => f.includes(`font-family: "${family}";`))) {
+        const [low, high = low] = face.match(/font-weight:\s*(\d+)(?:\s+(\d+))?;/)!.slice(1).filter(Boolean).map(Number);
+        for (const w of [400, 500, 600, 700]) if (w >= low && w <= high) covered.add(w);
+        expect(face).toMatch(/font-display:\s*swap;/);
+        const file = face.match(/url\("\.\/([^"]+\.woff2)"\)/)![1];
+        expect(existsSync(fileURLToPath(new URL(`../../src/app/fonts/${file}`, import.meta.url)))).toBe(true);
+      }
+      return [...covered].sort();
+    };
+    expect(weightsOf("MuseoModerno")).toEqual(expect.arrayContaining([500, 600, 700]));
+    expect(weightsOf("Raleway")).toEqual([400, 500, 600, 700]);
+    expect(weightsOf("IBM Plex Mono")).toEqual([400, 500, 600]);
   });
 
   // shared/theme/brand.json "header": the same header in every app.
