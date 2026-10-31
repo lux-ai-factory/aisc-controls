@@ -21,6 +21,7 @@ export async function writableProjects(
     const response = await (opts.fetchImpl ?? fetch)(`${platformUrl}/projects`, {
       headers: bearer(token),
       cache: "no-store",
+      signal: AbortSignal.timeout(3000),
     });
     if (!response.ok) return null;
     const rows = (await response.json()) as Array<{ pid: string; name: string; role?: string }>;

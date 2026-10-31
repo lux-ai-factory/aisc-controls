@@ -9,6 +9,12 @@ const PLATFORM = "http://platform:8000";
 const answer = (body: unknown, status = 200) =>
   vi.fn(async () => new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } }));
 
+// A platform that takes the request and never answers: only the caller's signal ends the wait.
+const silent = (_url: unknown, init?: RequestInit) =>
+  new Promise<Response>((_resolve, reject) => {
+    init?.signal?.addEventListener("abort", () => reject(init.signal?.reason));
+  });
+
 const opts = (fetchImpl: ReturnType<typeof vi.fn>, token: string | null = "caller-token") =>
   ({ platformUrl: PLATFORM + "/", token, fetchImpl: fetchImpl as unknown as typeof fetch });
 
@@ -78,4 +84,8 @@ describe("fetchCataloguePackage", () => {
     expect(await fetchCataloguePackage(project, "x", opts(fetchImpl))).toEqual({ ok: false, status: 400, reason: "Choose a project." });
     expect(fetchImpl).not.toHaveBeenCalled();
   });
+  it("gives up on a platform that never answers and says the catalogue is not answering", async () => {
+    const got = await fetchCataloguePackage(P1, "accuracy-checklist", opts(vi.fn(silent)));
+    expect(got).toEqual({ ok: false, status: 502, reason: "The catalogue is not answering. Nothing was installed." });
+  }, 10_000);
 });

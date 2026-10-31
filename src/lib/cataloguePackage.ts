@@ -36,7 +36,7 @@ export async function fetchCataloguePackage(
   try {
     response = await (opts.fetchImpl ?? fetch)(
       `${base}/projects/${encodeURIComponent(project)}/catalogue/control/${encodeURIComponent(slug)}/export`,
-      { cache: "no-store", headers: bearer(opts.token ?? null) },
+      { cache: "no-store", headers: bearer(opts.token ?? null), signal: AbortSignal.timeout(3000) },
     );
   } catch {
     return refused(502, NOT_ANSWERING);

@@ -31,4 +31,12 @@ describe("writableProjects", () => {
     expect(await writableProjects("tok", { platformUrl: "http://p", fetchImpl: down })).toBeNull();
     expect(await writableProjects("tok", { platformUrl: "", fetchImpl: reply([]) })).toBeNull();
   });
+
+  it("is null when the platform takes the request and never answers", async () => {
+    const silent = vi.fn((_url: unknown, init?: RequestInit) =>
+      new Promise<Response>((_resolve, reject) => {
+        init?.signal?.addEventListener("abort", () => reject(init.signal?.reason));
+      }));
+    expect(await writableProjects("tok", { platformUrl: "http://p", fetchImpl: silent as unknown as typeof fetch })).toBeNull();
+  }, 10_000);
 });
