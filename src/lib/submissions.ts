@@ -4,6 +4,7 @@
  * The database is the project, so nothing here filters by project: there is
  * nothing of another project's in it to filter out.
  */
+import type { PrismaClient } from "@prisma/client";
 import { projectDbFor } from "@/lib/projectDb";
 
 export async function submissionsOfProject(project: string) {
@@ -27,7 +28,11 @@ export async function submissionsOfProject(project: string) {
 }
 
 export async function submissionOfProject(project: string, id: string) {
-  const prisma = await projectDbFor(project, { write: false });
+  return submissionIn(await projectDbFor(project, { write: false }), id);
+}
+
+/** A submission read in a project database the caller already opened. */
+export async function submissionIn(prisma: PrismaClient, id: string) {
   return prisma.submission.findUnique({
     where: { id },
     include: {

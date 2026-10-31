@@ -13,7 +13,7 @@ import { describe, it, expect, beforeAll, afterAll, vi } from "vitest";
 //   action /p/[project]/checklists/[id]/fill          submitForm(project, checklistId)
 //   page   /p/[project]/checklists/[id]/review        ReviewPage
 //   action /p/[project]/checklists/[id]/review        saveReviewedQuestions(project, checklistId)
-//   page   /p/[project]/submissions/[id]              SubmissionPage (via submissionOfProject)
+//   page   /p/[project]/submissions/[id]              SubmissionPage (projectDbFor then submissionIn, as submissionOfProject)
 //   route  /p/[project]/submissions/[id]/report       GET (PDF)
 //   action /p/[project]/submissions/[id]              saveDraft, reopenForAmendment,
 //                                                     archiveSubmission, restoreSubmission

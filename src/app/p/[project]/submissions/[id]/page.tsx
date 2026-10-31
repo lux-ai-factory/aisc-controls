@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import type { PrismaClient } from "@prisma/client";
 import { projectDbFor } from "@/lib/projectDb";
 import {
   archiveSubmission,
@@ -8,7 +9,7 @@ import {
   restoreSubmission,
 } from "./actions";
 import DraftEditForm from "./DraftEditForm";
-import { submissionOfProject } from "@/lib/submissions";
+import { submissionIn } from "@/lib/submissions";
 import { formatDateTime } from "@/lib/formatDate";
 import { groupByCategory } from "@/lib/questions";
 import { answerSheet } from "@/lib/answerSheet";
@@ -39,11 +40,10 @@ const chainSelect = {
  * at a time.
  */
 async function loadVersionChain(
-  project: string,
+  prisma: PrismaClient,
   submissionId: string,
   checklistId: string,
 ): Promise<ChainEntry[]> {
-  const prisma = await projectDbFor(project, { write: false });
   const all = await prisma.submission.findMany({
     where: { checklistId },
     select: chainSelect,
@@ -94,11 +94,12 @@ export default async function SubmissionDetailPage({
   const basePath = process.env.NEXT_BASE_PATH || "";
 
   // Read in this project's own database, so an id from the URL can only reach
-  // this project's answers.
-  const sub = await submissionOfProject(project, id);
+  // this project's answers. Opened once: each opening asks the platform for admission.
+  const prisma = await projectDbFor(project, { write: false });
+  const sub = await submissionIn(prisma, id);
   if (!sub) notFound();
 
-  const chain = await loadVersionChain(project, sub.id, sub.checklistId);
+  const chain = await loadVersionChain(prisma, sub.id, sub.checklistId);
   const isDraft = sub.status === "Draft";
   const isArchived = sub.archivedAt !== null;
   // An older closed version: its amendment already exists, so reopening it would only lead there.

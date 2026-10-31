@@ -14,12 +14,15 @@ type Row = {
   previousVersionId: string | null;
 };
 
-const h = vi.hoisted(() => ({ chain: [] as Row[], sub: null as unknown }));
+const h = vi.hoisted(() => ({ chain: [] as Row[], sub: null as unknown, opened: 0 }));
 
+// Each opening asks the platform for admission.
 vi.mock("@/lib/projectDb", () => ({
-  projectDbFor: async () => ({ submission: { findMany: async () => h.chain } }),
+  projectDbFor: async () => {
+    h.opened += 1;
+    return { submission: { findMany: async () => h.chain, findUnique: async () => h.sub } };
+  },
 }));
-vi.mock("@/lib/submissions", () => ({ submissionOfProject: async () => h.sub }));
 vi.mock("@/app/p/[project]/submissions/[id]/actions", () => ({
   archiveSubmission: async () => {},
   reopenForAmendment: async () => {},
@@ -64,6 +67,15 @@ const history = (html: string) => html.match(/<section class="version-chain"[\s\
 
 beforeEach(() => {
   h.chain = [closed("s1", 1, null), closed("s2", 2, "s1"), closed("s3", 3, "s2")];
+  h.opened = 0;
+});
+
+describe("one render", () => {
+  it("opens the project's database once, so the platform is asked for admission once", async () => {
+    h.sub = submission(h.chain[1]);
+    await page("s2");
+    expect(h.opened).toBe(1);
+  });
 });
 
 describe("the version history", () => {
