@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { EXIT, migrateEach, projectDatabases, sweep, templateProblem } from "../../scripts/migrate-projects-lib.mjs";
+import { EXIT, migrateEach, pgConnectionString, projectDatabases, sweep, templateProblem } from "../../scripts/migrate-projects-lib.mjs";
 
 const TEMPLATE = "postgresql://controls_rw:pw@postgres:5432/{database}?schema=controls";
 const A = `project_${"a".repeat(32)}`;
@@ -49,5 +49,11 @@ describe("the migration sweep at start", () => {
       log: quiet,
     });
     expect(code).toBe(EXIT.retry);
+  });
+
+  it("lists the databases with the template's connection options, without Prisma's own", () => {
+    const template = "postgresql://controls_rw:pw@postgres:5432/{database}?schema=controls&connection_limit=2&sslmode=require&pool_timeout=10";
+    expect(pgConnectionString(template.replace("{database}", "postgres"))).toBe("postgresql://controls_rw:pw@postgres:5432/postgres?sslmode=require");
+    expect(pgConnectionString(TEMPLATE.replace("{database}", "postgres"))).toBe("postgresql://controls_rw:pw@postgres:5432/postgres");
   });
 });

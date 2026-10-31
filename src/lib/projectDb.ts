@@ -122,6 +122,24 @@ function isLostConnection(err: unknown): boolean {
   return typeof e.message === "string" && /terminating connection|server has closed the connection/i.test(e.message);
 }
 
+/** The parameters only Prisma reads: pg would pass them to the server, which refuses them. */
+const PRISMA_ONLY = ["schema", "connection_limit", "pool_timeout"];
+
+/** How long a direct pg connection waits for the cluster before giving up. */
+const CONNECT_TIMEOUT_MS = 5000;
+
+/**
+ * A database URL as pg.Client takes it: without Prisma's own parameters, with every other
+ * connection option (sslmode and the like) kept. scripts/migrate-projects-lib.mjs does the same.
+ */
+function pgConnectionString(url: string): string {
+  const [base, query = ""] = url.split(/\?(.*)/s);
+  const params = new URLSearchParams(query);
+  for (const name of PRISMA_ONLY) params.delete(name);
+  const rest = params.toString();
+  return rest ? `${base}?${rest}` : base;
+}
+
 /**
  * Whether this project's database is still there, asked of the cluster (the `postgres`
  * database, as scripts/migrate-projects.mjs does). Null when the cluster does not answer,
@@ -129,7 +147,8 @@ function isLostConnection(err: unknown): boolean {
  */
 async function databaseExists(pid: string): Promise<boolean | null> {
   const catalog = new pg.Client({
-    connectionString: (process.env.PROJECT_DATABASE_URL ?? "").replace("{database}", "postgres").split("?")[0],
+    connectionString: pgConnectionString((process.env.PROJECT_DATABASE_URL ?? "").replace("{database}", "postgres")),
+    connectionTimeoutMillis: CONNECT_TIMEOUT_MS,
   });
   try {
     await catalog.connect();
@@ -160,7 +179,7 @@ function schemaOf(url: string): string {
  */
 export async function lookupInstalledChecklist(url: string, catalogueId: string): Promise<string | null> {
   const schema = `"${schemaOf(url).replace(/"/g, '""')}"`;
-  const client = new pg.Client({ connectionString: url.split("?")[0] });
+  const client = new pg.Client({ connectionString: pgConnectionString(url), connectionTimeoutMillis: CONNECT_TIMEOUT_MS });
   try {
     await client.connect();
     const { rows } = await client.query(`SELECT id FROM ${schema}.checklist WHERE "catalogueId" = $1`, [catalogueId]);

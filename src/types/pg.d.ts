@@ -2,7 +2,7 @@
 // project database still exists). The package ships no types and @types/pg is not installed.
 declare module "pg" {
   export class Client {
-    constructor(config: { connectionString: string });
+    constructor(config: { connectionString: string; connectionTimeoutMillis?: number });
     connect(): Promise<void>;
     query(text: string, values?: unknown[]): Promise<{ rowCount: number | null; rows: Record<string, unknown>[] }>;
     end(): Promise<void>;

@@ -11,12 +11,15 @@
 import { execFileSync } from "node:child_process";
 import pg from "pg";
 
-import { sweep } from "./migrate-projects-lib.mjs";
+import { pgConnectionString, sweep } from "./migrate-projects-lib.mjs";
 
 const template = process.env.PROJECT_DATABASE_URL ?? "";
 
 async function listDatabases() {
-  const catalog = new pg.Client({ connectionString: template.replace("{database}", "postgres").split("?")[0] });
+  const catalog = new pg.Client({
+    connectionString: pgConnectionString(template.replace("{database}", "postgres")),
+    connectionTimeoutMillis: 5000,
+  });
   await catalog.connect();
   try {
     const { rows } = await catalog.query("select datname from pg_database");

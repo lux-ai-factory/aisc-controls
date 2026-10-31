@@ -21,6 +21,21 @@ export function templateProblem(template) {
   return null;
 }
 
+/** The parameters only Prisma reads: pg would pass them to the server, which refuses them. */
+const PRISMA_ONLY = ["schema", "connection_limit", "pool_timeout"];
+
+/**
+ * A database URL as pg.Client takes it: without Prisma's own parameters, with every other
+ * connection option (sslmode and the like) kept. src/lib/projectDb.ts does the same.
+ */
+export function pgConnectionString(url) {
+  const [base, query = ""] = url.split(/\?(.*)/s);
+  const params = new URLSearchParams(query);
+  for (const name of PRISMA_ONLY) params.delete(name);
+  const rest = params.toString();
+  return rest ? `${base}?${rest}` : base;
+}
+
 /** The names that are project databases, in order. */
 export function projectDatabases(names) {
   return names.filter((n) => PROJECT_DATABASE.test(n)).sort();
