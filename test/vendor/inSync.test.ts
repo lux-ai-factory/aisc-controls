@@ -10,6 +10,10 @@ const shared = join(app, "..", "..", "shared");
 const COPIES: [string, string][] = [
   ["src/vendor/aisc-access/projectAccess.ts", "access-ts/projectAccess.ts"],
   ["test/vendor/projectAccess.test.ts", "access-ts/projectAccess.test.ts"],
+  ["src/vendor/aisc-access/projectDb.mjs", "access-ts/projectDb.mjs"],
+  ["src/vendor/aisc-access/projectDb.d.mts", "access-ts/projectDb.d.mts"],
+  ["test/vendor/projectDb.test.ts", "access-ts/projectDb.test.ts"],
+  ["test/fixtures/projectdb-cases.json", "identity/projectdb-cases.json"],
   ...["emit", "canonical", "gatewayToken"].map((f): [string, string] => [
     `src/vendor/aisc-ledger/${f}.ts`, `ledger-ts/${f}.ts`]),
   ...["canonical", "emit", "jwksTimeout", "requestIdThroughGateway"].map((f): [string, string] => [
