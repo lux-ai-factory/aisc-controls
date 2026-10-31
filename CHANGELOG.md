@@ -2,7 +2,7 @@
 
 ## 2026-10-16: review fixes
 
-- The realm's JWKS, read inside a write's transaction for the ledger event's request id, is read with a 2 second timeout, and a failed read waits 10 seconds before the next like a good one: a slow Keycloak no longer holds the checklist's locks until Prisma's transaction timeout, and a down one is not asked by every event. Check: `npx vitest run test/unit/ledger/requestIdThroughGateway.test.ts`.
+- The realm's JWKS, read inside a write's transaction for the ledger event's request id, is read with a 2 second timeout, and a failed read waits 10 seconds before the next like a good one: a slow Keycloak no longer holds the checklist's locks until Prisma's transaction timeout, and a down one is not asked by every event. Check: `npx vitest run test/vendor/ledger/requestIdThroughGateway.test.ts`.
 - Changelog and README name `controls.submission.answers_removed` (2026-10-14) and the integration count, 91.
 
 ## 2026-10-14: review pass
@@ -10,7 +10,7 @@
 Areas: ledger, template editor, install dialog, fill and review forms, project databases, navigation, tests, docs.
 
 Security:
-- Ledger events cite `X-AISC-Request-Id` only on a request that came through the gateway (gateway token verified against the realm's JWKS, issued to `AISC_GATEWAY_CLIENT_ID`, any Bearer naming the same person); a direct caller can no longer make an event cite a request it names. New variables `AUTH_ENABLED`, `KEYCLOAK_ISSUER`, `KEYCLOAK_JWKS_URL`, `AISC_GATEWAY_CLIENT_ID`. Check: `npx vitest run test/unit/ledger/requestIdThroughGateway.test.ts`; on a stack, controls ledger events must have a non-null `request_id` (needs `KEYCLOAK_ISSUER` and `KEYCLOAK_JWKS_URL` on `controls-web`).
+- Ledger events cite `X-AISC-Request-Id` only on a request that came through the gateway (gateway token verified against the realm's JWKS, issued to `AISC_GATEWAY_CLIENT_ID`, any Bearer naming the same person); a direct caller can no longer make an event cite a request it names. New variables `AUTH_ENABLED`, `KEYCLOAK_ISSUER`, `KEYCLOAK_JWKS_URL`, `AISC_GATEWAY_CLIENT_ID`. Check: `npx vitest run test/vendor/ledger/requestIdThroughGateway.test.ts`; on a stack, controls ledger events must have a non-null `request_id` (needs `KEYCLOAK_ISSUER` and `KEYCLOAK_JWKS_URL` on `controls-web`).
 - The template editor (`AISC_ENABLE_TEMPLATE_EDITOR`) is off by default and, when on, for administrators only: the save refuses anybody else before reading the checklist, the review page is not found for them, and the library hides the link. Check: `npx vitest run test/unit/templateEditorFlag.test.ts test/unit/libraryNoCatalogue.test.ts`.
 
 Behaviour:
