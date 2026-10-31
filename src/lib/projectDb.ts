@@ -14,6 +14,7 @@
 import { PrismaClient } from "@prisma/client";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
+import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import pg from "pg";
 
@@ -329,9 +330,48 @@ export async function projectDbFor(pid: string, { write }: { write: boolean }): 
   }
 }
 
+/** The request being served, or null outside one (a script, a test). */
+async function currentRequest(): Promise<object | null> {
+  try {
+    // Next hands every caller in one request the same headers object.
+    return (await headers()) as unknown as object;
+  } catch {
+    return null;
+  }
+}
+
+/** What the platform answered in a request, by `read:`/`write:` and pid. */
+const admittedIn = new WeakMap<object, Map<string, Promise<Admission>>>();
+
+const READS = new Set(["GET", "HEAD", "OPTIONS"]);
+
 /** What the platform says the person behind this request may do in this project. For a
- *  page deciding what to show; what is allowed is enforced by projectDbFor. */
+ *  page deciding what to show; what is allowed is enforced by projectDbFor.
+ *
+ *  Asked once per request and pid (a read reuses a write that was allowed): the layout,
+ *  the page and its components share one /authz call. */
 export async function callerAccess(pid: string, method = "GET"): Promise<Admission> {
+  const request = await currentRequest();
+  if (!request) return askPlatform(pid, method);
+  let admitted = admittedIn.get(request);
+  if (!admitted) {
+    admitted = new Map();
+    admittedIn.set(request, admitted);
+  }
+  const write = !READS.has(method.toUpperCase());
+  const key = `${write ? "write" : "read"}:${pid}`;
+  let admission = admitted.get(key);
+  if (!admission) {
+    const wrote = write ? undefined : admitted.get(`write:${pid}`);
+    admission = wrote
+      ? wrote.then((a) => (a.ok ? a : askPlatform(pid, method)))
+      : askPlatform(pid, method);
+    admitted.set(key, admission);
+  }
+  return admission;
+}
+
+async function askPlatform(pid: string, method: string): Promise<Admission> {
   return admit(pid, method, await callerToken(), { platformUrl: platformUrl() });
 }
 
