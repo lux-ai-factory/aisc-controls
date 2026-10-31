@@ -68,14 +68,20 @@ async function migrateProjectDatabase(url: string): Promise<void> {
  * How many project databases this process keeps a client open to.
  *
  * Each client holds up to connection_limit=2 connections, so this is the
- * connection budget: 2 × 20 = 40 at most. The least recently used idle client is
- * disconnected when a 21st project is opened, and reconnects if it is needed
- * again, without migrating again: this process remembers which databases it
- * migrated. A client with work in progress (its migration, a query, a transaction)
- * is never disconnected: while every one is busy there may be more than 20 for a
- * moment, and the oldest is let go when its work ends.
+ * connection budget: 2 × 20 = 40 at most, plus the clients let go of in the last
+ * EVICTION_GRACE_MS. The least recently used idle client leaves the map when a 21st
+ * project is opened, and a new one is made if it is needed again, without migrating
+ * again: this process remembers which databases it migrated. A client with work in
+ * progress (its migration, a query, a transaction) is never let go of: while every
+ * one is busy there may be more than 20 for a moment, and the oldest is let go when
+ * its work ends.
  */
 export const MAX_OPEN_PROJECTS = 20;
+
+/** How long a client let go of stays connected: a request that was handed it may still be
+ *  between two of its queries, and prismaFor cannot tell when that request is done. One still
+ *  running a query when the time is up is given the same time again. */
+export const EVICTION_GRACE_MS = 60_000;
 
 /** `busy`: the work in progress on the client (its migration, queries, transactions). */
 type Entry = { client: PrismaClient; ready: Promise<void>; busy: number };
@@ -90,13 +96,26 @@ function forget(url: string, entry: Entry) {
   entry.client.$disconnect().catch(() => {});
 }
 
+/** Out of the map at once; disconnected once the requests that may hold it are done. */
+function evict(url: string, entry: Entry) {
+  if (open.get(url) === entry) open.delete(url);
+  const disconnectWhenIdle = () => {
+    if (entry.busy > 0) {
+      setTimeout(disconnectWhenIdle, EVICTION_GRACE_MS).unref?.();
+      return;
+    }
+    entry.client.$disconnect().catch(() => {});
+  };
+  setTimeout(disconnectWhenIdle, EVICTION_GRACE_MS).unref?.();
+}
+
 /** Over the budget, let go of the least recently used idle clients. A busy one stays, and so does
  *  the most recently used: it is the one just handed to a request, even if every other is busy. */
 function evictIdle() {
   const newest = [...open.keys()].pop();
   for (const [url, entry] of open) {
     if (open.size <= MAX_OPEN_PROJECTS) return;
-    if (entry.busy === 0 && url !== newest) forget(url, entry);
+    if (entry.busy === 0 && url !== newest) evict(url, entry);
   }
 }
 

@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { PrismaClient } from "@prisma/client";
 import {
+  EVICTION_GRACE_MS,
   MAX_OPEN_PROJECTS,
   NotAProject,
   closeProjectDatabases,
@@ -85,10 +86,12 @@ describe("prismaFor", () => {
 describe("the open project databases", () => {
   beforeEach(async () => {
     vi.stubEnv("PROJECT_DATABASE_URL", TEMPLATE);
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
     await closeProjectDatabases();
   });
 
   afterEach(async () => {
+    vi.useRealTimers();
     vi.restoreAllMocks();
     vi.unstubAllEnvs();
     await closeProjectDatabases();
@@ -133,6 +136,7 @@ describe("the open project databases", () => {
     const query = pending();
     const running = fakes[0].query(() => query.done); // the least recently used, busy
     await prismaFor(pid(MAX_OPEN_PROJECTS), { migrate, newClient: () => fakeClient() as never }); // the 21st
+    vi.advanceTimersByTime(EVICTION_GRACE_MS);
     expect(fakes[0].$disconnect).not.toHaveBeenCalled();
     expect(fakes[1].$disconnect).toHaveBeenCalledTimes(1); // the oldest idle one made room
     query.finish();
@@ -151,6 +155,7 @@ describe("the open project databases", () => {
     expect(newest.$disconnect).not.toHaveBeenCalled(); // the one just handed out, though it is the only idle one
     queries[0].finish();
     await running[0];
+    vi.advanceTimersByTime(EVICTION_GRACE_MS);
     expect(fakes[0].$disconnect).toHaveBeenCalledTimes(1); // idle now, and one too many open
     expect(fakes.slice(1).every((f) => f.$disconnect.mock.calls.length === 0)).toBe(true);
     queries.slice(1).forEach((q) => q.finish());
@@ -171,6 +176,37 @@ describe("the open project databases", () => {
     await open;
   });
 
+  it("does not disconnect a client handed to a request that waits between its queries", async () => {
+    const migrate = vi.fn(async () => {});
+    const a = fakeClient();
+    const client = (await prismaFor(pid(0), { migrate, newClient: () => a as never })) as unknown as ReturnType<typeof fakeClient>;
+    await client.query(async () => "first");
+    // while A's request waits (on the platform, say), 20 other projects are opened
+    for (let i = 1; i <= MAX_OPEN_PROJECTS; i++) await prismaFor(pid(i), { migrate, newClient: () => fakeClient() as never });
+    vi.advanceTimersByTime(EVICTION_GRACE_MS / 2);
+    expect(a.$disconnect).not.toHaveBeenCalled();
+    expect(await client.query(async () => "second")).toBe("second");
+    expect(a.$disconnect).not.toHaveBeenCalled();
+    // once the request is long done, the client let go of is disconnected
+    vi.advanceTimersByTime(EVICTION_GRACE_MS);
+    expect(a.$disconnect).toHaveBeenCalledTimes(1);
+  });
+
+  it("waits for a query still running on a client let go of before disconnecting it", async () => {
+    const migrate = vi.fn(async () => {});
+    const a = fakeClient();
+    const client = (await prismaFor(pid(0), { migrate, newClient: () => a as never })) as unknown as ReturnType<typeof fakeClient>;
+    for (let i = 1; i <= MAX_OPEN_PROJECTS; i++) await prismaFor(pid(i), { migrate, newClient: () => fakeClient() as never });
+    const slow = pending();
+    const running = client.query(() => slow.done);
+    vi.advanceTimersByTime(EVICTION_GRACE_MS);
+    expect(a.$disconnect).not.toHaveBeenCalled();
+    slow.finish();
+    await running;
+    vi.advanceTimersByTime(EVICTION_GRACE_MS);
+    expect(a.$disconnect).toHaveBeenCalledTimes(1);
+  });
+
   it("are at most 20, and the least recently used one is disconnected to make room", async () => {
     expect(MAX_OPEN_PROJECTS).toBe(20);
     const migrate = vi.fn(async () => {});
@@ -180,6 +216,7 @@ describe("the open project databases", () => {
 
     await prismaFor(pid(0), { migrate }); // used again, so the most recent
     await prismaFor(pid(MAX_OPEN_PROJECTS), { migrate }); // the 21st
+    vi.advanceTimersByTime(EVICTION_GRACE_MS);
 
     expect(disconnected[1]).toHaveBeenCalledTimes(1);
     expect(disconnected.filter((d) => d.mock.calls.length > 0)).toHaveLength(1);
