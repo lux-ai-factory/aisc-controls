@@ -8,7 +8,7 @@ import { formatTime } from "@/lib/formatDate";
 import { useLeaveGuard } from "@/lib/useLeaveGuard";
 import { saveDraft, type ActionState } from "./actions";
 import ProofFiles from "./ProofFiles";
-import type { ProofLink } from "@/lib/proofFiles";
+import type { ProofLink } from "@/lib/proofFileShape";
 
 type Q = {
   id: string;

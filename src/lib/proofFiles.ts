@@ -12,13 +12,11 @@
  */
 import type { Prisma, PrismaClient } from "@prisma/client";
 
+import { MAX_FILES_PER_QUESTION, type ProofLink } from "@/lib/proofFileShape";
 import { storeProofFile, type StoredFile } from "@/lib/proofStore";
 import { beforeTransaction } from "@/vendor/aisc-ledger/emit";
 
-export const MAX_FILES_PER_QUESTION = 10;
-
-/** A linked file as the pages show it. */
-export type ProofLink = StoredFile & { uploadedBy: string | null; uploadedAt: string };
+export { formatSize, MAX_FILES_PER_QUESTION, type ProofLink } from "@/lib/proofFileShape";
 /** A proof file event's details: what the file is, never its bytes. */
 export type ProofDetails = {
   submission: string;
@@ -206,17 +204,4 @@ export function attachmentHeader(name: string): string {
   const ascii = name.replace(/[^\x20-\x7e]|["\\]/g, "_");
   const exact = encodeURIComponent(name).replace(/['()*]/g, (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`);
   return `attachment; filename="${ascii}"; filename*=UTF-8''${exact}`;
-}
-
-/** A size as people read it: 512 B, 3.4 KB, 12 MB. */
-export function formatSize(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`;
-  const units = ["KB", "MB", "GB"];
-  let value = bytes / 1024;
-  let unit = 0;
-  while (value >= 1024 && unit < units.length - 1) {
-    value /= 1024;
-    unit += 1;
-  }
-  return `${value < 10 ? value.toFixed(1) : Math.round(value)} ${units[unit]}`;
 }

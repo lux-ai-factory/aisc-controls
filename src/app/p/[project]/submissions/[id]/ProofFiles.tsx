@@ -10,7 +10,7 @@ import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { formatDateTime } from "@/lib/formatDate";
-import { formatSize, MAX_FILES_PER_QUESTION, type ProofLink } from "@/lib/proofFiles";
+import { formatSize, MAX_FILES_PER_QUESTION, type ProofLink } from "@/lib/proofFileShape";
 
 /** The header the route handlers want, which a form posted from another site cannot send. */
 const OWN_PAGE = { "x-requested-with": "aisc-controls" };
