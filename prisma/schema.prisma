@@ -106,8 +106,29 @@ model SubmissionAnswer {
   questionOrder       Int?      @map("question_order")
   submission   Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
   question     Question?  @relation(fields: [questionId], references: [id], onDelete: SetNull)
+  files        SubmissionAnswerFile[]
 
   @@unique([submissionId, questionId])
   @@index([submissionId])
   @@map("submission_answer")
+}
+
+/// A file that proves an answer: the platform stores the file and never deletes it, this links it.
+model SubmissionAnswerFile {
+  id         String           @id @default(cuid())
+  answerId   String           @map("answer_id")
+  /// The platform's id of the stored file.
+  fileId     String           @map("file_id") @db.Uuid
+  name       String
+  /// The type the platform read from the file's bytes.
+  mime       String
+  size       Int
+  sha256     String
+  uploadedBy String?          @map("uploaded_by")
+  uploadedAt DateTime         @default(now()) @map("uploaded_at") @db.Timestamptz(3)
+  answer     SubmissionAnswer @relation(fields: [answerId], references: [id], onDelete: Cascade)
+
+  @@unique([answerId, fileId])
+  @@index([answerId])
+  @@map("submission_answer_file")
 }

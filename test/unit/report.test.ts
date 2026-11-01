@@ -104,3 +104,21 @@ describe("the status in the report", () => {
     expect(buildReportPayload({ ...base, status: "Draft", closedAt: null }, new Date(2026, 5, 3, 10, 0)).status).toBe("Draft");
   });
 });
+
+describe("the report's proof files", () => {
+  it("lists each question's files: name, type, size, who, when and SHA-256", () => {
+    const p = buildReportPayload({
+      ...base,
+      filesByQ: { q1: [{ id: "f1", name: "policy.pdf", mime: "application/pdf", size: 2048, sha256: "c".repeat(64),
+                         uploadedBy: "alice@example.org", uploadedAt: new Date(2026, 10, 1, 9, 30).toISOString() }] },
+    }, new Date(2026, 5, 3, 10, 0));
+    expect(p.groups[0].entries[0].files).toEqual([{ name: "policy.pdf", mime: "application/pdf", size: "2.0 KB",
+      uploadedBy: "alice@example.org", uploadedAt: "01/11/2026 09:30", sha256: "c".repeat(64) }]);
+    expect(p.groups[0].entries[1].files).toEqual([]);
+  });
+
+  it("a report without files lists none", () => {
+    expect(buildReportPayload(base, new Date()).groups.flatMap((g) => g.entries.map((e) => e.files))).toEqual([[], [], []]);
+  });
+});
+

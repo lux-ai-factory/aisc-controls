@@ -47,7 +47,7 @@ describe.skipIf(!hasThrowawayDb)("the dashboard may read a project's controls", 
     ).toEqual(["0"]);
   }, 60_000);
 
-  it("report_ro and dashboard_ro read exactly the five listed tables, not _prisma_migrations", async () => {
+  it("report_ro and dashboard_ro read exactly the listed tables (answers and their proof files among them), not _prisma_migrations", async () => {
     const readable = (reader: string) =>
       rows(
         `SELECT c.relname FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
@@ -55,7 +55,7 @@ describe.skipIf(!hasThrowawayDb)("the dashboard may read a project's controls", 
             AND has_table_privilege('${reader}', c.oid, 'SELECT') ORDER BY 1`,
         project,
       );
-    const listed = ["checklist", "checklist_question", "source", "submission", "submission_answer"];
+    const listed = ["checklist", "checklist_question", "source", "submission", "submission_answer", "submission_answer_file"];
     expect(readable("dashboard_ro")).toEqual(listed);
     expect(readable("report_ro")).toEqual(listed);
     expect(rows(`SET ROLE report_ro; SELECT count(*) FROM controls.submission_answer;`, project)).toEqual(["0"]);

@@ -1,5 +1,19 @@
 # Changelog of AISC Controls (newest first)
 
+## Unreleased: proof files
+
+- A question of a draft submission takes files that prove its answer (PDF, Word, Excel, PowerPoint, OpenDocument,
+  CSV, text, PNG, JPEG, WebP; up to 25 MB each, at most 10 per question). The platform checks and stores each file;
+  this app links it to the answer (new table `submission_answer_file`, read by `report_ro` and `dashboard_ro`) and
+  records `control.proof.attached`, or `control.proof.removed` when it is unlinked (the platform keeps the file).
+  Anybody in the project downloads a file, always as a download. A closed submission's files are frozen; its next
+  version starts with the same files linked. The page and the PDF report list each question's files (name, type,
+  size, who, when; the report also the SHA-256). New variable `PLATFORM_CONTROLS_TOKEN`. Check:
+  `npx vitest run test/unit/proofFiles.test.ts`, `bash ../../scripts/lib/controls-tests.sh` (`proof-files.test.ts`).
+- A draft's save keeps each answer's row (updated in place) instead of replacing them all, so the files linked to an
+  answer stay linked; an answer cleared while it holds files keeps its row with no answer.
+- The middleware lets request bodies up to 26 MB through to the routes (`experimental.middlewareClientMaxBodySize`).
+
 ## 2026-10-16: review fixes
 
 - The realm's JWKS, read inside a write's transaction for the ledger event's request id, is read with a 2 second timeout, and a failed read waits 10 seconds before the next like a good one: a slow Keycloak no longer holds the checklist's locks until Prisma's transaction timeout, and a down one is not asked by every event. Check: `npx vitest run test/vendor/ledger/requestIdThroughGateway.test.ts`.

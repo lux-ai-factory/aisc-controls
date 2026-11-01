@@ -77,6 +77,16 @@
           <p class="answer-text muted">Not answered</p>
         {% endif %}
         {% if item.stamp %}<p class="stamp muted">{{ item.stamp }}</p>{% endif %}
+        {% if item.files %}
+          <div class="proof-files">
+            <p class="muted">Proof files</p>
+            <ul>
+              {% for f in item.files %}
+                <li>{{ f.name }} · {{ f.mime }} · {{ f.size }} · {{ f.uploadedBy or "uploader not recorded" }} · {{ f.uploadedAt }}<br><span class="sha muted">SHA-256 {{ f.sha256 }}</span></li>
+              {% endfor %}
+            </ul>
+          </div>
+        {% endif %}
       </div>
     {% endfor %}
   {% endfor %}

@@ -11,6 +11,10 @@ vi.mock("react", async (importOriginal) => {
 vi.mock("@/lib/useLeaveGuard", () => ({ useLeaveGuard: () => {} }));
 vi.mock("@/app/p/[project]/checklists/[id]/fill/actions", () => ({ submitForm: async () => undefined }));
 vi.mock("@/app/p/[project]/submissions/[id]/actions", () => ({ saveDraft: async () => undefined }));
+vi.mock("next/navigation", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("next/navigation")>()),
+  useRouter: () => ({ refresh: () => {} }),
+}));
 vi.mock("@/lib/submissions", () => ({ submissionsOfProject: async () => [] }));
 vi.mock("@/lib/projectDb", () => ({
   projectDbFor: async () => ({ submission: { findMany: async () => [] } }),

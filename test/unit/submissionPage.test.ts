@@ -14,13 +14,16 @@ type Row = {
   previousVersionId: string | null;
 };
 
-const h = vi.hoisted(() => ({ chain: [] as Row[], sub: null as unknown, opened: 0 }));
+const h = vi.hoisted(() => ({ chain: [] as Row[], sub: null as unknown, opened: 0, files: [] as unknown[] }));
 
 // Each opening asks the platform for admission.
 vi.mock("@/lib/projectDb", () => ({
   projectDbFor: async () => {
     h.opened += 1;
-    return { submission: { findMany: async () => h.chain, findUnique: async () => h.sub } };
+    return {
+      submission: { findMany: async () => h.chain, findUnique: async () => h.sub },
+      submissionAnswerFile: { findMany: async () => h.files },
+    };
   },
 }));
 vi.mock("@/app/p/[project]/submissions/[id]/actions", () => ({
@@ -32,6 +35,7 @@ vi.mock("@/app/p/[project]/submissions/[id]/actions", () => ({
 }));
 vi.mock("@/app/p/[project]/submissions/[id]/DraftEditForm", () => ({ default: () => null }));
 vi.mock("next/navigation", () => ({
+  useRouter: () => ({ refresh: () => {} }),
   notFound: () => {
     throw new Error("NEXT_NOT_FOUND");
   },
@@ -68,6 +72,7 @@ const history = (html: string) => html.match(/<section class="version-chain"[\s\
 beforeEach(() => {
   h.chain = [closed("s1", 1, null), closed("s2", 2, "s1"), closed("s3", 3, "s2")];
   h.opened = 0;
+  h.files = [];
 });
 
 describe("one render", () => {
@@ -217,5 +222,24 @@ describe("a final submission's wording", () => {
     const html = await page("s3");
     expect(html).toContain("AI card version not recorded");
     expect(html).not.toContain("not stamped");
+  });
+});
+
+describe("proof files", () => {
+  const file = {
+    id: "row1", answerId: "a1", fileId: "5b7f0b1e-1d7e-4c7a-9a43-0c1f5d0b9e11", name: "policy.pdf",
+    mime: "application/pdf", size: 4096, sha256: "b".repeat(64), uploadedBy: "alice@example.org",
+    uploadedAt: new Date(2026, 10, 1, 9, 30), answer: { id: "a1", questionId: "q1" },
+  };
+
+  it("a closed submission lists each question's files for download, with nothing to attach or remove", async () => {
+    h.sub = submission(h.chain[2]);
+    h.files = [file];
+    const html = await page("s3");
+    expect(html).toContain("policy.pdf");
+    expect(html).toContain("alice@example.org");
+    expect(html).toContain(`/p/${P1}/submissions/s3/questions/q1/files/${file.fileId}`);
+    expect(html).not.toContain("Attach file");
+    expect(html).not.toContain(">Remove<");
   });
 });

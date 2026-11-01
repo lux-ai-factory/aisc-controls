@@ -10,6 +10,11 @@ const nextConfig: NextConfig = {
   // Pin the workspace root so Next.js doesn't get confused by a stray
   // package-lock.json in an ancestor directory.
   outputFileTracingRoot: __dirname,
+  experimental: {
+    // The middleware reads a copy of each request's body, and Next cuts that copy (and so the body the route
+    // gets) at 10 MB by default: a proof file is up to 25 MB (the platform's cap), sent as a multipart form.
+    middlewareClientMaxBodySize: "26mb",
+  },
   ...(basePath ? { basePath, assetPrefix: basePath } : {}),
 };
 

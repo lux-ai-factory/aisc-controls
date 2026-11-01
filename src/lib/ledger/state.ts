@@ -9,12 +9,14 @@ import { canonical } from "@/vendor/aisc-ledger/canonical";
 // questionId is empty only in a closed submission, for a question removed since; its states are not built again.
 type Answer = { questionId: string | null; answer: string | null; score: number | null };
 
-/** What a submission says: the whole of it, its answers ordered by question id. */
+/** What a submission says: the whole of it, its answers ordered by question id. An answer row with neither an
+ *  answer nor a score (one that only holds proof files) says nothing, and is left out. */
 export function submissionState(label: string, status: string, answers: Answer[]) {
   return {
     label,
     status,
     answers: answers
+      .filter((a) => a.answer !== null || a.score !== null)
       .map((a) => ({ questionId: a.questionId, answer: a.answer, score: a.score }))
       .sort((x, y) => (x.questionId ?? "").localeCompare(y.questionId ?? "")),
   };

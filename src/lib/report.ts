@@ -7,6 +7,7 @@ import { groupByCategory } from "./questions";
 import { answeredCount, coverage, readinessPercent, SCORE_LABELS, SCORE_VALUES } from "./scoring";
 import { statusLabel } from "./labels";
 import { formatDateTime } from "./formatDate";
+import { formatSize, type ProofLink } from "./proofFiles";
 
 export type ReportQuestion = {
   id: string;
@@ -36,6 +37,18 @@ export type ReportInput = {
   /** The AI card version each answer was given under, keyed by question id; null: not stamped. A question
    *  with no answer row is not in it. */
   versionByQ: Record<string, number | null>;
+  /** The files proving each answer, keyed as the answers are; none when left out. */
+  filesByQ?: Record<string, ProofLink[]>;
+};
+
+/** A proof file as the report lists it: what it is and who attached it when, never its bytes. */
+export type ReportFile = {
+  name: string;
+  mime: string;
+  size: string;
+  uploadedBy: string | null;
+  uploadedAt: string;
+  sha256: string;
 };
 
 export type ReportItem = {
@@ -46,6 +59,7 @@ export type ReportItem = {
   answer: string | null;
   /** As the submission's page shows it: "answered under vN", "AI card version not recorded", or null without an answer. */
   stamp: string | null;
+  files: ReportFile[];
 };
 
 export type ReportPayload = {
@@ -96,6 +110,14 @@ export function buildReportPayload(
         scoreLabel: score != null ? (SCORE_LABELS[score] ?? null) : null,
         answer: input.answersByQ[q.id] ?? null,
         stamp: stampOf(input.versionByQ, q.id),
+        files: (input.filesByQ?.[q.id] ?? []).map((f) => ({
+          name: f.name,
+          mime: f.mime,
+          size: formatSize(f.size),
+          uploadedBy: f.uploadedBy,
+          uploadedAt: formatDateTime(new Date(f.uploadedAt)),
+          sha256: f.sha256,
+        })),
       };
     }),
   }));

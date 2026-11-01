@@ -32,7 +32,10 @@ vi.mock("next/navigation", () => ({
   },
 }));
 vi.mock("@/lib/projectDb", () => ({
-  projectDbFor: vi.fn(async () => ({ submission: { findUnique: vi.fn(async () => submission) } })),
+  projectDbFor: vi.fn(async () => ({
+    submission: { findUnique: vi.fn(async () => submission) },
+    submissionAnswerFile: { findMany: vi.fn(async () => []) },
+  })),
 }));
 
 afterEach(() => {

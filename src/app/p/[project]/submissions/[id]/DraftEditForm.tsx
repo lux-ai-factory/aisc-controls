@@ -7,6 +7,8 @@ import ScoreScale from "@/components/ScoreScale";
 import { formatTime } from "@/lib/formatDate";
 import { useLeaveGuard } from "@/lib/useLeaveGuard";
 import { saveDraft, type ActionState } from "./actions";
+import ProofFiles from "./ProofFiles";
+import type { ProofLink } from "@/lib/proofFiles";
 
 type Q = {
   id: string;
@@ -22,6 +24,8 @@ export default function DraftEditForm({
   questions,
   answersByQ,
   scoresByQ,
+  filesByQ = {},
+  basePath = "",
 }: {
   project: string;
   submissionId: string;
@@ -29,6 +33,10 @@ export default function DraftEditForm({
   questions: Q[];
   answersByQ: Record<string, string>;
   scoresByQ: Record<string, number>;
+  /** The files proving each answer, by question id. */
+  filesByQ?: Record<string, ProofLink[]>;
+  /** The path the app is served under, for the files' links (a raw link does not get it from Next). */
+  basePath?: string;
 }) {
   const action = saveDraft.bind(null, project, submissionId);
   const [state, formAction, pending] = useActionState<ActionState, FormData>(
@@ -76,6 +84,14 @@ export default function DraftEditForm({
                   defaultValue={answersByQ[q.id] ?? ""}
                 />
                 <ScoreScale questionId={q.id} currentScore={currentScore} />
+                <ProofFiles
+                  basePath={basePath}
+                  project={project}
+                  submissionId={submissionId}
+                  questionId={q.id}
+                  files={filesByQ[q.id] ?? []}
+                  editable
+                />
               </div>
             );
           })}

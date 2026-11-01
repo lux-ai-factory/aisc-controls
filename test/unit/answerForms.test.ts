@@ -14,6 +14,7 @@ const guarded = vi.hoisted(() => vi.fn());
 vi.mock("@/lib/useLeaveGuard", () => ({ useLeaveGuard: guarded }));
 vi.mock("@/app/p/[project]/checklists/[id]/fill/actions", () => ({ submitForm: async () => undefined }));
 vi.mock("@/app/p/[project]/submissions/[id]/actions", () => ({ saveDraft: async () => undefined }));
+vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh: () => {} }) }));
 
 import FillForm from "@/app/p/[project]/checklists/[id]/fill/FillForm";
 import DraftEditForm from "@/app/p/[project]/submissions/[id]/DraftEditForm";
@@ -102,5 +103,17 @@ describe("the draft form's wording", () => {
     expect(html).toContain("<legend>Maturity (1-5)</legend>");
     expect(html).not.toContain("Readiness");
     expect(html).not.toContain("\u2014");
+  });
+});
+
+describe("the draft form's proof files", () => {
+  it("every question can attach a file, and no file control submits the form", () => {
+    const html = draft();
+    expect(html.match(/>Attach file</g)).toHaveLength(questions.length);
+    const fileInputs = html.match(/<input[^>]*type="file"[^>]*>/g) ?? [];
+    expect(fileInputs).toHaveLength(questions.length);
+    for (const input of fileInputs) expect(input).not.toContain("name=");
+    const attachButtons = html.match(/<button[^>]*>Attach file<\/button>/g) ?? [];
+    for (const button of attachButtons) expect(button).toContain('type="button"');
   });
 });

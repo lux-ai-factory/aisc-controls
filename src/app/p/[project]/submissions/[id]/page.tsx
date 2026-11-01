@@ -9,6 +9,8 @@ import {
   restoreSubmission,
 } from "./actions";
 import DraftEditForm from "./DraftEditForm";
+import ProofFiles from "./ProofFiles";
+import { filesByQuestion } from "@/lib/proofFiles";
 import { submissionIn } from "@/lib/submissions";
 import { formatDateTime } from "@/lib/formatDate";
 import { groupByCategory } from "@/lib/questions";
@@ -100,6 +102,7 @@ export default async function SubmissionDetailPage({
   if (!sub) notFound();
 
   const chain = await loadVersionChain(prisma, sub.id, sub.checklistId);
+  const filesByQ = await filesByQuestion(prisma, sub.id);
   const isDraft = sub.status === "Draft";
   const isArchived = sub.archivedAt !== null;
   // An older closed version: its amendment already exists, so reopening it would only lead there.
@@ -273,6 +276,8 @@ export default async function SubmissionDetailPage({
           questions={sub.checklist.questions}
           answersByQ={answersByQ}
           scoresByQ={scoresByQ}
+          filesByQ={filesByQ}
+          basePath={basePath}
         />
       ) : (
         groupByCategory(sheet.questions).map((group, gi) => (
@@ -295,6 +300,14 @@ export default async function SubmissionDetailPage({
                   ) : (
                     <p className="answer-text muted">Not answered</p>
                   )}
+                  <ProofFiles
+                    basePath={basePath}
+                    project={project}
+                    submissionId={sub.id}
+                    questionId={q.id}
+                    files={filesByQ[q.id] ?? []}
+                    editable={false}
+                  />
                   {q.id in versionByQ && (
                     <p className="meta">
                       {versionByQ[q.id] !== null ? `answered under v${versionByQ[q.id]}` : "AI card version not recorded"}

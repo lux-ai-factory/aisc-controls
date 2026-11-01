@@ -68,7 +68,8 @@ export function answerSheet(status: string, live: LiveQuestion[], answers: Store
   for (const { key, answer } of keyed) {
     if (answer.answer != null) sheet.answersByQ[key] = answer.answer;
     if (answer.score != null) sheet.scoresByQ[key] = answer.score;
-    sheet.versionByQ[key] = answer.systemVersionNumber;
+    // a row that only holds proof files was not answered under any version
+    if (answer.answer != null || answer.score != null) sheet.versionByQ[key] = answer.systemVersionNumber;
   }
   return sheet;
 }

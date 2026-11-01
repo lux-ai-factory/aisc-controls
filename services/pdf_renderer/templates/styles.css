@@ -222,3 +222,7 @@ code {
 .score-3 { background: #fbf3c4; color: #8a6d0b; }
 .score-4 { background: #e0f0e4; color: #15803d; }
 .score-5 { background: #c8ead6; color: #027a48; }
+
+/* a question's proof files: listed, never embedded */
+.proof-files ul { margin: 2pt 0 0 12pt; padding: 0; font-size: 8.5pt; }
+.proof-files .sha { font-family: monospace; font-size: 7pt; word-break: break-all; }

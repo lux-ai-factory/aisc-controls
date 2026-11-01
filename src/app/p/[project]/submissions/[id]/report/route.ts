@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { projectDbFor } from "@/lib/projectDb";
 import { buildReportPayload, type ReportInput } from "@/lib/report";
 import { answerSheet } from "@/lib/answerSheet";
+import { filesByQuestion } from "@/lib/proofFiles";
 import { slugify } from "@/lib/slugify";
 import { findCountry, findRegulation } from "@/data";
 
@@ -62,6 +63,7 @@ export async function GET(
     answersByQ: sheet.answersByQ,
     scoresByQ: sheet.scoresByQ,
     versionByQ: sheet.versionByQ,
+    filesByQ: await filesByQuestion(prisma, sub.id),
   };
 
   const payload = buildReportPayload(input, new Date());

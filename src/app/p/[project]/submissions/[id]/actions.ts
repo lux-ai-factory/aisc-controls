@@ -9,6 +9,7 @@ import { latestVersion } from "@/lib/systemVersion";
 import { callerToken } from "@/lib/access/callerToken";
 import { emitEvent } from "@/vendor/aisc-ledger/emit";
 import { submissionState } from "@/lib/ledger/state";
+import { carryProofFiles } from "@/lib/proofFiles";
 
 // savedAt: when a save went through (an ISO time), for the form to confirm it.
 export type ActionState = { error?: string; savedAt?: string } | undefined;
@@ -125,8 +126,28 @@ export async function saveDraft(
         ? { label, status: "Closed", closedAt: new Date(), questionsVersion: checklist.questions_version }
         : { label },
     });
-    await tx.submissionAnswer.deleteMany({ where: { submissionId } });
-    await tx.submissionAnswer.createMany({ data: rows });
+    // Each answer keeps its row, and so the files linked to it: a new one is made, a changed one updated, and
+    // one no longer given is deleted, unless files are linked to it, which keeps it with no answer.
+    for (const row of rows) {
+      const before = old.get(row.questionId);
+      if (!before) await tx.submissionAnswer.create({ data: row });
+      else if (shouldClose || !isUnchanged(row, before)) await tx.submissionAnswer.update({ where: { id: before.id }, data: row });
+    }
+    const given = new Set(rows.map((r) => r.questionId));
+    const dropped = replaced.filter((a) => a.questionId !== null && !given.has(a.questionId));
+    const holdingFiles = new Set((await tx.submissionAnswerFile.findMany({
+      where: { answerId: { in: dropped.map((a) => a.id) } }, select: { answerId: true },
+    })).map((f) => f.answerId));
+    const gone = dropped.filter((a) => !holdingFiles.has(a.id)).map((a) => a.id);
+    if (gone.length > 0) await tx.submissionAnswer.deleteMany({ where: { id: { in: gone } } });
+    for (const a of dropped.filter((d) => holdingFiles.has(d.id))) {
+      const question = current.get(a.questionId as string);
+      const asked = shouldClose && question
+        ? { questionText: question.text, questionArticle: question.article, questionCategory: question.category,
+            questionOrder: question.order }
+        : {};
+      await tx.submissionAnswer.update({ where: { id: a.id }, data: { answer: null, score: null, ...asked } });
+    }
     await emitEvent(tx, {
       action: shouldClose ? "controls.submission.closed" : "controls.submission.draft_saved",
       itemType: "submission",
@@ -186,20 +207,22 @@ export async function reopenForAmendment(project: string, submissionId: string):
       status: "Draft",
       version: previous.version + 1,
       previousVersionId: previous.id,
-      answers: {
-        // An amendment copies each answer as it was, stamp included.
-        create: carried.map((a) => ({
-          questionId: a.questionId,
-          answer: a.answer,
-          score: a.score,
-          systemVersionPid: a.systemVersionPid,
-          systemVersionNumber: a.systemVersionNumber,
-          answeredAt: a.answeredAt,
-        })),
-      },
     },
     select: { id: true },
     });
+    // An amendment copies each answer as it was, stamp included, and links the same proof files to it.
+    await tx.submissionAnswer.createMany({
+      data: carried.map((a) => ({
+        submissionId: made.id,
+        questionId: a.questionId,
+        answer: a.answer,
+        score: a.score,
+        systemVersionPid: a.systemVersionPid,
+        systemVersionNumber: a.systemVersionNumber,
+        answeredAt: a.answeredAt,
+      })),
+    });
+    await carryProofFiles(tx, carried, made.id);
     // The amendment is a new submission (its own item); this event is the closed one's. Its content is the
     // amendment's first state, which the amendment's first save continues as its `before`.
     await emitEvent(tx, {
