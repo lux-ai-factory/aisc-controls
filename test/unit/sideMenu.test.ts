@@ -62,10 +62,10 @@ describe("the header inside a project", () => {
   it("keeps only the logo, the app's title and Back: the other links moved to the left menu", () => {
     const html = renderToStaticMarkup(createElement(SiteHeader, { project: "demo" }));
     expect(html).toMatch(/<span class="divider"><\/span><span>Checklists<\/span>/);
-    // Checklists are opened from step 4, Collect evidence, so Back returns there and says so.
-    expect(html).toMatch(/<a href="http:\/\/launcher\.test\/evidence\.html\?project=demo" class="btn ghost site-back">← Collect evidence<\/a>/);
+    // Checklists are opened from step 4, AI Assessment Sandbox, so Back returns there and says so.
+    expect(html).toMatch(/<a href="http:\/\/launcher\.test\/evidence\.html\?project=demo" class="btn ghost site-back">← AI Assessment Sandbox<\/a>/);
     expect(html).not.toContain("← Back");
-    expect(html).not.toContain("Sandbox");
+    expect(html).not.toContain("Configurator");
     for (const gone of ["Library", "Answered checklists", ">Sources<"]) expect(html).not.toContain(gone);
   });
 });

@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 /**
  * A project's menu on the left, as qualification's and control objectives':
  * the installed checklists and the submissions, and the archived submissions
- * at its bottom. "← Collect evidence" is not one of them: it is the header's own button.
+ * at its bottom. "← AI Assessment Sandbox" is not one of them: it is the header's own button.
  *
  * Raw <a href> links, so each one adds the base path itself (as SiteHeader).
  * The path from usePathname has no base path, so the item of the page shown is

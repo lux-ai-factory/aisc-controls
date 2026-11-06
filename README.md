@@ -3,7 +3,7 @@
 The checklists of AISC, the AI Assessment Sandbox Configurator: the compose
 services `controls-web` and `controls-pdf`. AISC walks a project through four
 steps: 1 Qualify the AI system, 2 Set control objectives, 3 Choose tests and
-checklists, 4 Collect evidence. A checklist is installed in step 3, from the
+checklists, 4 AI Assessment Sandbox. A checklist is installed in step 3, from the
 project's catalogue; this app is where people answer it, the "Answer
 checklists" column of step 4.
 
@@ -12,7 +12,7 @@ Each question is answered with a score from 1 to 5 ("Not started" to
 has either. A set of answers (a submission) is a draft until it is closed;
 reopening a closed submission makes a new version, and the closed one stays as
 it was. Each submission can be downloaded as a PDF report. The platform (the
-Collect evidence tiles and the Evidence map), the results dashboard and the
+AI Assessment Sandbox tiles and the Evidence map), the results dashboard and the
 report read the answers from the project's database.
 
 An answered checklist shows two figures: **coverage**, the questions answered

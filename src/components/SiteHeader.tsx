@@ -1,7 +1,7 @@
 /**
  * The header.
  *
- * Inside a project it holds "← Collect evidence", to that project's step 4 on
+ * Inside a project it holds "← AI Assessment Sandbox", to that project's step 4 on
  * the launcher, where the checklists are opened from; the logo goes
  * to the project's page, where the other steps are. The project is chosen
  * there and this app never asks again, so these are the ways back out. The
@@ -16,7 +16,7 @@ export default function SiteHeader({ project }: { project?: string }) {
   const projectPage = project
     ? `${withoutTrailingSlash(launcherUrl())}/p/${encodeURIComponent(project)}`
     : null;
-  // The checklists are opened from the project's step 4, Collect evidence, so Back returns there.
+  // The checklists are opened from the project's step 4, AI Assessment Sandbox, so Back returns there.
   const sandboxPage = project
     ? `${withoutTrailingSlash(launcherUrl())}/evidence.html?project=${encodeURIComponent(project)}`
     : null;
@@ -32,7 +32,7 @@ export default function SiteHeader({ project }: { project?: string }) {
         </a>
         {sandboxPage && (
           <a href={sandboxPage} className="btn ghost site-back">
-            ← Collect evidence
+            ← AI Assessment Sandbox
           </a>
         )}
       </div>
