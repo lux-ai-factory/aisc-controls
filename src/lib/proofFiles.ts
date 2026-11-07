@@ -81,7 +81,8 @@ async function lockDraft(tx: Tx, submissionId: string, checklistId: string): Pro
 /**
  * Attach one file to a question of a draft: the platform stores it, then the link and its event are
  * written together. The checks are made before the file is sent (no file is stored for a closed
- * submission or a full question) and again under the draft's lock.
+ * submission or a full question) and again under the draft's lock; a file refused there stays stored,
+ * linked to nothing, and its id is logged.
  */
 export async function attachProofFile(
   prisma: PrismaClient,
@@ -101,7 +102,7 @@ export async function attachProofFile(
   if (!stored.ok) return stored;
 
   await beforeTransaction();
-  return prisma.$transaction(async (tx) => {
+  const result: ProofResult = await prisma.$transaction(async (tx) => {
     const locked = await lockDraft(tx, submissionId, sub.checklistId);
     if (locked) return locked;
     if (!(await tx.question.findUnique({ where: { id: questionId }, select: { id: true } }))) {
@@ -117,6 +118,12 @@ export async function attachProofFile(
     await record(tx, answer.id, detailsOf(submissionId, questionId, link));
     return { ok: true, file: asLink(link) };
   });
+  if (!result.ok) {
+    // the platform keeps every file it stored: this one is linked to nothing, so it is named here to be found
+    console.warn(`controls: proof file ${stored.file.id} of project ${pid} was stored but not linked `
+      + `(submission ${submissionId}, question ${questionId}): ${result.error}`);
+  }
+  return result;
 }
 
 /** Unlink one file from a draft's question; the platform keeps the file. An answer that only held files

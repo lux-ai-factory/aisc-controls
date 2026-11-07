@@ -12,6 +12,7 @@ const state = vi.hoisted(() => ({
   stored: new Map<string, { bytes: Uint8Array; mime: string; name: string; sha256: string }>(),
   refuse: null as null | { status: number; error: string },
   platformCalls: 0,
+  afterStore: null as null | (() => void),
 }));
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 vi.mock("next/navigation", () => ({
@@ -46,6 +47,7 @@ vi.mock("@/lib/proofStore", async (importOriginal) => {
       const id = randomUUID();
       const sha256 = createHash("sha256").update(bytes).digest("hex");
       state.stored.set(id, { bytes, mime: "application/pdf", name, sha256 });
+      state.afterStore?.();
       return { ok: true, file: { id, name, mime: "application/pdf", size: bytes.length, sha256 } };
     },
     readProofFile: async (_pid: string, id: string) => {
@@ -131,6 +133,7 @@ describe.skipIf(!hasThrowawayDb)("proof files of an answer", () => {
     state.role = "editor";
     state.refuse = null;
     state.platformCalls = 0;
+    state.afterStore = null;
   });
 
   async function draft(answers: Record<string, string> = { [`a:${qA}`]: "yes" }): Promise<string> {
@@ -219,6 +222,19 @@ describe.skipIf(!hasThrowawayDb)("proof files of an answer", () => {
     expect(state.platformCalls).toBe(0);
     expect(links(sub)).toHaveLength(10);
     expect((await attach(attachRequest("other.pdf"), at(sub, qB))).status).toBe(201);   // per question
+  });
+
+  it("a file stored but then refused under the draft's lock is logged by its id, so the orphan can be found", async () => {
+    const sub = await draft();
+    state.afterStore = () => rows(`UPDATE controls.submission SET status = 'Closed' WHERE id = '${sub}'`, project);
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const res = await attach(attachRequest("late.pdf"), at(sub, qA));
+    const logged = warn.mock.calls.map((c) => c.join(" "));
+    warn.mockRestore();
+    expect(res.status).toBe(409);
+    expect(links(sub)).toEqual([]);
+    const [orphan] = [...state.stored.entries()].filter(([, f]) => f.name === "late.pdf").map(([id]) => id);
+    expect(logged.some((line) => line.includes(orphan) && line.includes(project.toLowerCase()))).toBe(true);
   });
 
   it("a file the platform refuses is not linked, and its reason is passed on", async () => {
