@@ -157,6 +157,24 @@ export async function saveReviewedQuestions(
                     answers: { select: { questionId: true, answer: true, score: true } } },
         })
       : [];
+    // The drafts' answers take their proof links with them (ON DELETE CASCADE): each link removed is recorded as a
+    // remove from the page records it, so the ledger never shows a file attached and not unlinked.
+    const unlinked = ledgerOn() && removedIds.length
+      ? await tx.submissionAnswerFile.findMany({
+          where: { answer: { questionId: { in: removedIds }, submission: { status: "Draft" } } },
+          include: { answer: { select: { submissionId: true, questionId: true } } },
+          orderBy: [{ uploadedAt: "asc" }, { id: "asc" }],
+        })
+      : [];
+    for (const link of unlinked) {
+      await emitEvent(tx, {
+        action: "control.proof.removed",
+        itemType: "answer",
+        itemId: link.answerId,
+        details: { submission: link.answer.submissionId, question: link.answer.questionId as string, file: link.fileId,
+                   name: link.name, mime: link.mime, size: link.size, sha256: link.sha256 },
+      });
+    }
     const version = was.questionsVersion + 1;
     if (removedIds.length) {
       await tx.submissionAnswer.deleteMany({ where: { questionId: { in: removedIds }, submission: { status: "Draft" } } });

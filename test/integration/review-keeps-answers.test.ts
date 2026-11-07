@@ -173,4 +173,22 @@ describe.skipIf(!hasThrowawayDb)("a review keeps the questions it does not remov
     const removed = (events[0].content as { removed_answers: { submission: string; question: string }[] }).removed_answers;
     expect(removed).toEqual([expect.objectContaining({ submission: draft, question: q[2], status: "Draft" })]);
   });
+
+  it("a draft's proof files on a removed question are recorded as removed, with the question they were on", async () => {
+    const { id, q, draft } = await answered();
+    const prisma = await prismaFor(project);
+    const answer = await prisma.submissionAnswer.findUniqueOrThrow({
+      where: { submissionId_questionId: { submissionId: draft, questionId: q[2] } } });
+    const fileId = randomUUID();
+    await prisma.submissionAnswerFile.create({ data: { answerId: answer.id, fileId, name: "proof.pdf",
+      mime: "application/pdf", size: 3, sha256: "ab".repeat(32), uploadedBy: "alice@example.org" } });
+    await review(id, [{ id: q[0], text: "A?" }, { id: q[1], text: "B?" }]);
+    const events = rows(
+      `SELECT json_build_object('item_type', item_type, 'item_id', item_id, 'details', details) FROM ledger.outbox
+         WHERE action = 'control.proof.removed' AND details->>'file' = '${fileId}'`, project,
+    ).map((line) => JSON.parse(line) as { item_type: string; item_id: string; details: Record<string, unknown> });
+    expect(events).toEqual([{ item_type: "answer", item_id: answer.id,
+      details: { submission: draft, question: q[2], file: fileId, name: "proof.pdf", mime: "application/pdf", size: 3,
+                 sha256: "ab".repeat(32) } }]);
+  });
 });
