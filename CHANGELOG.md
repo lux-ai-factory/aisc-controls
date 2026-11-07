@@ -7,8 +7,8 @@
   this app links it to the answer (new table `submission_answer_file`, read by `report_ro` and `dashboard_ro`) and
   records `control.proof.attached`, or `control.proof.removed` when it is unlinked (the platform keeps the file).
   Anybody in the project downloads a file, always as a download. A closed submission's files are frozen; its next
-  version starts with the same files linked. The page and the PDF report list each question's files (name, type,
-  size, who, when; the report also the SHA-256). New variable `PLATFORM_CONTROLS_TOKEN`. Check:
+  version starts with the same files linked. The page lists each question's files (name, size, who, when); the PDF
+  report lists them with their type and SHA-256 too. New variable `PLATFORM_CONTROLS_TOKEN`. Check:
   `npx vitest run test/unit/proofFiles.test.ts`, `bash ../../scripts/lib/controls-tests.sh` (`proof-files.test.ts`).
 - A draft's save keeps each answer's row (updated in place) instead of replacing them all, so the files linked to an
   answer stay linked; an answer cleared while it holds files keeps its row with no answer.
