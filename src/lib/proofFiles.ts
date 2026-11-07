@@ -36,6 +36,7 @@ const FULL = `A question takes at most ${MAX_FILES_PER_QUESTION} files. Remove o
 const NO_SUBMISSION = "Submission not found.";
 const NO_QUESTION = "Question not found.";
 const NO_FILE = "File not found.";
+const REMOVED = "removed-";
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const refused = (status: number, error: string): ProofResult => ({ ok: false, status, error });
@@ -149,10 +150,14 @@ export async function removeProofFile(
   });
 }
 
-/** The file linked to this question of this submission, or null. */
+/** The file linked to this question of this submission, or null. A question removed since is named as
+ *  filesByQuestion keys it, `removed-<answer id>`: the answer that lost its question. */
 export async function linkedFile(prisma: PrismaClient, submissionId: string, questionId: string, fileId: string) {
   if (!UUID.test(fileId)) return null;
-  const row = await prisma.submissionAnswerFile.findFirst({ where: { fileId, answer: { submissionId, questionId } } });
+  const answer = questionId.startsWith(REMOVED)
+    ? { submissionId, id: questionId.slice(REMOVED.length), questionId: null }
+    : { submissionId, questionId };
+  const row = await prisma.submissionAnswerFile.findFirst({ where: { fileId, answer } });
   return row ? asLink(row) : null;
 }
 
@@ -165,7 +170,7 @@ export async function filesByQuestion(db: PrismaClient | Tx, submissionId: strin
     orderBy: [{ uploadedAt: "asc" }, { id: "asc" }],
   });
   const out: Record<string, ProofLink[]> = {};
-  for (const row of rows) (out[row.answer.questionId ?? `removed-${row.answer.id}`] ??= []).push(asLink(row));
+  for (const row of rows) (out[row.answer.questionId ?? `${REMOVED}${row.answer.id}`] ??= []).push(asLink(row));
   return out;
 }
 

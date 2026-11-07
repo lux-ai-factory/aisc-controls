@@ -295,6 +295,29 @@ describe.skipIf(!hasThrowawayDb)("proof files of an answer", () => {
     expect((await download(new Request("https://controls.test/x"), atFile(sub, qA, a.id))).status).toBe(200);
   });
 
+  it("a closed submission's file on a question removed since downloads under the key the page lists it by", async () => {
+    const prisma = await prismaFor(project);
+    const tag = randomUUID().slice(0, 8);
+    const source = await prisma.source.create({ data: { name: `S ${tag}`, slug: `s-${tag}` } });
+    const own = await prisma.checklist.create({
+      data: { title: `C ${tag}`, sourceId: source.id, controlTopic: "Testing", questions: { create: [{ order: 1, text: "Gone?" }] } },
+      include: { questions: true },
+    });
+    const gone = own.questions[0].id;
+    const to = await redirected(() => submitForm(project, own.id, undefined, form({ label: "Run", [`a:${gone}`]: "yes" })));
+    const sub = to.split("/").pop() as string;
+    const { file } = await (await attach(attachRequest(), at(sub, gone))).json();
+    await saveDraft(project, sub, undefined, form({ label: "Run", [`a:${gone}`]: "yes", intent: "close" }));
+    const [answer] = rows(`SELECT id FROM controls.submission_answer WHERE "submissionId" = '${sub}' AND "questionId" = '${gone}'`, project);
+    await prisma.question.delete({ where: { id: gone } });                      // a review removed it; the answer stays
+    const res = await download(new Request("https://controls.test/x"), atFile(sub, `removed-${answer}`, file.id));
+    expect(res.status).toBe(200);
+    expect(new Uint8Array(await res.arrayBuffer())).toEqual(PDF);
+    // the key names that answer only
+    expect((await download(new Request("https://controls.test/x"), atFile(sub, `removed-${randomUUID()}`, file.id))).status)
+      .toBe(404);
+  });
+
   it("a request from another site is refused", async () => {
     const sub = await draft();
     state.platformCalls = 0;
