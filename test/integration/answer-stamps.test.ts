@@ -197,6 +197,19 @@ describe.skipIf(!hasThrowawayDb)("answers carry the system version", () => {
     expect(s[qA].at).not.toBeNull();
   }, 60_000);
 
+  it("an answer cleared but kept for its proof files loses its stamp", async () => {
+    const id = await draft();
+    platform.latest = { pid: V1, number: 1 };
+    await saveDraft(project, id, undefined, form({ label: "Run", [`a:${qA}`]: "Yes", [`s:${qA}`]: "4" }));
+    const prisma = await prismaFor(project);
+    const answer = await prisma.submissionAnswer.findUniqueOrThrow({
+      where: { submissionId_questionId: { submissionId: id, questionId: qA } } });
+    await prisma.submissionAnswerFile.create({ data: { answerId: answer.id, fileId: randomUUID(), name: "p.pdf",
+      mime: "application/pdf", size: 1, sha256: "ab".repeat(32) } });
+    await saveDraft(project, id, undefined, form({ label: "Run" }));          // cleared; the row stays for its file
+    expect(stamps(project, id)[qA]).toEqual({ answer: null, score: null, pid: null, number: null, at: null });
+  }, 60_000);
+
   it("saving again with no change changes no stamp and no answered_at", async () => {
     const id = await draft();
     platform.latest = { pid: V1, number: 1 };

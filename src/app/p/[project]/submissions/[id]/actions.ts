@@ -146,7 +146,11 @@ export async function saveDraft(
         ? { questionText: question.text, questionArticle: question.article, questionCategory: question.category,
             questionOrder: question.order }
         : {};
-      await tx.submissionAnswer.update({ where: { id: a.id }, data: { answer: null, score: null, ...asked } });
+      // no longer answered: no answer, and no stamp saying under which card version it was given
+      await tx.submissionAnswer.update({
+        where: { id: a.id },
+        data: { answer: null, score: null, systemVersionPid: null, systemVersionNumber: null, answeredAt: null, ...asked },
+      });
     }
     await emitEvent(tx, {
       action: shouldClose ? "controls.submission.closed" : "controls.submission.draft_saved",
