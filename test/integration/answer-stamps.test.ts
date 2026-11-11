@@ -37,6 +37,8 @@ import { randomUUID } from "node:crypto";
 
 import { prismaFor, projectDatabaseName, projectDatabaseUrl, closeProjectDatabases } from "@/lib/projectDb";
 import { saveDraft, reopenForAmendment } from "@/app/p/[project]/submissions/[id]/actions";
+
+const AMEND = { reason: "Corrected a date", requestedBy: "Test auditor" };
 import { submitForm } from "@/app/p/[project]/checklists/[id]/fill/actions";
 import { hasThrowawayDb, makeProject, dropProject, rows, su } from "./throwawayDb";
 
@@ -252,7 +254,7 @@ describe.skipIf(!hasThrowawayDb)("answers carry the system version", () => {
     expect(original[qA].pid).toBe(V1);
 
     platform.latest = { pid: V2, number: 2 };
-    const url = await captureRedirect(() => reopenForAmendment(project, id));
+    const url = await captureRedirect(() => reopenForAmendment(project, id, AMEND));
     const next = url.split("/").pop() as string;
     expect(next).not.toBe(id);
     expect(stamps(project, next)[qA]).toEqual(original[qA]);

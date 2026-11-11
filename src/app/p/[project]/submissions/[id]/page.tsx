@@ -127,6 +127,15 @@ export default async function SubmissionDetailPage({
     totalQuestions,
   );
 
+  // The reason and the requester come from the form; the action refuses the amendment without them.
+  async function amend(form: FormData) {
+    "use server";
+    await reopenForAmendment(project, id, {
+      reason: String(form.get("reason") ?? ""),
+      requestedBy: String(form.get("requestedBy") ?? ""),
+    });
+  }
+
   return (
     <main className="page">
       <header className="page-header">
@@ -201,11 +210,24 @@ export default async function SubmissionDetailPage({
         )}
         {!isDraft && !isArchived && !nextVersion && (
           <>
-            <form action={reopenForAmendment.bind(null, project, sub.id)}>
-              <button className="btn" type="submit">
-                Amend (makes version {sub.version + 1})
-              </button>
-            </form>
+            <details className="amend">
+              <summary className="btn">Amend (makes version {sub.version + 1})</summary>
+              <form action={amend} className="qf-form">
+                <div className="field">
+                  <label htmlFor="amend-reason">Why are the answers amended?</label>
+                  <textarea id="amend-reason" name="reason" rows={3} required />
+                </div>
+                <div className="field">
+                  <label htmlFor="amend-requested-by">Who asked for it?</label>
+                  <input id="amend-requested-by" name="requestedBy" required />
+                </div>
+                <div className="qf-actions">
+                  <button className="btn" type="submit">
+                    Make version {sub.version + 1}
+                  </button>
+                </div>
+              </form>
+            </details>
             <form action={archiveSubmission.bind(null, project, sub.id)}>
               <button className="btn ghost" type="submit">
                 Archive

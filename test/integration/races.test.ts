@@ -32,6 +32,8 @@ import { prismaFor, projectDatabaseName } from "@/lib/projectDb";
 import { submitForm } from "@/app/p/[project]/checklists/[id]/fill/actions";
 import { saveDraft, reopenForAmendment, archiveSubmission } from "@/app/p/[project]/submissions/[id]/actions";
 
+const AMEND = { reason: "Corrected a date", requestedBy: "Test auditor" };
+
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 function field(entries: Record<string, string>): FormData {
@@ -91,8 +93,8 @@ describe.skipIf(!hasThrowawayDb)("two writes at once (integration)", () => {
     for (let i = 0; i < 3; i++) {
       const sub = await closed(`reopen ${i}`);
       const [a, b] = await Promise.all([
-        outcome(() => reopenForAmendment(project, sub.id)),
-        outcome(() => reopenForAmendment(project, sub.id)),
+        outcome(() => reopenForAmendment(project, sub.id, AMEND)),
+        outcome(() => reopenForAmendment(project, sub.id, AMEND)),
       ]);
       expect(a.error ?? b.error).toBeUndefined();
       expect(a.redirect).toBeDefined();

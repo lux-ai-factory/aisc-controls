@@ -181,7 +181,15 @@ export async function saveDraft(
 // The actions below throw when refused: they return nothing, so there is no
 // state to put the refusal in, and the page shows it as an error.
 
-export async function reopenForAmendment(project: string, submissionId: string): Promise<void> {
+export async function reopenForAmendment(
+  project: string,
+  submissionId: string,
+  amend: { reason: string; requestedBy: string },
+): Promise<void> {
+  // Refused before anything is opened or made: a correction to a closed submission says why and who asked.
+  const reason = amend.reason.trim();
+  const requestedBy = amend.requestedBy.trim();
+  if (!reason || !requestedBy) throw new Error("Say why the answers are amended and who asked for it.");
   const prisma = await projectDbFor(project, { write: true });
   const base = inProject(project);
 
@@ -211,6 +219,8 @@ export async function reopenForAmendment(project: string, submissionId: string):
       status: "Draft",
       version: previous.version + 1,
       previousVersionId: previous.id,
+      amendReason: reason,
+      amendRequestedBy: requestedBy,
     },
     select: { id: true },
     });
@@ -233,7 +243,7 @@ export async function reopenForAmendment(project: string, submissionId: string):
       action: "controls.submission.reopened",
       itemType: "submission",
       itemId: previous.id,
-      details: { next: made.id, version: previous.version + 1 },
+      details: { next: made.id, version: previous.version + 1, reason, requested_by: requestedBy },
       content: { next: submissionState(previous.label, "Draft", carried) },
     });
     return made;

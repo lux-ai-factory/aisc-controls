@@ -36,6 +36,8 @@ import { randomUUID } from "node:crypto";
 import { prismaFor, projectDatabaseUrl, closeProjectDatabases } from "@/lib/projectDb";
 import { submitForm } from "@/app/p/[project]/checklists/[id]/fill/actions";
 import { saveDraft, reopenForAmendment } from "@/app/p/[project]/submissions/[id]/actions";
+
+const AMEND = { reason: "Corrected a date", requestedBy: "Test auditor" };
 import { saveReviewedQuestions } from "@/app/p/[project]/checklists/[id]/review/actions";
 import { countries, regulations } from "@/data";
 import { hasThrowawayDb, makeProject, dropProject, rows } from "./throwawayDb";
@@ -167,7 +169,7 @@ describe.skipIf(!hasThrowawayDb)("a closed submission keeps the wording it answe
   it("an amendment of a closed submission leaves out its answers to removed questions", async () => {
     const { id, q, closed } = await answered();
     await review(id, [{ id: q[1], text: "B?" }]);
-    const next = (await redirected(() => reopenForAmendment(project, closed))).split("/").pop() as string;
+    const next = (await redirected(() => reopenForAmendment(project, closed, AMEND))).split("/").pop() as string;
     expect(rows(`SELECT answer FROM controls.submission_answer WHERE "submissionId" = '${next}'`, project)).toEqual(["closed b"]);
   });
 

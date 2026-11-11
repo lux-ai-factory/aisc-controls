@@ -63,6 +63,8 @@ import { prismaFor, closeProjectDatabases } from "@/lib/projectDb";
 import { submitForm } from "@/app/p/[project]/checklists/[id]/fill/actions";
 import { saveReviewedQuestions } from "@/app/p/[project]/checklists/[id]/review/actions";
 import { saveDraft, reopenForAmendment, archiveSubmission, restoreSubmission, discardDraft } from "@/app/p/[project]/submissions/[id]/actions";
+
+const AMEND = { reason: "Corrected a date", requestedBy: "Test auditor" };
 import { installFromCatalogue } from "@/app/p/[project]/install/actions";
 import { POST as installApi } from "@/app/api/install/route";
 import { hasThrowawayDb, makeProject, dropProject, rows, su } from "./throwawayDb";
@@ -189,7 +191,7 @@ describe.skipIf(!hasThrowawayDb)("every controls write records its ledger event"
     await archiveSubmission(project, id);
     await restoreSubmission(project, id);
     await restoreSubmission(project, id);                              // not archived any more: nothing
-    const next = (await redirected(() => reopenForAmendment(project, id))).split("/").pop();
+    const next = (await redirected(() => reopenForAmendment(project, id, AMEND))).split("/").pop();
     const mine = outbox(id);
     expect(mine.map((r) => r.action)).toEqual(["controls.submission.created", "controls.submission.draft_saved",
       "controls.submission.closed", "controls.submission.archived", "controls.submission.restored",
@@ -317,7 +319,7 @@ describe.skipIf(!hasThrowawayDb)("every controls write records its ledger event"
   it("a reopening records the amendment's first state, which its first save continues", async () => {
     const { id, q } = await freshChecklist();
     const sub = await closedSubmission(id, q[0], "v1");
-    const next = (await redirected(() => reopenForAmendment(project, sub))).split("/").pop() as string;
+    const next = (await redirected(() => reopenForAmendment(project, sub, AMEND))).split("/").pop() as string;
     const [reopened] = outbox(sub).filter((r) => r.action === "controls.submission.reopened");
     await saveDraft(project, next, undefined, form({ label: "Run", [`a:${q[0]}`]: "v2" }));
     const [saved] = outbox(next);

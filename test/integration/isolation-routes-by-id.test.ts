@@ -166,7 +166,7 @@ describe.skipIf(!hasThrowawayDb)("a controls id opened under another project's p
 
     const state = await saveDraft(mine, theirSubmission, undefined, form({ label: "hijacked" }));
     expect(state).toBeTruthy();
-    await expect(reopenForAmendment(mine, theirSubmission)).rejects.toThrow();
+    await expect(reopenForAmendment(mine, theirSubmission, { reason: "r", requestedBy: "w" })).rejects.toThrow();
     await expect(archiveSubmission(mine, theirSubmission)).rejects.toThrow();
     await expect(restoreSubmission(mine, theirSubmission)).rejects.toThrow();
 

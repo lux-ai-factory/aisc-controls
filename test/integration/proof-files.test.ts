@@ -63,6 +63,8 @@ import { createHash, randomUUID } from "node:crypto";
 import { prismaFor, closeProjectDatabases } from "@/lib/projectDb";
 import { submitForm } from "@/app/p/[project]/checklists/[id]/fill/actions";
 import { saveDraft, reopenForAmendment } from "@/app/p/[project]/submissions/[id]/actions";
+
+const AMEND = { reason: "Corrected a date", requestedBy: "Test auditor" };
 import { POST as attach } from "@/app/p/[project]/submissions/[id]/questions/[question]/files/route";
 import { GET as download, DELETE as remove } from "@/app/p/[project]/submissions/[id]/questions/[question]/files/[file]/route";
 import { hasThrowawayDb, makeProject, dropProject, rows } from "./throwawayDb";
@@ -301,7 +303,7 @@ describe.skipIf(!hasThrowawayDb)("proof files of an answer", () => {
     const a = (await (await attach(attachRequest("a.pdf"), at(sub, qA))).json()).file;
     const b = (await (await attach(attachRequest("b.pdf"), at(sub, qB))).json()).file;
     await saveDraft(project, sub, undefined, form({ label: "Run", [`a:${qA}`]: "yes", intent: "close" }));
-    const next = (await redirected(() => reopenForAmendment(project, sub))).split("/").pop() as string;
+    const next = (await redirected(() => reopenForAmendment(project, sub, AMEND))).split("/").pop() as string;
     expect(links(next).map((l) => [l.question, l.file, l.by]).sort())
       .toEqual([[qA, a.id, "alice@example.org"], [qB, b.id, "alice@example.org"]].sort());
     expect((await remove(sameOrigin("DELETE"), atFile(next, qA, a.id))).status).toBe(200);

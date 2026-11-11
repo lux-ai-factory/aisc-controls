@@ -64,6 +64,8 @@ import {
   discardDraft,
 } from "@/app/p/[project]/submissions/[id]/actions";
 
+const AMEND = { reason: "Corrected a date", requestedBy: "Test auditor" };
+
 // The SQL runs in the throwaway container, never the live one (see ./throwawayDb.ts).
 const hasDb = hasThrowawayDb;
 
@@ -131,7 +133,7 @@ describe.skipIf(!hasDb)("a server action checks the project it is told to change
     ["saveReviewedQuestions", () => saveReviewedQuestions(victim, checklistId, undefined, reviewForm())],
     ["submitForm", () => submitForm(victim, checklistId, undefined, field({ label: "planted" }))],
     ["saveDraft", () => saveDraft(victim, draftId, undefined, field({ label: "hijacked" }))],
-    ["reopenForAmendment", () => reopenForAmendment(victim, closedId)],
+    ["reopenForAmendment", () => reopenForAmendment(victim, closedId, AMEND)],
     ["archiveSubmission", () => archiveSubmission(victim, closedId)],
     ["restoreSubmission", () => restoreSubmission(victim, archivedId)],
     ["discardDraft", () => discardDraft(victim, draftId)],
