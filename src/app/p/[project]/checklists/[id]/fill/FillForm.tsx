@@ -35,7 +35,7 @@ export default function FillForm({
   const grouped = groupByCategory(questions);
 
   return (
-    <form ref={formRef} onSubmit={keepTypedOnRefusal(formAction)} className="qf-form">
+    <form ref={formRef} action={formAction} onSubmit={keepTypedOnRefusal(formAction)} className="qf-form">
       {state?.error && <div className="error">{state.error}</div>}
 
       <section className="qf-section">

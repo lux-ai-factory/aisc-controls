@@ -50,7 +50,7 @@ export default function DraftEditForm({
   const grouped = groupByCategory(questions);
 
   return (
-    <form ref={formRef} onSubmit={keepTypedOnRefusal(formAction)} className="qf-form">
+    <form ref={formRef} action={formAction} onSubmit={keepTypedOnRefusal(formAction)} className="qf-form">
       {state?.error && <div className="error">{state.error}</div>}
       {/* the browser formats it, so the time is the reader's own */}
       {state?.savedAt && (
