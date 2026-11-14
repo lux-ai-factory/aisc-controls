@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useRef } from "react";
+import { keepTypedOnRefusal } from "@/lib/keepTypedOnRefusal";
 import Link from "next/link";
 import { groupByCategory } from "@/lib/questions";
 import ScoreScale from "@/components/ScoreScale";
@@ -34,7 +35,7 @@ export default function FillForm({
   const grouped = groupByCategory(questions);
 
   return (
-    <form ref={formRef} action={formAction} className="qf-form">
+    <form ref={formRef} onSubmit={keepTypedOnRefusal(formAction)} className="qf-form">
       {state?.error && <div className="error">{state.error}</div>}
 
       <section className="qf-section">
