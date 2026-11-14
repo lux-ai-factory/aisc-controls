@@ -75,16 +75,22 @@ describe.skipIf(!hasThrowawayDb)("answers point at a card version of their own d
     expect(bad).toThrow(/submission_answer_system_version_pid_fkey/);
   }, 120_000);
 
-  it("a version that an answer names cannot be deleted (NO ACTION)", async () => {
+  it("a version that an answer names cannot be deleted: the platform keeps every version, and the key names it", async () => {
     needTemplate();
     const project = makeTemplatedProject();
     made.push(project);
     await prismaFor(project);
     addSystemVersion(project, V1, 1);
     (await answered(project, V1))();
-    expect(() => su(`DELETE FROM project.system WHERE pid = '${V1}'`, projectDatabaseName(project))).toThrow(
-      /submission_answer_system_version_pid_fkey/,
-    );
+    const db = projectDatabaseName(project);
+    expect(() => su(`DELETE FROM project.system WHERE pid = '${V1}'`, db)).toThrow(/is kept/);
+    expect(
+      su(
+        `SELECT count(*) FROM pg_constraint WHERE conname = 'submission_answer_system_version_pid_fkey'
+           AND confrelid = 'project.system'::regclass`,
+        db,
+      ).trim(),
+    ).toBe("1");
   }, 120_000);
 
   it("the migration refuses, naming the pid, when an answer names a version absent from project.system", async () => {
