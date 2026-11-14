@@ -14,9 +14,10 @@ const COPIES: [string, string][] = [
   ["src/vendor/aisc-access/projectDb.d.mts", "access-ts/projectDb.d.mts"],
   ["test/vendor/projectDb.test.ts", "access-ts/projectDb.test.ts"],
   ["test/fixtures/projectdb-cases.json", "identity/projectdb-cases.json"],
-  ...["emit", "canonical", "gatewayToken"].map((f): [string, string] => [
+  ["test/fixtures/switch-cases.json", "identity/switch-cases.json"],
+  ...["emit", "canonical", "gatewayToken", "switches"].map((f): [string, string] => [
     `src/vendor/aisc-ledger/${f}.ts`, `ledger-ts/${f}.ts`]),
-  ...["canonical", "emit", "jwksTimeout", "requestIdThroughGateway"].map((f): [string, string] => [
+  ...["canonical", "emit", "jwksTimeout", "requestIdThroughGateway", "switches"].map((f): [string, string] => [
     `test/vendor/ledger/${f}.test.ts`, `ledger-ts/${f}.test.ts`]),
 ];
 

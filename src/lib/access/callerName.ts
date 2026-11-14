@@ -12,13 +12,11 @@ import { headers } from "next/headers";
 
 import { tokenFromHeaders } from "@/lib/access/callerToken";
 import { keyForJwks, verifyToken, type KeyFor } from "@/vendor/aisc-ledger/gatewayToken";
+import { authEnabled } from "@/vendor/aisc-ledger/switches";
 
 type Claims = Record<string, unknown>;
 
 const keysByUrl = new Map<string, KeyFor>();
-
-const authEnabled = () =>
-  ["1", "true", "yes", "on"].includes((process.env.AUTH_ENABLED ?? "true").trim().toLowerCase());
 
 function unverifiedClaims(token: string): Claims | null {
   try {
