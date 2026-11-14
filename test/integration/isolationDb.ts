@@ -34,10 +34,10 @@ function templateFiles(): string[] {
 export function makeTemplatedProject(): string {
   const pid = randomUUID();
   const db = projectDatabaseName(pid);
-  su(`CREATE DATABASE ${db} OWNER platform_rw`);
-  // As platform_rw, the role projectdb.provision connects as, so every schema the template
-  // makes is owned by platform_rw exactly as in a provisioned database.
-  for (const file of templateFiles()) su(`SET ROLE platform_rw;\n${readFileSync(join(TEMPLATE_DIR, file), "utf8")}`, db);
+  su(`CREATE DATABASE ${db} OWNER platform_owner`);
+  // As platform_owner, the role projectdb.provision acts as (through platform_migrator), so every
+  // schema the template makes is owned as in a provisioned database.
+  for (const file of templateFiles()) su(`SET ROLE platform_owner;\n${readFileSync(join(TEMPLATE_DIR, file), "utf8")}`, db);
   return pid;
 }
 

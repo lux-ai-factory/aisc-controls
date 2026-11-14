@@ -38,8 +38,8 @@ export function su(sql: string, db = "platform"): string {
   ).toString();
 }
 
-// A project database is made with every platform template file, in order, as platform_rw (the
-// role projectdb.provision connects as), exactly as isolationDb.makeTemplatedProject does.
+// A project database is made with every platform template file, in order, as platform_owner (the
+// role projectdb.provision acts as, through platform_migrator), exactly as isolationDb.makeTemplatedProject does.
 // Controls' answer key refers to project.system (template 0006), so a database with only 0001
 // cannot be migrated. ISOLATION_TEMPLATE_DIR as in ./isolationDb.ts. The loop is inline because
 // isolationDb imports this file.
@@ -51,11 +51,11 @@ const TEMPLATE_DIR =
 export function makeProject(): string {
   const pid = randomUUID();
   const db = projectDatabaseName(pid);
-  su(`CREATE DATABASE ${db} OWNER platform_rw`);
+  su(`CREATE DATABASE ${db} OWNER platform_owner`);
   const files = readdirSync(TEMPLATE_DIR)
     .filter((f) => /^\d{4}_.*\.sql$/.test(f))
     .sort();
-  for (const file of files) su(`SET ROLE platform_rw;\n${readFileSync(join(TEMPLATE_DIR, file), "utf8")}`, db);
+  for (const file of files) su(`SET ROLE platform_owner;\n${readFileSync(join(TEMPLATE_DIR, file), "utf8")}`, db);
   return pid;
 }
 
