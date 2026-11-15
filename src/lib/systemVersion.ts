@@ -1,5 +1,6 @@
 /**
- * The AI card version an answer is given under: the project's latest saved card version.
+ * The AI card version an answer is given under: the project's latest saved card version, and the revision
+ * its card is at.
  *
  * An answer carries it, so a result can be read against the card that was in force when it was given.
  * It is read from project.saved_system in the save's own transaction (the versions live in the same
@@ -11,11 +12,13 @@
  */
 import type { Prisma } from "@prisma/client";
 
-export type CardStamp = { pid: string; number: number };
+export type CardStamp = { pid: string; number: number; revision: number };
 
 export async function latestVersion(tx: Pick<Prisma.TransactionClient, "$queryRaw">): Promise<CardStamp | null> {
   await tx.$queryRaw`SELECT 1 AS locked FROM (SELECT pg_advisory_xact_lock_shared(hashtext('project.system'))) l`;
-  const [latest] = await tx.$queryRaw<{ pid: string; number: number }[]>`
-    SELECT pid::text AS pid, number FROM project.saved_system ORDER BY number DESC LIMIT 1`;
-  return latest ? { pid: latest.pid, number: Number(latest.number) } : null;
+  const [latest] = await tx.$queryRaw<{ pid: string; number: number; card_revision: number }[]>`
+    SELECT pid::text AS pid, number, card_revision FROM project.saved_system ORDER BY number DESC LIMIT 1`;
+  return latest
+    ? { pid: latest.pid, number: Number(latest.number), revision: Number(latest.card_revision) }
+    : null;
 }

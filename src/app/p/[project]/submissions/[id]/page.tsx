@@ -15,6 +15,8 @@ import { submissionIn } from "@/lib/submissions";
 import { formatDateTime } from "@/lib/formatDate";
 import { groupByCategory } from "@/lib/questions";
 import { answerSheet } from "@/lib/answerSheet";
+import { cardVersionShort } from "@/lib/cardVersionLabel";
+import { stampOf } from "@/lib/report";
 import { answeredCount, coverage, readinessPercent } from "@/lib/scoring";
 import { maturityLabel, statusLabel } from "@/lib/labels";
 
@@ -111,10 +113,16 @@ export default async function SubmissionDetailPage({
 
   // A closed submission shows the questions as it answered them; a draft, the template as it is now.
   const sheet = answerSheet(sub.status, sub.checklist.questions, sub.answers);
-  const { answersByQ, scoresByQ, versionByQ } = sheet;
+  const { answersByQ, scoresByQ, versionByQ, revisionByQ } = sheet;
+  // each card version and revision the answers were given under, once, in order
   const versionsAnswered = [
-    ...new Set(sub.answers.map((a) => a.systemVersionNumber).filter((n): n is number => n !== null)),
-  ].sort((x, y) => x - y);
+    ...new Set(
+      sub.answers
+        .flatMap((a) => (a.systemVersionNumber !== null ? [[a.systemVersionNumber, a.systemCardRevision ?? 1]] : []))
+        .sort(([v1, r1], [v2, r2]) => v1 - v2 || r1 - r2)
+        .map(([v, r]) => cardVersionShort(v, r)),
+    ),
+  ];
   const totalQuestions = sheet.questions.length;
   const scoreValues = Object.values(scoresByQ);
   const scoredCount = scoreValues.length;
@@ -156,7 +164,7 @@ export default async function SubmissionDetailPage({
           {sub.closedAt && <> · finalised {formatDateTime(sub.closedAt)}</>}
           {sub.archivedAt && <> · archived {formatDateTime(sub.archivedAt)}</>}
           {versionsAnswered.length > 0 && (
-            <> · answered under {versionsAnswered.map((n) => `v${n}`).join(", ")} of the AI card</>
+            <> · answered under {versionsAnswered.join(", ")} of the AI card</>
           )}
         </p>
         {!isDraft && sub.questionsVersion !== null && (
@@ -332,7 +340,7 @@ export default async function SubmissionDetailPage({
                   />
                   {q.id in versionByQ && (
                     <p className="meta">
-                      {versionByQ[q.id] !== null ? `answered under v${versionByQ[q.id]}` : "AI card version not recorded"}
+                      {stampOf(versionByQ, q.id, revisionByQ)}
                     </p>
                   )}
                 </div>

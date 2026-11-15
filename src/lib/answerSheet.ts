@@ -23,6 +23,8 @@ type StoredAnswer = {
   answer: string | null;
   score: number | null;
   systemVersionNumber: number | null;
+  /** Absent in a row read without it: not recorded. */
+  systemCardRevision?: number | null;
   questionText: string | null;
   questionArticle: string | null;
   questionCategory: string | null;
@@ -36,6 +38,8 @@ export type AnswerSheet = {
   scoresByQ: Record<string, number>;
   /** The AI card version each answer was given under; null: not stamped. A question without an answer row is not in it. */
   versionByQ: Record<string, number | null>;
+  /** The revision of that version's card, keyed as versionByQ; null: not recorded. */
+  revisionByQ: Record<string, number | null>;
 };
 
 export function answerSheet(status: string, live: LiveQuestion[], answers: StoredAnswer[]): AnswerSheet {
@@ -64,12 +68,15 @@ export function answerSheet(status: string, live: LiveQuestion[], answers: Store
     for (const a of answers) if (a.questionId !== null && byId.has(a.questionId)) keyed.push({ key: a.questionId, answer: a });
   }
 
-  const sheet: AnswerSheet = { questions, answersByQ: {}, scoresByQ: {}, versionByQ: {} };
+  const sheet: AnswerSheet = { questions, answersByQ: {}, scoresByQ: {}, versionByQ: {}, revisionByQ: {} };
   for (const { key, answer } of keyed) {
     if (answer.answer != null) sheet.answersByQ[key] = answer.answer;
     if (answer.score != null) sheet.scoresByQ[key] = answer.score;
     // a row that only holds proof files was not answered under any version
-    if (answer.answer != null || answer.score != null) sheet.versionByQ[key] = answer.systemVersionNumber;
+    if (answer.answer != null || answer.score != null) {
+      sheet.versionByQ[key] = answer.systemVersionNumber;
+      sheet.revisionByQ[key] = answer.systemCardRevision ?? null;
+    }
   }
   return sheet;
 }

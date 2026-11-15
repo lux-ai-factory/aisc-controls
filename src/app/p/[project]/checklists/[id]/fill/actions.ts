@@ -51,6 +51,7 @@ export async function submitForm(
       ...answer,
       systemVersionPid: latest?.pid ?? null,
       systemVersionNumber: latest?.number ?? null,
+      systemCardRevision: latest?.revision ?? null,
       answeredAt,
     }));
     const made = await tx.submission.create({

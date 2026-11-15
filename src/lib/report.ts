@@ -8,6 +8,7 @@ import { answeredCount, coverage, readinessPercent, SCORE_LABELS, SCORE_VALUES }
 import { statusLabel } from "./labels";
 import { formatDateTime } from "./formatDate";
 import { formatSize, type ProofLink } from "./proofFiles";
+import { cardVersionShort } from "./cardVersionLabel";
 
 export type ReportQuestion = {
   id: string;
@@ -37,6 +38,8 @@ export type ReportInput = {
   /** The AI card version each answer was given under, keyed by question id; null: not stamped. A question
    *  with no answer row is not in it. */
   versionByQ: Record<string, number | null>;
+  /** The revision of that version's card, keyed as versionByQ; null or absent: not recorded. */
+  revisionByQ?: Record<string, number | null>;
   /** The files proving each answer, keyed as the answers are; none when left out. */
   filesByQ?: Record<string, ProofLink[]>;
 };
@@ -57,7 +60,8 @@ export type ReportItem = {
   score: number | null;
   scoreLabel: string | null;
   answer: string | null;
-  /** As the submission's page shows it: "answered under vN", "AI card version not recorded", or null without an answer. */
+  /** As the submission's page shows it: "answered under v1" (or "v1.2" for revision 2 of its card), "AI card
+   *  version not recorded", or null without an answer. */
   stamp: string | null;
   files: ReportFile[];
 };
@@ -89,10 +93,16 @@ export type ReportPayload = {
   generatedAt: string;
 };
 
-function stampOf(versionByQ: Record<string, number | null>, questionId: string): string | null {
+export function stampOf(
+  versionByQ: Record<string, number | null>,
+  questionId: string,
+  revisionByQ: Record<string, number | null> = {},
+): string | null {
   if (!(questionId in versionByQ)) return null;
   const version = versionByQ[questionId];
-  return version !== null ? `answered under v${version}` : "AI card version not recorded";
+  return version !== null
+    ? `answered under ${cardVersionShort(version, revisionByQ[questionId] ?? null)}`
+    : "AI card version not recorded";
 }
 
 export function buildReportPayload(
@@ -109,7 +119,7 @@ export function buildReportPayload(
         score,
         scoreLabel: score != null ? (SCORE_LABELS[score] ?? null) : null,
         answer: input.answersByQ[q.id] ?? null,
-        stamp: stampOf(input.versionByQ, q.id),
+        stamp: stampOf(input.versionByQ, q.id, input.revisionByQ),
         files: (input.filesByQ?.[q.id] ?? []).map((f) => ({
           name: f.name,
           mime: f.mime,

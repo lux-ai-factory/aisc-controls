@@ -94,11 +94,13 @@ export async function saveDraft(
         ? {
             systemVersionPid: before.systemVersionPid,
             systemVersionNumber: before.systemVersionNumber,
+            systemCardRevision: before.systemCardRevision,
             answeredAt: before.answeredAt,
           }
         : {
             systemVersionPid: known?.pid ?? null,
             systemVersionNumber: known?.number ?? null,
+            systemCardRevision: known?.revision ?? null,
             answeredAt,
           };
       // Closing freezes the question as it is now beside its answer; a draft follows the template instead.
@@ -139,7 +141,8 @@ export async function saveDraft(
       // no longer answered: no answer, and no stamp saying under which card version it was given
       await tx.submissionAnswer.update({
         where: { id: a.id },
-        data: { answer: null, score: null, systemVersionPid: null, systemVersionNumber: null, answeredAt: null, ...asked },
+        data: { answer: null, score: null, systemVersionPid: null, systemVersionNumber: null, systemCardRevision: null,
+                answeredAt: null, ...asked },
       });
     }
     await emitEvent(tx, {
@@ -218,6 +221,7 @@ export async function reopenForAmendment(
         score: a.score,
         systemVersionPid: a.systemVersionPid,
         systemVersionNumber: a.systemVersionNumber,
+        systemCardRevision: a.systemCardRevision,
         answeredAt: a.answeredAt,
       })),
     });

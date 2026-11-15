@@ -63,6 +63,7 @@ export async function GET(
     answersByQ: sheet.answersByQ,
     scoresByQ: sheet.scoresByQ,
     versionByQ: sheet.versionByQ,
+    revisionByQ: sheet.revisionByQ,
     filesByQ: await filesByQuestion(prisma, sub.id),
   };
 

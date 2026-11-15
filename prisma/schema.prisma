@@ -101,6 +101,8 @@ model SubmissionAnswer {
   /// The AI card version (core.system) that was the latest when this was answered.
   systemVersionPid    String?   @map("system_version_pid") @db.Uuid
   systemVersionNumber Int?      @map("system_version_number")
+  /// The revision of that version's card; empty when it was not recorded.
+  systemCardRevision  Int?      @map("system_card_revision")
   answeredAt          DateTime? @map("answered_at") @db.Timestamptz(3)
   /// The question as it was when the submission was closed; empty in a draft, which follows the template.
   questionText        String?   @map("question_text")
