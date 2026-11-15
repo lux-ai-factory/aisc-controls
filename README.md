@@ -165,6 +165,7 @@ Environment variables read by the app (`src/`, `scripts/`, `next.config.ts`):
 | Variable | Meaning | Default |
 | --- | --- | --- |
 | `PROJECT_DATABASE_URL` | Template of a project database's URL; `{database}` is replaced by `project_<pid without hyphens>`. Keep `schema=controls` and `connection_limit=2` (the app keeps at most 20 project databases open, so at most 40 connections). In the stack, compose sets `postgresql://controls_rw:<password>@postgres:5432/{database}?schema=controls&connection_limit=2` with the generated `controls_rw` password, or `CONTROLS_PROJECT_DATABASE_URL` when set. | none: required |
+| `PROJECT_MIGRATE_DATABASE_URL` | The same template for the migrations, as `controls_migrator`, whose sessions act as `controls_owner`, the owner of the schema's tables (`scripts/migrate-projects.mjs`, and the app at a project's first open). A database is migrated only once its `controls` schema is `controls_owner`'s. In the stack, compose sets it with the generated `controls_migrator` password, or `CONTROLS_PROJECT_MIGRATE_DATABASE_URL` when set. | none: required |
 | `DATABASE_URL` | Read by the Prisma CLI only. The app sets it per project for `prisma migrate deploy`; set it yourself for `npm run db:studio`, `db:seed` or `examples:export` on one project database. | none |
 | `PLATFORM_URL` | The platform API: who is in which project, which projects a person may change, the latest AI card version. Empty means every project page answers 503. Stack: `http://platform:8000`. | empty |
 | `LAUNCHER_URL` | The launcher, where a project is chosen; the app sends people there when they arrive without a project. Its origin may also call `/api/install`: the stack serves the catalogue's pages there. | `http://localhost:8100/` |
@@ -212,6 +213,7 @@ npm test                     # everything; the integration and chain tests skip 
   cd apps/controls
   CONTROLS_TEST_PG_CONTAINER=$TPG_NAME \
   PROJECT_DATABASE_URL="$(tpg_dsn controls_rw '{database}')?schema=controls&connection_limit=2" \
+  PROJECT_MIGRATE_DATABASE_URL="$(tpg_dsn controls_migrator '{database}')?schema=controls&connection_limit=2" \
     npx vitest run test/integration
   ```
 

@@ -1,8 +1,8 @@
 import { describe, it, expect, afterAll } from "vitest";
 
 // Inside a project database an answer's system_version_pid is a foreign key to
-// project.system(pid), ON DELETE NO ACTION, added by a controls migration that refuses, with
-// a clear message, when an answer names an absent pid.
+// project.system(pid), added by a controls migration that refuses, with a clear message, when an
+// answer names an absent pid; ON DELETE RESTRICT since 20261115000000_owner_role.
 //
 // The project database is made with every platform template file (./isolationDb.ts), so
 // project.system comes from the platform's real 0006_project_system.sql, not from a copy here.
@@ -48,7 +48,7 @@ describe.skipIf(!hasThrowawayDb)("answers point at a card version of their own d
     for (const pid of made) dropProject(pid);
   });
 
-  it("after migrating, the foreign key exists on project.system(pid), NO ACTION", async () => {
+  it("after migrating, the foreign key exists on project.system(pid), RESTRICT", async () => {
     needTemplate();
     const project = makeTemplatedProject();
     made.push(project);
@@ -60,7 +60,7 @@ describe.skipIf(!hasThrowawayDb)("answers point at a card version of their own d
             AND conname = 'submission_answer_system_version_pid_fkey'`,
         project,
       ),
-    ).toEqual(["submission_answer_system_version_pid_fkey|project.system|a"]);
+    ).toEqual(["submission_answer_system_version_pid_fkey|project.system|r"]);
   }, 120_000);
 
   it("an answer stamped with a version of this database is accepted, an absent one is refused", async () => {

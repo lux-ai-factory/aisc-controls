@@ -58,11 +58,15 @@ export function projectDatabaseUrl(
   return template.replace("{database}", projectDatabaseName(pid));
 }
 
-/** Bring one project database to this app's schema. */
+/**
+ * Bring one project database to this app's schema: scripts/migrate-projects.mjs for that database alone,
+ * the same code as the one-shot. It migrates as controls_migrator (PROJECT_MIGRATE_DATABASE_URL), whose
+ * sessions act as controls_owner, and only once the database's controls schema is that role's: the role
+ * this app connects as reads and writes rows, it never migrates.
+ */
 async function migrateProjectDatabase(url: string): Promise<void> {
-  await run("npx", ["prisma", "migrate", "deploy"], {
-    env: { ...process.env, DATABASE_URL: url },
-  });
+  const database = decodeURIComponent(new URL(url).pathname.slice(1));
+  await run("node", ["scripts/migrate-projects.mjs", database], { env: process.env });
 }
 
 /**

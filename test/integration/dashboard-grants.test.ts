@@ -35,8 +35,9 @@ describe.skipIf(!hasThrowawayDb)("the dashboard may read a project's controls", 
   // Readers get no default privilege (it would also cover tables holding secrets): they get
   // exactly the listed tables, granted by the owner's migration
   // 20260926000100_readers_read_the_listed_tables.
-  it("a table controls_rw makes later is not readable (no default privilege to a reader)", async () => {
-    rows(`SET ROLE controls_rw; CREATE TABLE controls.later_table (id int);`, project);
+  // A later table is made by a migration, as controls_owner: controls_rw makes none (20261115000000_owner_role).
+  it("a table a later migration makes is not readable (no default privilege to a reader)", async () => {
+    rows(`SET ROLE controls_owner; CREATE TABLE controls.later_table (id int);`, project);
     expect(() => rows(`SET ROLE dashboard_ro; SELECT count(*) FROM controls.later_table;`, project)).toThrow();
     expect(
       rows(
