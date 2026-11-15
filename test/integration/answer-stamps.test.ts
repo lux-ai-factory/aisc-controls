@@ -284,7 +284,8 @@ describe.skipIf(!hasThrowawayDb)("a project database made before answers were st
       { recursive: true },
     );
     execFileSync("npx", ["prisma", "migrate", "deploy", "--schema", join(tmp, "schema.prisma")], {
-      env: { ...process.env, DATABASE_URL: projectDatabaseUrl(project) },
+      // the older migrations as the stack runs them now: as controls_migrator, acting as controls_owner
+      env: { ...process.env, DATABASE_URL: projectDatabaseUrl(project, process.env.PROJECT_MIGRATE_DATABASE_URL) },
       stdio: "pipe",
     });
     rows(
