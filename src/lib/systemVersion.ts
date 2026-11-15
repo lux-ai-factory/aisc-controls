@@ -1,33 +1,21 @@
 /**
- * The AI card version that is the latest for a project, as the platform says.
+ * The AI card version an answer is given under: the project's latest saved card version.
  *
- * An answer carries it, so a result can be read against the card that was in
- * force when it was given. Never throws: when the platform does not answer, the
- * answer is saved unstamped, and a warning says why.
+ * An answer carries it, so a result can be read against the card that was in force when it was given.
+ * It is read from project.saved_system in the save's own transaction (the versions live in the same
+ * project database), never from the platform over the network: a platform that is slow or silent cannot
+ * leave a new answer unstamped. The read first takes a shared lock on the key the platform takes to make
+ * or correct a version, so no version is made or corrected between this read and the save's commit: an
+ * answer never carries a version older than one that existed when it was stored. Null: the project has no
+ * card version yet.
  */
-import { platformUrl } from "@/lib/appUrls";
-import { bearer, withoutTrailingSlash } from "@/lib/http";
+import type { Prisma } from "@prisma/client";
 
-export async function latestVersion(
-  pid: string,
-  token: string | null,
-): Promise<{ pid: string; number: number } | null> {
-  const base = withoutTrailingSlash(platformUrl());
-  if (!base) return null;
-  try {
-    const res = await fetch(`${base}/projects/${encodeURIComponent(pid)}/system-versions/latest`, {
-      headers: bearer(token),
-      cache: "no-store",
-      signal: AbortSignal.timeout(3000),
-    });
-    if (!res.ok) {
-      console.warn(`platform answered ${res.status} for the latest version of ${pid}`);
-      return null;
-    }
-    const body = await res.json();
-    return body ? { pid: body.pid, number: body.number } : null;
-  } catch (err) {
-    console.warn(`platform did not answer for the latest version of ${pid}`, err);
-    return null;
-  }
+export type CardStamp = { pid: string; number: number };
+
+export async function latestVersion(tx: Pick<Prisma.TransactionClient, "$queryRaw">): Promise<CardStamp | null> {
+  await tx.$queryRaw`SELECT 1 AS locked FROM (SELECT pg_advisory_xact_lock_shared(hashtext('project.system'))) l`;
+  const [latest] = await tx.$queryRaw<{ pid: string; number: number }[]>`
+    SELECT pid::text AS pid, number FROM project.saved_system ORDER BY number DESC LIMIT 1`;
+  return latest ? { pid: latest.pid, number: Number(latest.number) } : null;
 }

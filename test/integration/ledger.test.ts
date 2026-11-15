@@ -5,7 +5,7 @@ import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from "vites
 // failure after the event leaves neither, and a question review's event keeps what the review deletes
 // (the old questions, and every draft answer removed) and the closed answers it leaves. Throwaway Postgres only.
 
-const state = vi.hoisted(() => ({ request: "", failAfter: "", onLatest: null as null | (() => void), sourceName: "" }));
+const state = vi.hoisted(() => ({ request: "", failAfter: "", sourceName: "" }));
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 vi.mock("next/navigation", () => ({
   redirect: (url: string) => {
@@ -26,14 +26,7 @@ vi.mock("@/vendor/aisc-access/projectAccess", async (importOriginal) => ({
 vi.mock("@/lib/access/callerToken", () => ({
   callerToken: async () => "caller-token",
 }));
-vi.mock("@/lib/systemVersion", () => ({
-  // a test can act between a save's reads and its transaction (the platform is asked in between)
-  latestVersion: async () => {
-    state.onLatest?.();
-    state.onLatest = null;
-    return null;
-  },
-}));
+vi.mock("@/lib/systemVersion", () => ({ latestVersion: async () => null }));
 vi.mock("@/lib/cataloguePackage", () => ({
   fetchCataloguePackage: async (_project: string, slug: string) => ({
     ok: true,
@@ -67,8 +60,7 @@ import { saveDraft, reopenForAmendment, archiveSubmission, restoreSubmission, di
 const AMEND = { reason: "Corrected a date", requestedBy: "Test auditor" };
 import { installFromCatalogue } from "@/app/p/[project]/install/actions";
 import { POST as installUnderProject } from "@/app/p/[project]/api/install/route";
-import { hasThrowawayDb, makeProject, dropProject, rows, su } from "./throwawayDb";
-import { projectDatabaseName } from "@/lib/projectDb";
+import { hasThrowawayDb, makeProject, dropProject, rows } from "./throwawayDb";
 import { countries, regulations } from "@/data";
 
 const REQUEST = "a7a7a7a7-0000-4000-8000-000000000001";
@@ -156,7 +148,6 @@ describe.skipIf(!hasThrowawayDb)("every controls write records its ledger event"
     vi.stubEnv("AUTH_ENABLED", "false");
     state.request = REQUEST;
     state.failAfter = "";
-    state.onLatest = null;
     state.sourceName = "";
   });
 
@@ -275,10 +266,16 @@ describe.skipIf(!hasThrowawayDb)("every controls write records its ledger event"
     const { id, q } = await freshChecklist();
     const sub = (await redirected(() => submitForm(project, id, undefined, form({ label: "Two tabs", [`a:${q[0]}`]: "first" }))))
       .split("/").pop() as string;
-    // the other tab closes it after this save has read the draft, before its transaction
-    state.onLatest = () => su(`UPDATE controls.submission SET status = 'Closed', closed_at = now() WHERE id = '${sub}'`,
-                              projectDatabaseName(project));
-    const answer = await saveDraft(project, sub, undefined, form({ label: "Two tabs", [`a:${q[0]}`]: "changed" }));
+    // the other tab holds the draft's lock while this save reads it as a draft, then closes it
+    const prisma = await prismaFor(project);
+    let save!: ReturnType<typeof saveDraft>;
+    await prisma.$transaction(async (tx) => {
+      await tx.$queryRaw`SELECT id FROM controls.submission WHERE id = ${sub} FOR UPDATE`;
+      save = saveDraft(project, sub, undefined, form({ label: "Two tabs", [`a:${q[0]}`]: "changed" }));
+      await new Promise((r) => setTimeout(r, 400));               // the save has read, and waits for the lock
+      await tx.$executeRaw`UPDATE controls.submission SET status = 'Closed', closed_at = now() WHERE id = ${sub}`;
+    }, { timeout: 20_000 });
+    const answer = await save;
     expect(answer).toEqual({ error: expect.stringMatching(/Only draft submissions/) });
     expect(rows(`SELECT answer FROM controls.submission_answer WHERE "submissionId" = '${sub}'`, project)).toEqual(["first"]);
     expect(outbox(sub).map((r) => r.action)).toEqual(["controls.submission.created"]);

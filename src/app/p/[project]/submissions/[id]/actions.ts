@@ -6,7 +6,6 @@ import { projectDbFor, writableProject } from "@/lib/projectDb";
 import type { PrismaClient, SubmissionAnswer } from "@prisma/client";
 import { parseAnswers, REVISED, type ParsedAnswer } from "@/lib/checklistForm";
 import { latestVersion } from "@/lib/systemVersion";
-import { callerToken } from "@/lib/access/callerToken";
 import { emitEvent } from "@/vendor/aisc-ledger/emit";
 import { submissionState } from "@/lib/ledger/state";
 import { carryProofFiles } from "@/lib/proofFiles";
@@ -67,22 +66,13 @@ export async function saveDraft(
   const shouldClose = formData.get("intent") === "close";
 
   // Each answer carries the card version that was the latest when it was
-  // answered. The rows are deleted and recreated, so an unchanged answer keeps
-  // its old stamp; only a new or changed one is stamped now. "Unchanged" is
-  // decided against the answers read under the lock (another tab may have saved
-  // since the page read them). The platform is asked outside the transaction,
-  // and only when there is something to stamp: when the read under the lock
-  // finds a change the first guess missed, the save asks and runs again.
+  // answered. An unchanged answer keeps its old stamp; only a new or changed one
+  // is stamped now. "Unchanged" is decided against the answers read under the
+  // lock (another tab may have saved since the page read them), and the latest
+  // version is read in the same transaction, from the project's own database.
   const parsed = parseAnswers(formData, validIds);
-  const guess = new Map(
-    (await prisma.submissionAnswer.findMany({ where: { submissionId } })).map((a) => [a.questionId, a]),
-  );
-  type Latest = Awaited<ReturnType<typeof latestVersion>>;
-  let latest: Latest | undefined = parsed.every((a) => isUnchanged(a, guess.get(a.questionId)))
-    ? undefined
-    : await latestVersion(project, await callerToken());
 
-  const attempt = (known: Latest | undefined) => prisma.$transaction(async (tx) => {
+  const saved = await prisma.$transaction(async (tx) => {
     // A review of the checklist locks it to replace its questions: this waits for it, and refuses an answer
     // to a question it removed rather than failing on the foreign key.
     const [checklist] = await tx.$queryRaw<{ questions_version: number }[]>`
@@ -96,7 +86,7 @@ export async function saveDraft(
     if (!now || now.status !== "Draft") return "closed" as const;
     const replaced = await tx.submissionAnswer.findMany({ where: { submissionId } });
     const old = new Map(replaced.map((a) => [a.questionId, a]));
-    if (known === undefined && parsed.some((a) => !isUnchanged(a, old.get(a.questionId)))) return "ask" as const;
+    const known = parsed.some((a) => !isUnchanged(a, old.get(a.questionId))) ? await latestVersion(tx) : null;
     const answeredAt = new Date();
     const rows = parsed.map((answer) => {
       const before = old.get(answer.questionId);
@@ -164,11 +154,6 @@ export async function saveDraft(
     return "saved" as const;
   });
 
-  let saved = await attempt(latest);
-  if (saved === "ask") {
-    latest = await latestVersion(project, await callerToken());
-    saved = await attempt(latest);
-  }
   if (saved === "revised") return { error: REVISED };
   if (saved !== "saved") return { error: "Only draft submissions can be edited. Amend it first." };
 

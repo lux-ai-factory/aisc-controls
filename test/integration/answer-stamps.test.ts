@@ -4,8 +4,11 @@ import { describe, it, expect, beforeAll, afterAll, vi } from "vitest";
 // answered. saveDraft deletes and recreates the rows, so an unchanged answer
 // must carry its old stamp over, or every save would restamp every answer.
 //
-// Runs only against a throwaway Postgres (see ./throwawayDb.ts). The platform
-// is a stub HTTP server; who may write is mocked, as in submission-lifecycle.
+// The latest version is the project's own: a test makes the next one in the
+// project's database, as the platform does when a card is saved.
+//
+// Runs only against a throwaway Postgres (see ./throwawayDb.ts); who may write
+// is mocked, as in submission-lifecycle.
 
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 vi.mock("next/navigation", () => ({
@@ -26,8 +29,6 @@ vi.mock("@/lib/access/callerToken", () => ({
   callerToken: async () => "caller-token",
 }));
 
-import { createServer, type Server } from "node:http";
-import type { AddressInfo } from "node:net";
 import { execFileSync } from "node:child_process";
 import { cpSync, mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -42,12 +43,6 @@ const AMEND = { reason: "Corrected a date", requestedBy: "Test auditor" };
 import { submitForm } from "@/app/p/[project]/checklists/[id]/fill/actions";
 import { hasThrowawayDb, makeProject, dropProject, rows, su } from "./throwawayDb";
 
-const V1 = "11111111-1111-4111-8111-111111111111";
-const V2 = "22222222-2222-4222-8222-222222222222";
-
-/** What the stub platform says is the latest version; null = none; "down" = 500. */
-const platform: { latest: { pid: string; number: number } | null | "down" } = { latest: null };
-let server: Server;
 
 type Stamp = { answer: string | null; score: number | null; pid: string | null; number: number | null; at: string | null };
 
@@ -96,32 +91,25 @@ describe.skipIf(!hasThrowawayDb)("answers carry the system version", () => {
   let qA: string;
   let qB: string;
 
+  /** The project's next card version, made in its database as the platform makes it. */
+  let numbered = 0;
+  function newVersion(): { pid: string; number: number } {
+    const made = { pid: randomUUID(), number: ++numbered };
+    su(
+      "SET ROLE platform_rw; INSERT INTO project.system (pid, number, name) VALUES " +
+        `('${made.pid}', ${made.number}, 'MCAS')`,
+      projectDatabaseName(project),
+    );
+    return made;
+  }
+
   async function draft(label = "Run") {
     const prisma = await prismaFor(project);
     return (await prisma.submission.create({ data: { checklistId, label } })).id;
   }
 
   beforeAll(async () => {
-    server = createServer((req, res) => {
-      if (platform.latest === "down") {
-        res.writeHead(500).end("{}");
-        return;
-      }
-      res.writeHead(200, { "Content-Type": "application/json" });
-      res.end(JSON.stringify(platform.latest && { ...platform.latest, project_id: project, name: "MCAS" }));
-    });
-    await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
-    process.env.PLATFORM_URL = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
-
     project = makeProject();
-    // An answer's stamp is a foreign key into this database's project.system, so the
-    // versions the stub platform names must be rows there, as the platform writes them
-    // before it answers "latest".
-    su(
-      "SET ROLE platform_rw; INSERT INTO project.system (pid, number, name) VALUES " +
-        `('${V1}', 1, 'MCAS'), ('${V2}', 2, 'MCAS')`,
-      projectDatabaseName(project),
-    );
     const prisma = await prismaFor(project);
     const tag = randomUUID().slice(0, 8);
     const source = await prisma.source.create({ data: { name: `S ${tag}`, slug: `s-${tag}` } });
@@ -142,8 +130,6 @@ describe.skipIf(!hasThrowawayDb)("answers carry the system version", () => {
   afterAll(async () => {
     await closeProjectDatabases();
     if (project) dropProject(project);
-    server?.closeAllConnections();
-    await new Promise<void>((resolve) => (server ? server.close(() => resolve()) : resolve()));
   });
 
   it("the three stamp columns exist, nullable (the version key is isolation-answer-fk.test.ts's)", () => {
@@ -160,48 +146,43 @@ describe.skipIf(!hasThrowawayDb)("answers carry the system version", () => {
     ]);
   });
 
-  it("A answered under v1, then B under v2: A keeps v1, B gets v2", async () => {
+  it("a project with no card version yet saves its answers unstamped", async () => {
     const id = await draft();
-    platform.latest = { pid: V1, number: 1 };
+    expect((await saveDraft(project, id, undefined, form({ label: "Run", [`a:${qA}`]: "Yes", [`s:${qA}`]: "3" })))?.error).toBeUndefined();
+    const s = stamps(project, id);
+    expect(s[qA]).toMatchObject({ answer: "Yes", score: 3, pid: null, number: null });
+    // It was answered now, even though there was no version to name.
+    expect(s[qA].at).not.toBeNull();
+  }, 60_000);
+
+  it("A answered under one version, then B under the next: A keeps the first, B gets the next", async () => {
+    const id = await draft();
+    const v1 = newVersion();
     expect((await saveDraft(project, id, undefined, form({ label: "Run", [`a:${qA}`]: "Yes", [`s:${qA}`]: "4" })))?.error).toBeUndefined();
 
-    platform.latest = { pid: V2, number: 2 };
+    const v2 = newVersion();
     expect(
       (await saveDraft(project, id, undefined, form({ label: "Run", [`a:${qA}`]: "Yes", [`s:${qA}`]: "4", [`a:${qB}`]: "No", [`s:${qB}`]: "1" })))?.error,
     ).toBeUndefined();
 
     const s = stamps(project, id);
-    expect(s[qA]).toMatchObject({ pid: V1, number: 1 });
-    expect(s[qB]).toMatchObject({ pid: V2, number: 2 });
+    expect(s[qA]).toMatchObject(v1);
+    expect(s[qB]).toMatchObject(v2);
     expect(s[qA].at).not.toBeNull();
     expect(s[qB].at).not.toBeNull();
   }, 60_000);
 
   it("a changed answer is restamped with the version latest now", async () => {
     const id = await draft();
-    platform.latest = { pid: V1, number: 1 };
+    newVersion();
     await saveDraft(project, id, undefined, form({ label: "Run", [`a:${qA}`]: "Yes", [`s:${qA}`]: "4" }));
-    platform.latest = { pid: V2, number: 2 };
+    const latest = newVersion();
     await saveDraft(project, id, undefined, form({ label: "Run", [`a:${qA}`]: "Yes", [`s:${qA}`]: "2" }));
-    expect(stamps(project, id)[qA]).toMatchObject({ score: 2, pid: V2, number: 2 });
-  }, 60_000);
-
-  it("with the platform down the save succeeds, and new answers are unstamped", async () => {
-    const id = await draft();
-    platform.latest = "down";
-    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
-    const result = await saveDraft(project, id, undefined, form({ label: "Run", [`a:${qA}`]: "Yes", [`s:${qA}`]: "3" }));
-    warn.mockRestore();
-    expect(result?.error).toBeUndefined();
-    const s = stamps(project, id);
-    expect(s[qA]).toMatchObject({ answer: "Yes", score: 3, pid: null, number: null });
-    // It was answered now, even though the version could not be named.
-    expect(s[qA].at).not.toBeNull();
+    expect(stamps(project, id)[qA]).toMatchObject({ score: 2, ...latest });
   }, 60_000);
 
   it("an answer cleared but kept for its proof files loses its stamp", async () => {
     const id = await draft();
-    platform.latest = { pid: V1, number: 1 };
     await saveDraft(project, id, undefined, form({ label: "Run", [`a:${qA}`]: "Yes", [`s:${qA}`]: "4" }));
     const prisma = await prismaFor(project);
     const answer = await prisma.submissionAnswer.findUniqueOrThrow({
@@ -214,46 +195,39 @@ describe.skipIf(!hasThrowawayDb)("answers carry the system version", () => {
 
   it("saving again with no change changes no stamp and no answered_at", async () => {
     const id = await draft();
-    platform.latest = { pid: V1, number: 1 };
+    const v1 = newVersion();
     await saveDraft(project, id, undefined, form({ label: "Run", [`a:${qA}`]: "Yes", [`s:${qA}`]: "4" }));
     const before = stamps(project, id);
-    expect(before[qA].pid).toBe(V1);
+    expect(before[qA].pid).toBe(v1.pid);
 
-    platform.latest = { pid: V2, number: 2 };
+    newVersion();
     await new Promise((r) => setTimeout(r, 20));
     await saveDraft(project, id, undefined, form({ label: "Run renamed", [`a:${qA}`]: "Yes", [`s:${qA}`]: "4" }));
     expect(stamps(project, id)).toEqual(before);
   }, 60_000);
 
   it("the first fill stamps its answers too, not only a later save", async () => {
-    platform.latest = { pid: V1, number: 1 };
+    const v1 = newVersion();
     const url = await captureRedirect(() =>
       submitForm(project, checklistId, undefined, form({ label: "First", [`a:${qA}`]: "Yes", [`s:${qA}`]: "4" })));
     const id = url.split("/").pop() as string;
     const first = stamps(project, id)[qA];
-    expect([first.pid, first.number]).toEqual([V1, 1]);
+    expect([first.pid, first.number]).toEqual([v1.pid, v1.number]);
     expect(first.at).not.toBeNull();
     // and an answer left as it was keeps that stamp through a save under a newer version
-    platform.latest = { pid: V2, number: 2 };
+    newVersion();
     await saveDraft(project, id, undefined, form({ label: "First", [`a:${qA}`]: "Yes", [`s:${qA}`]: "4" }));
-    expect(stamps(project, id)[qA].pid).toBe(V1);
-  }, 60_000);
-
-  it("a first fill with the platform down is saved, unstamped", async () => {
-    platform.latest = "down";
-    const url = await captureRedirect(() =>
-      submitForm(project, checklistId, undefined, form({ label: "Down", [`a:${qA}`]: "Yes", [`s:${qA}`]: "3" })));
-    expect(stamps(project, url.split("/").pop() as string)[qA].pid).toBeNull();
+    expect(stamps(project, id)[qA].pid).toBe(v1.pid);
   }, 60_000);
 
   it("amending a closed submission keeps each copied answer's stamp", async () => {
     const id = await draft();
-    platform.latest = { pid: V1, number: 1 };
+    const v1 = newVersion();
     await saveDraft(project, id, undefined, form({ label: "Run", intent: "close", [`a:${qA}`]: "Yes", [`s:${qA}`]: "4" }));
     const original = stamps(project, id);
-    expect(original[qA].pid).toBe(V1);
+    expect(original[qA].pid).toBe(v1.pid);
 
-    platform.latest = { pid: V2, number: 2 };
+    newVersion();
     const url = await captureRedirect(() => reopenForAmendment(project, id, AMEND));
     const next = url.split("/").pop() as string;
     expect(next).not.toBe(id);

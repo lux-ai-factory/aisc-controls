@@ -7,7 +7,6 @@ import { parseAnswers, REVISED } from "@/lib/checklistForm";
 import { emitEvent } from "@/vendor/aisc-ledger/emit";
 import { submissionState } from "@/lib/ledger/state";
 import { latestVersion } from "@/lib/systemVersion";
-import { callerToken } from "@/lib/access/callerToken";
 
 const schema = z.object({
   // trimmed, as saveDraft trims it: a blank label is refused here too
@@ -34,17 +33,7 @@ export async function submitForm(
   if (!checklist) return { error: "Checklist not found." };
 
   const validIds = new Set(checklist.questions.map((q) => q.id));
-  // Each answer carries the card version that was the latest when it was answered, as saveDraft
-  // stamps a new or changed one; with the platform not answering it is saved unstamped.
   const given = parseAnswers(formData, validIds);
-  const latest = given.length ? await latestVersion(project, await callerToken()) : null;
-  const answeredAt = new Date();
-  const answers = given.map((answer) => ({
-    ...answer,
-    systemVersionPid: latest?.pid ?? null,
-    systemVersionNumber: latest?.number ?? null,
-    answeredAt,
-  }));
 
   // The submission and its ledger event, in one transaction. A review of the checklist locks it to
   // replace its questions: this waits for it, and refuses answers to questions it removed rather than
@@ -53,7 +42,17 @@ export async function submitForm(
     await tx.$queryRaw`SELECT id FROM controls.checklist WHERE id = ${checklistId} FOR SHARE`;
     const current = new Set((await tx.question.findMany({ where: { checklistId }, select: { id: true } }))
       .map((q) => q.id));
-    if (answers.some((a) => !current.has(a.questionId))) return null;
+    if (given.some((a) => !current.has(a.questionId))) return null;
+    // Each answer carries the card version that is the latest now, as saveDraft stamps a new or changed
+    // one: read in this transaction from the project's own database.
+    const latest = given.length ? await latestVersion(tx) : null;
+    const answeredAt = new Date();
+    const answers = given.map((answer) => ({
+      ...answer,
+      systemVersionPid: latest?.pid ?? null,
+      systemVersionNumber: latest?.number ?? null,
+      answeredAt,
+    }));
     const made = await tx.submission.create({
       data: {
         checklistId,
