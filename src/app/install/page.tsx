@@ -1,31 +1,19 @@
-import { installOptions } from "@/lib/installControl";
-import InstallDialog from "./InstallDialog";
+import { redirect } from "next/navigation";
+import { installOptions, installPagePath } from "@/lib/installControl";
 
-/** The same install as the catalogue's own dialog, as a page: for when the
- *  catalogue cannot reach this app from the browser (a catalogue on another
- *  site, or a link opened by hand). */
+/** The install page the catalogue links to without a project: it opens the install page of the project
+ *  the catalogue named (or the first one that can take the control), where the install is recorded. */
 export default async function InstallPage({ searchParams }: { searchParams: Promise<{ slug?: string; project?: string }> }) {
   const sp = await searchParams;
+  const slug = sp.slug?.trim() ?? "";
+  const options = await installOptions(slug, sp.project);
+  if (options.ok) redirect(installPagePath(options.preselect, slug));
   return (
     <main className="center">
       <section className="card install-dialog" aria-labelledby="install-title">
         <h1 id="install-title">Install a checklist</h1>
-        {await body(sp.slug?.trim() ?? "", sp.project)}
+        <div className="error">{options.error}</div>
       </section>
     </main>
-  );
-}
-
-async function body(slug: string, wanted: string | undefined) {
-  const options = await installOptions(slug, wanted);
-  if (!options.ok) return <div className="error">{options.error}</div>;
-  return (
-    <InstallDialog
-      slug={slug}
-      control={options.control}
-      projects={options.projects}
-      preselect={options.preselect}
-      installed={options.installed}
-    />
   );
 }

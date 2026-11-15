@@ -91,6 +91,11 @@ export async function installOptions(slug: string, wanted?: string | null): Prom
   };
 }
 
+/** The install page of one project, inside this app: installs are made under the project's address. */
+export function installPagePath(project: string, slug: string): string {
+  return `/p/${encodeURIComponent(project)}/install?slug=${encodeURIComponent(slug)}`;
+}
+
 /** Install into one project, after the platform says this person may change it. */
 export async function installForCaller(
   project: string,

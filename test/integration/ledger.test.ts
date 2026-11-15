@@ -66,7 +66,7 @@ import { saveDraft, reopenForAmendment, archiveSubmission, restoreSubmission, di
 
 const AMEND = { reason: "Corrected a date", requestedBy: "Test auditor" };
 import { installFromCatalogue } from "@/app/p/[project]/install/actions";
-import { POST as installApi } from "@/app/api/install/route";
+import { POST as installUnderProject } from "@/app/p/[project]/api/install/route";
 import { hasThrowawayDb, makeProject, dropProject, rows, su } from "./throwawayDb";
 import { projectDatabaseName } from "@/lib/projectDb";
 import { countries, regulations } from "@/data";
@@ -93,6 +93,14 @@ type Row = { action: string; item_id: string; db_role: string; request_id: strin
   content: Record<string, unknown> | null; before: Record<string, unknown> | null;
   after: Record<string, unknown> | null; item_version: string | null };
 
+/** The catalogue's Install button: a POST to the install API under the project, from the catalogue's origin. */
+function installApi(project: string, body: FormData): Promise<Response> {
+  return installUnderProject(
+    new Request(`https://controls.test/p/${project}/api/install`, { method: "POST", body, headers: { origin: "https://catalogue.test" } }),
+    { params: Promise.resolve({ project }) },
+  );
+}
+
 /** An install as the catalogue's Install button makes it: a POST to the install API from the
  *  catalogue's origin. Returns `{ installed }`, the checklist's id, when it worked. */
 async function installHere(project: string, slug: string, _prev?: undefined): Promise<{ installed?: string; error?: string }> {
@@ -100,7 +108,7 @@ async function installHere(project: string, slug: string, _prev?: undefined): Pr
   const body = new FormData();
   body.set("project", project);
   body.set("slug", slug);
-  const res = await installApi(new Request("https://controls.test/api/install", { method: "POST", body, headers: { origin: "https://catalogue.test" } }));
+  const res = await installApi(project, body);
   const answer = await res.json();
   return res.ok ? { installed: answer.checklistId } : { error: answer.error };
 }
@@ -371,7 +379,7 @@ describe.skipIf(!hasThrowawayDb)("every controls write records its ledger event"
         const body = new FormData();
         body.set("project", project);
         body.set("slug", slug);
-        return installApi(new Request("https://controls.test/api/install", { method: "POST", body, headers: { origin: "https://catalogue.test" } }));
+        return installApi(project, body);
       },
     ]) {
       const slug = `ldg-${randomUUID().slice(0, 6)}`;

@@ -41,7 +41,8 @@ vi.mock("@/lib/installChecklist", async (importOriginal) => ({
   },
 }));
 
-import { GET, POST } from "@/app/api/install/route";
+import { GET, POST as postWithoutProject } from "@/app/api/install/route";
+import { POST } from "@/app/p/[project]/api/install/route";
 
 const PKG = {
   meta: { catalogueId: "accuracy-checklist", title: "Accuracy checklist", sourceName: "AESIA", controlTopic: "Accuracy" },
@@ -51,13 +52,15 @@ const PKG = {
 function get(query: string, origin: string | null = CATALOGUE) {
   return GET(new Request(`http://localhost/controls/api/install?${query}`, { headers: origin ? { origin } : {} }));
 }
+/** The install, posted under the project the form names, as the catalogue's dialog posts it. */
 function post(fields: Record<string, string>, origin: string | null = CATALOGUE) {
   return POST(
-    new Request("http://localhost/controls/api/install", {
+    new Request(`http://localhost/controls/p/${fields.project}/api/install`, {
       method: "POST",
       headers: origin ? { origin } : {},
       body: new URLSearchParams(fields),
     }),
+    { params: Promise.resolve({ project: fields.project }) },
   );
 }
 
@@ -200,6 +203,19 @@ describe("POST: installing from the catalogue's dialog", () => {
     const res = await post({ slug: "accuracy-checklist", project: P1 });
     expect(res.status).toBe(403);
     expect(await res.json()).toEqual({ error: "You can read this project but not change it." });
+    expect(h.installs).toEqual([]);
+  });
+
+  it("an install posted outside a project's address is refused, so none goes unrecorded", async () => {
+    const res = await postWithoutProject(
+      new Request("http://localhost/controls/api/install", {
+        method: "POST",
+        headers: { origin: CATALOGUE },
+        body: new URLSearchParams({ slug: "accuracy-checklist", project: P1 }),
+      }),
+    );
+    expect(res.status).toBe(410);
+    expect((await res.json()).error).toContain("Nothing was installed.");
     expect(h.installs).toEqual([]);
   });
 

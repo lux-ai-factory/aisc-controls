@@ -6,21 +6,27 @@ import { installChosen, type ChooseState } from "./actions";
 import type { ControlSummary } from "@/lib/installControl";
 import type { ProjectChoice } from "@/lib/writableProjects";
 
-/** One screen: the control, the project to install it into, and Install. */
+/** One screen: the control, the project to install it into, and Install. The page sits under the project
+ *  it installs into (`address`), so choosing another project opens that project's install page. */
 export default function InstallDialog({
   slug,
+  address,
+  installPageBase,
   control,
   projects,
   preselect,
   installed,
 }: {
   slug: string;
+  address: string;
+  /** This app's base path, for the other projects' install pages. */
+  installPageBase: string;
   control: ControlSummary;
   projects: ProjectChoice[];
   preselect: string;
   installed: Record<string, string>;
 }) {
-  const [state, formAction, pending] = useActionState<ChooseState, FormData>(installChosen.bind(null, slug), undefined);
+  const [state, formAction, pending] = useActionState<ChooseState, FormData>(installChosen.bind(null, address, slug), undefined);
   const [project, setProject] = useState(preselect);
   const already = installed[project];
   const shownFrom = projects.find((p) => p.pid === preselect)?.name;
@@ -42,7 +48,12 @@ export default function InstallDialog({
           id="install-project"
           name="project"
           value={project}
-          onChange={(e) => setProject(e.target.value)}
+          onChange={(e) => {
+            setProject(e.target.value);
+            if (e.target.value !== address) {
+              window.location.assign(`${installPageBase}/p/${encodeURIComponent(e.target.value)}/install?slug=${encodeURIComponent(slug)}`);
+            }
+          }}
         >
           {projects.map((p) => <option key={p.pid} value={p.pid}>{p.name}</option>)}
         </select>

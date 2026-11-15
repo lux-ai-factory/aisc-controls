@@ -17,7 +17,7 @@ import { describe, it, expect, beforeAll, afterAll, vi } from "vitest";
 //   route  /p/[project]/submissions/[id]/report       GET (PDF)
 //   action /p/[project]/submissions/[id]              saveDraft, reopenForAmendment,
 //                                                     archiveSubmission, restoreSubmission
-// Not by id (not in scope here): /, /install, /api/install, /p/[project], checklists list,
+// Not by id (not in scope here): /, /install, /api/install, /p/[project]/install, /p/[project]/api/install, /p/[project], checklists list,
 // sources list and new, submissions list and archived, install actions (by catalogue slug).
 
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));

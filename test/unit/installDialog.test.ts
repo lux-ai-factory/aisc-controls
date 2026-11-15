@@ -48,6 +48,7 @@ vi.mock("next/navigation", () => ({
 }));
 
 import InstallPage from "@/app/install/page";
+import ProjectInstallPage from "@/app/p/[project]/install/page";
 import InstallDialog from "@/app/install/InstallDialog";
 
 const PKG = {
@@ -72,8 +73,18 @@ function walk(node: ReactNode, out: { els: Array<{ type: unknown; props: Record<
   return out;
 }
 
+/** The install page as the catalogue opens it: it sends the person on to the install page of the project
+ *  the install goes into, which shows the dialog. */
 async function page(search: { slug?: string; project?: string }) {
-  return walk(await InstallPage({ searchParams: Promise.resolve(search) }));
+  try {
+    return walk(await InstallPage({ searchParams: Promise.resolve(search) }));
+  } catch (err) {
+    const to = (err as { redirectUrl?: string }).redirectUrl;
+    if (!to) throw err;
+    const [, project] = /^\/p\/([^/]+)\/install\?/.exec(to) ?? [];
+    const slug = new URL(to, "http://x").searchParams.get("slug") ?? "";
+    return walk(await ProjectInstallPage({ params: Promise.resolve({ project }), searchParams: Promise.resolve({ slug }) }));
+  }
 }
 const dialogProps = (tree: ReturnType<typeof walk>) => tree.els.find((e) => e.type === InstallDialog)?.props;
 
@@ -189,6 +200,8 @@ describe("the dialog", () => {
     renderToStaticMarkup(
       createElement(InstallDialog, {
         slug: "accuracy-checklist",
+        address: P1,
+        installPageBase: "/controls",
         control,
         projects: [{ pid: P1, name: "MCAS" }, { pid: P2, name: "Other" }],
         preselect: P1,
@@ -234,7 +247,7 @@ describe("installing from the dialog", () => {
     const { installChosen } = await import("@/app/install/actions");
     const fd = new FormData();
     fd.set("project", bad);
-    expect(await installChosen("accuracy-checklist", undefined, fd)).toEqual({ error: "Choose a project." });
+    expect(await installChosen(P1, "accuracy-checklist", undefined, fd)).toEqual({ error: "Choose a project." });
   });
 
   it("hands the chosen project to the checked install action", async () => {
@@ -245,7 +258,19 @@ describe("installing from the dialog", () => {
     const { installChosen } = await import("@/app/install/actions");
     const fd = new FormData();
     fd.set("project", P1);
-    expect(await installChosen("accuracy-checklist", undefined, fd)).toEqual({ error: `called ${P1} accuracy-checklist` });
+    expect(await installChosen(P1, "accuracy-checklist", undefined, fd)).toEqual({ error: `called ${P1} accuracy-checklist` });
+    vi.doUnmock("@/app/p/[project]/install/actions");
+  });
+
+  it("refuses a project other than the page's own: only there is the install recorded", async () => {
+    vi.doMock("@/app/p/[project]/install/actions", () => ({
+      installFromCatalogue: async () => ({ error: "installed" }),
+    }));
+    vi.resetModules();
+    const { installChosen } = await import("@/app/install/actions");
+    const fd = new FormData();
+    fd.set("project", P2);
+    expect((await installChosen(P1, "accuracy-checklist", undefined, fd))?.error).toContain("Nothing was installed.");
     vi.doUnmock("@/app/p/[project]/install/actions");
   });
 });
