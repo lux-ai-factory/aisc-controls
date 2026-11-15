@@ -35,6 +35,11 @@ function isUnchanged(answer: ParsedAnswer, before: SubmissionAnswer | undefined)
   return before !== undefined && before.answer === answer.answer && before.score === answer.score;
 }
 
+/** An answer given again as it is stored, whose stored answer has no card version stamp. */
+function isUnstamped(answer: ParsedAnswer, before: SubmissionAnswer | undefined): boolean {
+  return isUnchanged(answer, before) && before.systemVersionPid === null;
+}
+
 /** A unique key two requests raced for (Prisma's P2002). */
 const isUniqueClash = (err: unknown) => (err as { code?: unknown } | null)?.code === "P2002";
 
@@ -67,9 +72,12 @@ export async function saveDraft(
 
   // Each answer carries the card version that was the latest when it was
   // answered. An unchanged answer keeps its old stamp; only a new or changed one
-  // is stamped now. "Unchanged" is decided against the answers read under the
-  // lock (another tab may have saved since the page read them), and the latest
-  // version is read in the same transaction, from the project's own database.
+  // is stamped now, and an unchanged one that has no stamp (it was given before
+  // the card had a version) takes the latest version's, keeping when it was given:
+  // a report reads only the answers stamped with its version. "Unchanged" is
+  // decided against the answers read under the lock (another tab may have saved
+  // since the page read them), and the latest version is read in the same
+  // transaction, from the project's own database.
   const parsed = parseAnswers(formData, validIds);
 
   const saved = await prisma.$transaction(async (tx) => {
@@ -86,17 +94,26 @@ export async function saveDraft(
     if (!now || now.status !== "Draft") return "closed" as const;
     const replaced = await tx.submissionAnswer.findMany({ where: { submissionId } });
     const old = new Map(replaced.map((a) => [a.questionId, a]));
-    const known = parsed.some((a) => !isUnchanged(a, old.get(a.questionId))) ? await latestVersion(tx) : null;
+    const known = parsed.some((a) => isUnstamped(a, old.get(a.questionId)) || !isUnchanged(a, old.get(a.questionId)))
+      ? await latestVersion(tx)
+      : null;
     const answeredAt = new Date();
     const rows = parsed.map((answer) => {
       const before = old.get(answer.questionId);
       const stamp = isUnchanged(answer, before)
-        ? {
-            systemVersionPid: before.systemVersionPid,
-            systemVersionNumber: before.systemVersionNumber,
-            systemCardRevision: before.systemCardRevision,
-            answeredAt: before.answeredAt,
-          }
+        ? before.systemVersionPid === null && known
+          ? {
+              systemVersionPid: known.pid,
+              systemVersionNumber: known.number,
+              systemCardRevision: known.revision,
+              answeredAt: before.answeredAt,
+            }
+          : {
+              systemVersionPid: before.systemVersionPid,
+              systemVersionNumber: before.systemVersionNumber,
+              systemCardRevision: before.systemCardRevision,
+              answeredAt: before.answeredAt,
+            }
         : {
             systemVersionPid: known?.pid ?? null,
             systemVersionNumber: known?.number ?? null,
@@ -123,7 +140,9 @@ export async function saveDraft(
     for (const row of rows) {
       const before = old.get(row.questionId);
       if (!before) await tx.submissionAnswer.create({ data: row });
-      else if (shouldClose || !isUnchanged(row, before)) await tx.submissionAnswer.update({ where: { id: before.id }, data: row });
+      else if (shouldClose || !isUnchanged(row, before) || row.systemVersionPid !== before.systemVersionPid) {
+        await tx.submissionAnswer.update({ where: { id: before.id }, data: row });
+      }
     }
     const given = new Set(rows.map((r) => r.questionId));
     const dropped = replaced.filter((a) => a.questionId !== null && !given.has(a.questionId));

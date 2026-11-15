@@ -155,6 +155,25 @@ describe.skipIf(!hasThrowawayDb)("answers carry the system version", () => {
     expect(s[qA].at).not.toBeNull();
   }, 60_000);
 
+  it("an answer saved before the card had a version takes the version's stamp on its next save, even unchanged", async () => {
+    // runs while the project still has no card version: the tests above make none
+    const id = await draft();
+    await saveDraft(project, id, undefined, form({ label: "Run", [`a:${qA}`]: "Yes", [`s:${qA}`]: "3" }));
+    const unstamped = stamps(project, id)[qA];
+    expect(unstamped.pid).toBeNull();
+
+    const v1 = newVersion();
+    expect((await saveDraft(project, id, undefined, form({ label: "Run", [`a:${qA}`]: "Yes", [`s:${qA}`]: "3" })))?.error).toBeUndefined();
+    const s = stamps(project, id)[qA];
+    expect(s).toMatchObject({ answer: "Yes", score: 3, ...v1 });
+    // the answer was given then, not now
+    expect(s.at).toBe(unstamped.at);
+    // and once stamped, it keeps that stamp through the next unchanged save
+    newVersion();
+    await saveDraft(project, id, undefined, form({ label: "Run", [`a:${qA}`]: "Yes", [`s:${qA}`]: "3" }));
+    expect(stamps(project, id)[qA]).toMatchObject(v1);
+  }, 60_000);
+
   it("A answered under one version, then B under the next: A keeps the first, B gets the next", async () => {
     const id = await draft();
     const v1 = newVersion();
