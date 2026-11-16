@@ -42,7 +42,13 @@ export type ReportInput = {
   revisionByQ?: Record<string, number | null>;
   /** The files proving each answer, keyed as the answers are; none when left out. */
   filesByQ?: Record<string, ProofLink[]>;
+  /** For an amendment: the version it amends, why it was made and who asked for it. */
+  amendment?: Amendment | null;
+  /** The version that replaced this one, when it was amended since. */
+  replacedBy?: number | null;
 };
+
+export type Amendment = { amends: number; reason: string; requestedBy: string };
 
 /** A proof file as the report lists it: what it is and who attached it when, never its bytes. */
 export type ReportFile = {
@@ -90,6 +96,9 @@ export type ReportPayload = {
   groups: { category: string | null; entries: ReportItem[] }[];
   /** The AI card versions the answers were given under, each once, in order. */
   cardVersions: number[];
+  /** As the submission's page says it: what an amendment amends and why, and which version replaced this one. */
+  amendment: Amendment | null;
+  replacedBy: number | null;
   generatedAt: string;
 };
 
@@ -165,6 +174,8 @@ export function buildReportPayload(
     cardVersions: [
       ...new Set(Object.values(input.versionByQ).filter((n): n is number => n !== null)),
     ].sort((x, y) => x - y),
+    amendment: input.amendment ?? null,
+    replacedBy: input.replacedBy ?? null,
     generatedAt: formatDateTime(generatedAt),
   };
 }

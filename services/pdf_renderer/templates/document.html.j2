@@ -37,6 +37,8 @@
           <tr><th>Status</th><td>{{ data.status }} (version {{ data.version }})</td></tr>
           <tr><th>Created</th><td>{{ data.createdAt }}</td></tr>
           {% if data.closedAt %}<tr><th>Finalised</th><td>{{ data.closedAt }}</td></tr>{% endif %}
+          {% if data.amendment %}<tr><th>Amends version {{ data.amendment.amends }}</th><td>{{ data.amendment.reason }} (requested by {{ data.amendment.requestedBy }})</td></tr>{% endif %}
+          {% if data.replacedBy %}<tr><th>Replaced by version {{ data.replacedBy }}</th><td>This version is no longer the current one.</td></tr>{% endif %}
           {% if data.cardVersions %}<tr><th>Answered under</th><td>{% for v in data.cardVersions %}v{{ v }}{% if not loop.last %}, {% endif %}{% endfor %} of the AI card</td></tr>{% endif %}
           {% if data.countries %}<tr><th>Countries</th><td>{{ data.countries | join(", ") }}</td></tr>{% endif %}
           {% if data.regulations %}<tr><th>Regulations</th><td>{{ data.regulations | join(", ") }}</td></tr>{% endif %}

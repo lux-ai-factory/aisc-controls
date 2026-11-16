@@ -28,6 +28,8 @@ type ChainEntry = {
   status: "Draft" | "Closed";
   closedAt: Date | null;
   archivedAt: Date | null;
+  amendReason: string | null;
+  amendRequestedBy: string | null;
 };
 
 const chainSelect = {
@@ -37,7 +39,15 @@ const chainSelect = {
   closedAt: true,
   archivedAt: true,
   previousVersionId: true,
+  amendReason: true,
+  amendRequestedBy: true,
 } as const;
+
+/** Why an amendment was made and who asked for it, as one line; null for a first version. */
+function amendmentLine(v: { amendReason: string | null; amendRequestedBy: string | null }): string | null {
+  if (!v.amendReason) return null;
+  return v.amendRequestedBy ? `${v.amendReason} (requested by ${v.amendRequestedBy})` : v.amendReason;
+}
 
 /**
  * Returns the full draft-to-final version history for a submission, ordered
@@ -79,6 +89,8 @@ async function loadVersionChain(
       status: cursor.status as "Draft" | "Closed",
       closedAt: cursor.closedAt,
       archivedAt: cursor.archivedAt,
+      amendReason: cursor.amendReason,
+      amendRequestedBy: cursor.amendRequestedBy,
     });
   }
   return chain;
@@ -116,6 +128,8 @@ export default async function SubmissionDetailPage({
   // An older closed version: its amendment already exists, so reopening it would only lead there.
   const at = chain.findIndex((v) => v.id === sub.id);
   const nextVersion = at >= 0 ? (chain[at + 1] ?? null) : null;
+  const previousVersion = at > 0 ? chain[at - 1] : null;
+  const amended = amendmentLine(sub);
 
   // A closed submission shows the questions as it answered them; a draft, the template as it is now.
   const sheet = answerSheet(sub.status, sub.checklist.questions, sub.answers);
@@ -173,6 +187,13 @@ export default async function SubmissionDetailPage({
             <> · answered under {versionsAnswered.join(", ")} of the AI card</>
           )}
         </p>
+        {amended && (
+          <p className="meta">
+            Amends {previousVersion ? (
+              <Link href={`/p/${project}/submissions/${previousVersion.id}`}>v{previousVersion.version}</Link>
+            ) : `v${sub.version - 1}`}: {amended}
+          </p>
+        )}
         {!isDraft && sub.questionsVersion !== null && (
           <p className="meta">Answered under checklist revision {sub.questionsVersion}</p>
         )}
@@ -256,6 +277,7 @@ export default async function SubmissionDetailPage({
                   {v.closedAt && (
                     <span className="meta">finalised {formatDateTime(v.closedAt)}</span>
                   )}
+                  {amendmentLine(v) && <span className="meta">amended: {amendmentLine(v)}</span>}
                 </>
               );
               // The version on screen is not a link: following it would only reload this page.

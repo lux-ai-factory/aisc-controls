@@ -37,6 +37,7 @@ export async function GET(
         },
       },
       answers: true,
+      nextVersion: { select: { version: true } },
     },
   });
   if (!sub) notFound();
@@ -65,6 +66,11 @@ export async function GET(
     versionByQ: sheet.versionByQ,
     revisionByQ: sheet.revisionByQ,
     filesByQ: await filesByQuestion(prisma, sub.id),
+    // An amendment is made as the version after the one it amends, with its reason and requester.
+    amendment: sub.previousVersionId && sub.amendReason && sub.amendRequestedBy
+      ? { amends: sub.version - 1, reason: sub.amendReason, requestedBy: sub.amendRequestedBy }
+      : null,
+    replacedBy: sub.nextVersion?.version ?? null,
   };
 
   const payload = buildReportPayload(input, new Date());
