@@ -2,12 +2,12 @@
 # The image of the controls-web and controls-migrate services of the aisc stack.
 # Standalone development uses `npm run dev` and does not need it.
 
-FROM node:20-bookworm-slim AS deps
+FROM node:20.20.2-bookworm-slim@sha256:2cf067cfed83d5ea958367df9f966191a942351a2df77d6f0193e162b5febfc0 AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 
-FROM node:20-bookworm-slim AS builder
+FROM node:20.20.2-bookworm-slim@sha256:2cf067cfed83d5ea958367df9f966191a942351a2df77d6f0193e162b5febfc0 AS builder
 WORKDIR /app
 # OpenSSL so Prisma generates the engine matching the runtime libssl (3.0.x).
 RUN apt-get update && apt-get install -y --no-install-recommends openssl \
@@ -19,7 +19,7 @@ ARG NEXT_BASE_PATH=""
 ENV NEXT_BASE_PATH=$NEXT_BASE_PATH
 RUN npx prisma generate && npm run build
 
-FROM node:20-bookworm-slim AS runner
+FROM node:20.20.2-bookworm-slim@sha256:2cf067cfed83d5ea958367df9f966191a942351a2df77d6f0193e162b5febfc0 AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 # `next start` evaluates next.config.ts again at run time, and that reads basePath
