@@ -19,5 +19,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
+# runs as its own user, not root
+RUN useradd --system --uid 10040 --no-create-home renderer
+USER renderer
 EXPOSE 8005
 CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8005"]

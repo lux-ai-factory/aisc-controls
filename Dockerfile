@@ -35,7 +35,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends openssl \
 # scripts/migrate-projects.mjs (prisma migrate deploy on each project database)
 # from this same image.
 COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/.next ./.next
+# next start writes its cache under .next, so the node user owns it
+COPY --from=builder --chown=node:node /app/.next ./.next
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/src ./src
@@ -44,5 +45,7 @@ COPY --from=builder /app/scripts ./scripts
 COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/next.config.ts ./next.config.ts
 COPY --from=builder /app/tsconfig.json ./tsconfig.json
+# the node image's own unprivileged user, not root
+USER node
 EXPOSE 3000
 CMD ["npx", "next", "start", "-p", "3000"]
