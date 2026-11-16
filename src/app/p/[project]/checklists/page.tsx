@@ -37,7 +37,10 @@ export default async function LibraryPage({ params, searchParams }: PageProps) {
       orderBy: { createdAt: "desc" },
       include: {
         source: { select: { id: true, name: true, citation: true, url: true } },
-        _count: { select: { questions: true, submissions: true } },
+        // as the Submissions page lists them: the latest version of each, not archived
+        _count: {
+          select: { questions: true, submissions: { where: { archivedAt: null, nextVersion: { is: null } } } },
+        },
       },
     }),
     prisma.source.findMany({

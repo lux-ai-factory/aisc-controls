@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { projectDbFor } from "@/lib/projectDb";
 import { formatDate } from "@/lib/formatDate";
+import { answerSheet } from "@/lib/answerSheet";
+import { answeredCount } from "@/lib/scoring";
 
 export default async function ArchivedSubmissionsPage({
   params,
@@ -18,11 +20,21 @@ export default async function ArchivedSubmissionsPage({
           title: true,
           controlTopic: true,
           source: { select: { id: true, name: true } },
+          questions: { select: { id: true, order: true, text: true, article: true, category: true } },
         },
       },
-      _count: { select: { answers: true } },
+      answers: true,
     },
   });
+  // The questions each one answered, as the Submissions page counts them: a row that holds only a proof
+  // file is not an answer.
+  const answered = new Map(rows.map((r) => {
+    const sheet = answerSheet(r.status, r.checklist.questions, r.answers);
+    const given = sheet.questions.map((q) => ({
+      questionId: q.id, answer: sheet.answersByQ[q.id] ?? null, score: sheet.scoresByQ[q.id] ?? null,
+    }));
+    return [r.id, answeredCount(given, sheet.questions.map((q) => q.id))];
+  }));
 
   return (
     <main className="page">
@@ -55,7 +67,7 @@ export default async function ArchivedSubmissionsPage({
                   {r.checklist.source.name} · {r.checklist.controlTopic}
                 </p>
                 <p className="meta">
-                  {r._count.answers} answers · archived{" "}
+                  {answered.get(r.id) ?? 0} {answered.get(r.id) === 1 ? "answer" : "answers"} · archived{" "}
                   {formatDate(r.archivedAt!)}
                 </p>
               </div>

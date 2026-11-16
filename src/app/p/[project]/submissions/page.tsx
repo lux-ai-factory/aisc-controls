@@ -66,7 +66,7 @@ export default async function SubmissionsPage({
                   {r.checklist.source.name} · {r.checklist.controlTopic}
                 </p>
                 <p className="meta">
-                  {r._count.answers} answers · last updated{" "}
+                  {answersLabel(coverageById.get(r.id)?.answered ?? 0)} · last updated{" "}
                   {formatDate(r.updatedAt)}
                 </p>
                 <p className="readiness-line">
@@ -98,4 +98,9 @@ export default async function SubmissionsPage({
 function formatCoverage(c: Coverage | undefined): string {
   if (!c || c.percent === null) return "n/a";
   return `${c.answered}/${c.total} (${c.percent}%)`;
+}
+
+/** The questions a submission answered (a row that holds only a proof file is not an answer). */
+function answersLabel(answered: number): string {
+  return `${answered} ${answered === 1 ? "answer" : "answers"}`;
 }

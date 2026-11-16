@@ -22,7 +22,6 @@ export async function submissionsOfProject(project: string) {
         },
       },
       answers: true,
-      _count: { select: { answers: true } },
     },
   });
 }
