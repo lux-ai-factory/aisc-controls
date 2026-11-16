@@ -6,14 +6,15 @@
  * project, and are they allowed to change it. The platform decides; this asks
  * it once per request and turns the answer into a status.
  *
- * It covers server actions without naming any of them, because an action is a
- * POST to the page it sits on.
+ * A refused page is shown as this app's refused page, with the platform's
+ * reason (rewritten there, so the address stays the one the person opened).
  */
 import { NextResponse, type NextRequest } from "next/server";
 
 import { admit, projectFromPath } from "@/vendor/aisc-access/projectAccess";
 import { tokenFromHeaders } from "@/lib/access/callerToken";
 import { platformUrl } from "@/lib/appUrls";
+import { REFUSAL_HEADER, refusalHeaderValue } from "@/lib/refusal";
 
 export const config = {
   // Only the pages inside a project. The rest (the root page, /install and its
@@ -22,6 +23,8 @@ export const config = {
   matcher: ["/p/:path*"],
 };
 
+const READS = new Set(["GET", "HEAD"]);
+
 export async function middleware(request: NextRequest) {
   const project = projectFromPath(request.nextUrl.pathname);
   if (!project) return NextResponse.next();
@@ -29,5 +32,17 @@ export async function middleware(request: NextRequest) {
   const token = tokenFromHeaders(request.headers) || null;
   const admission = await admit(project, request.method, token, { platformUrl: platformUrl() });
   if (admission.ok) return NextResponse.next();
-  return new NextResponse(admission.message, { status: admission.status });
+  // Anything else but a page (an upload, the install API) keeps a short answer its caller reads.
+  if (!READS.has(request.method)) return new NextResponse(admission.message, { status: admission.status });
+
+  const refused = request.nextUrl.clone();
+  refused.pathname = "/refused";
+  refused.search = "";
+  const forwarded = new Headers(request.headers);
+  forwarded.set(REFUSAL_HEADER, refusalHeaderValue({
+    status: admission.status,
+    message: admission.message,
+    path: request.nextUrl.pathname + request.nextUrl.search,
+  }));
+  return NextResponse.rewrite(refused, { request: { headers: forwarded } });
 }
