@@ -60,7 +60,7 @@ function submission(row: Row, questions = [{ id: "q1", text: "Is it logged?", ar
   };
 }
 
-async function page(id: string, search: { discard?: string } = {}) {
+async function page(id: string, search: { discard?: string; report?: string } = {}) {
   return renderToStaticMarkup(
     await SubmissionDetailPage({ params: Promise.resolve({ project: P1, id }), searchParams: Promise.resolve(search) }),
   );
@@ -243,5 +243,22 @@ describe("proof files", () => {
     expect(html).toContain(`/p/${P1}/submissions/s3/questions/q1/files/${file.fileId}`);
     expect(html).not.toContain("Attach file");
     expect(html).not.toContain(">Remove<");
+  });
+});
+
+describe("a report that could not be made", () => {
+  it("is said on the page the download came from, with no detail of why", async () => {
+    h.sub = submission(h.chain[2]);
+    expect(await page("s3", { report: "failed" })).toContain("The PDF could not be made just now");
+  });
+
+  it("is not said without a failed report", async () => {
+    h.sub = submission(h.chain[2]);
+    expect(await page("s3")).not.toContain("could not be made");
+  });
+
+  it("says only what it knows, never text from the address", async () => {
+    h.sub = submission(h.chain[2]);
+    expect(await page("s3", { report: "<b>made up</b>" })).not.toContain("made up");
   });
 });

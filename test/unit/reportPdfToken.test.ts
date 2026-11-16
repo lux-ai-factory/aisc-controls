@@ -2,7 +2,8 @@ import { describe, it, expect, vi, afterEach } from "vitest";
 
 // controls-pdf refuses a caller without a token (services/pdf_renderer/service_token.py). Its one
 // caller is this route, which sends CONTROLS_WEB_TO_PDF_TOKEN in
-// X-AISC-Service-Token, and a refusal is still reported as the renderer's 502.
+// X-AISC-Service-Token, and a refusal sends the person back to the submission, which says the PDF could
+// not be made.
 
 const HEADER = "X-AISC-Service-Token";
 // Split so no credential scanner reads it as a real one.
@@ -66,10 +67,11 @@ describe("the report route calls controls-pdf with its token", () => {
     expect(init.headers["content-type"]).toBe("application/json");
   });
 
-  it("sends no token header when none is set, and a refusal is a 502", async () => {
+  it("sends no token header when none is set, and a refusal leads back to the submission", async () => {
     vi.stubEnv("CONTROLS_WEB_TO_PDF_TOKEN", "");
     const { res, fetchImpl } = await report(401);
     expect(fetchImpl.mock.calls[0][1].headers[HEADER]).toBeUndefined();
-    expect(res.status).toBe(502);
+    expect(res.status).toBe(303);
+    expect(res.headers.get("location")).toMatch(/\/submissions\/[^/?]+\?report=failed$/);
   });
 });

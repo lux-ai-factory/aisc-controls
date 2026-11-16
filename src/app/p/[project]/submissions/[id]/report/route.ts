@@ -5,6 +5,7 @@ import { answerSheet } from "@/lib/answerSheet";
 import { filesByQuestion } from "@/lib/proofFiles";
 import { slugify } from "@/lib/slugify";
 import { findCountry, findRegulation } from "@/data";
+import { appBasePath } from "@/lib/appUrls";
 
 // Always render against live data; never cache the binary.
 export const dynamic = "force-dynamic";
@@ -14,8 +15,9 @@ const RENDERER_URL = process.env.PDF_RENDERER_URL ?? "http://localhost:8005";
 /**
  * GET /p/{project}/submissions/{id}/report: the submission's answers and scores
  * as a PDF, made by the bundled renderer (services/pdf_renderer) and sent back as
- * a download. The app does not depend on the renderer: when it is unreachable
- * this returns a 502 with a hint rather than crashing the page.
+ * a download. The app does not depend on the renderer: when it is unreachable or
+ * refuses, the person is sent back to the submission, which says the PDF could
+ * not be made; why goes to the log.
  */
 export async function GET(
   _req: Request,
@@ -89,20 +91,16 @@ export async function GET(
       cache: "no-store",
     });
   } catch (err) {
-    return new Response(
-      `PDF renderer unreachable at ${RENDERER_URL}. ` +
-        "Start it with `docker compose up -d pdf` (in AISC the service is controls-pdf).\n\n" +
-        String(err),
-      { status: 502, headers: { "content-type": "text/plain; charset=utf-8" } },
+    console.error(
+      `controls: PDF renderer unreachable at ${RENDERER_URL} (in AISC the service is controls-pdf): ${String(err)}`,
     );
+    return backToSubmission(project, id);
   }
 
   if (!res.ok) {
     const detail = await res.text().catch(() => "");
-    return new Response(`PDF renderer returned ${res.status}.\n${detail}`, {
-      status: 502,
-      headers: { "content-type": "text/plain; charset=utf-8" },
-    });
+    console.error(`controls: PDF renderer answered ${res.status}: ${detail.slice(0, 2000)}`);
+    return backToSubmission(project, id);
   }
 
   const pdf = await res.arrayBuffer();
@@ -114,4 +112,10 @@ export async function GET(
       "content-length": String(pdf.byteLength),
     },
   });
+}
+
+/** The submission's page, saying the PDF could not be made. */
+function backToSubmission(project: string, id: string): Response {
+  const page = `${appBasePath()}/p/${encodeURIComponent(project)}/submissions/${encodeURIComponent(id)}?report=failed`;
+  return new Response(null, { status: 303, headers: { location: page, "cache-control": "no-store" } });
 }

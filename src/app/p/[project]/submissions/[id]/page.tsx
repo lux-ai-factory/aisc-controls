@@ -101,10 +101,13 @@ export default async function SubmissionDetailPage({
   searchParams,
 }: {
   params: Promise<{ project: string; id: string }>;
-  searchParams?: Promise<{ discard?: string }>;
+  searchParams?: Promise<{ discard?: string; report?: string }>;
 }) {
   const { project, id } = await params;
-  const askedToDiscard = (await searchParams)?.discard === "1";
+  const asked = await searchParams;
+  const askedToDiscard = asked?.discard === "1";
+  // The report download comes back here when the PDF could not be made (its route logs why).
+  const reportFailed = asked?.report === "failed";
 
   // Next does not add basePath to a raw <a href> link, so it is prefixed here
   // (as in SiteHeader) and the report download works when the app is served
@@ -167,6 +170,9 @@ export default async function SubmissionDetailPage({
   return (
     <main className="page">
       <header className="page-header">
+        {reportFailed && (
+          <div className="error">The PDF could not be made just now. Try the download again in a moment.</div>
+        )}
         <h1>
           {sub.label}{" "}
           <span className={`status status--${sub.status.toLowerCase()}`}>
