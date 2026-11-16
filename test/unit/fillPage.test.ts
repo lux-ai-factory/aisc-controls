@@ -9,14 +9,15 @@ const P1 = "3f2b8c1e-0d4a-4e7b-9a55-1c2d3e4f5a6b";
 type Sub = {
   id: string; label: string; status: string; version: number; archivedAt: Date | null; previousVersionId?: string;
 };
-const h = vi.hoisted(() => ({ subs: [] as Sub[], asked: [] as unknown[] }));
+const h = vi.hoisted(() => ({ subs: [] as Sub[], asked: [] as unknown[], mayWrite: true }));
 
 vi.mock("@/lib/projectDb", () => ({
   projectDbFor: async () => ({
     checklist: {
       findUnique: async () => ({
         id: "chk", title: "Logging", controlTopic: "Records", description: null, sourceUpdatedAt: null,
-        countryIds: [], regulationIds: [], questions: [],
+        countryIds: [], regulationIds: [],
+        questions: [{ id: "q1", text: "Is every run logged?", article: null, category: null, order: 1 }],
         source: { id: "s", name: "S", citation: null, url: null },
       }),
     },
@@ -30,7 +31,11 @@ vi.mock("@/lib/projectDb", () => ({
       },
     },
   }),
+  callerAccess: async (pid: string) => ({
+    ok: true, pid, slug: pid, role: h.mayWrite ? "editor" : "viewer", admin: false, mayWrite: h.mayWrite,
+  }),
 }));
+vi.mock("@/app/p/[project]/checklists/[id]/fill/FillForm", () => ({ default: () => "fill-form" }));
 vi.mock("@/app/p/[project]/checklists/[id]/fill/actions", () => ({ submitForm: async () => undefined }));
 vi.mock("next/navigation", () => ({
   notFound: () => {
@@ -48,6 +53,7 @@ const render = async () =>
 beforeEach(() => {
   h.subs = [];
   h.asked = [];
+  h.mayWrite = true;
 });
 
 describe("the fill page", () => {
@@ -81,5 +87,26 @@ describe("the fill page", () => {
 
   it("lists nothing when the checklist has no submissions yet", async () => {
     expect(await render()).not.toContain("/submissions/");
+  });
+});
+
+describe("the fill page for a person who may only read the project", () => {
+  beforeEach(() => {
+    h.mayWrite = false;
+  });
+
+  it("offers no form to answer, and says they can read the project but not change it", async () => {
+    const html = await render();
+    expect(html).not.toContain("fill-form");
+    expect(html).toMatch(/can read this project but not change it/i);
+  });
+
+  it("still shows the checklist's questions", async () => {
+    expect(await render()).toContain("Is every run logged?");
+  });
+
+  it("an editor gets the form", async () => {
+    h.mayWrite = true;
+    expect(await render()).toContain("fill-form");
   });
 });

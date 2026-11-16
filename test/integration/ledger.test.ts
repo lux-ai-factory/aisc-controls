@@ -218,7 +218,7 @@ describe.skipIf(!hasThrowawayDb)("every controls write records its ledger event"
 
   it("a closed submission cannot be discarded", async () => {
     const id = await closedSubmission(checklistId, qA, "final");
-    await expect(discardDraft(project, id)).rejects.toThrow("Only a draft can be discarded.");
+    expect(await discardDraft(project, id)).toEqual({ error: "Only a draft can be discarded." });
     expect(rows(`SELECT status FROM controls.submission WHERE id = '${id}'`, project)).toEqual(["Closed"]);
     expect(outbox(id).map((r) => r.action)).not.toContain("controls.submission.discarded");
   });

@@ -11,7 +11,7 @@ const h = vi.hoisted(() => ({
 }));
 
 vi.mock("@/lib/projectDb", () => ({
-  projectDbFor: async () => ({
+  writableProject: async () => ({ prisma: {
     $transaction: async (fn: (tx: unknown) => unknown) => {
       h.transactions += 1;
       return fn({
@@ -27,8 +27,7 @@ vi.mock("@/lib/projectDb", () => ({
         submissionAnswer: { createMany: async () => ({ count: 0 }) },
       });
     },
-  }),
-  writableProject: async () => {},
+  } }),
 }));
 vi.mock("@/vendor/aisc-ledger/emit", () => ({ emitEvent: async (_tx: unknown, e: Record<string, unknown>) => { h.events.push(e); } }));
 vi.mock("@/lib/proofFiles", () => ({ carryProofFiles: async () => {} }));
@@ -49,7 +48,8 @@ const closedRow = () => ({
 
 async function amend(reason: string, requestedBy: string) {
   try {
-    await reopenForAmendment("p", "old", { reason, requestedBy });
+    const refused = await reopenForAmendment("p", "old", { reason, requestedBy });
+    if (refused?.error) return refused.error;
   } catch (e) {
     return (e as Error).message;
   }

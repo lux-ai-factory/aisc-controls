@@ -6,7 +6,8 @@
  * project, and are they allowed to change it. The platform decides; this asks
  * it once per request and turns the answer into a status.
  *
- * A refused page is shown as this app's refused page, with the platform's
+ * A server action is a POST to the page it sits on; it is let through to the
+ * action, which checks for itself. A refused page is shown as this app's refused page, with the platform's
  * reason (rewritten there, so the address stays the one the person opened).
  */
 import { NextResponse, type NextRequest } from "next/server";
@@ -32,6 +33,10 @@ export async function middleware(request: NextRequest) {
   const token = tokenFromHeaders(request.headers) || null;
   const admission = await admit(project, request.method, token, { platformUrl: platformUrl() });
   if (admission.ok) return NextResponse.next();
+  // A form (a server action) goes on to its action, which asks the platform again before it changes
+  // anything (projectDbFor) and answers the refusal in the form's own state: the form keeps what was typed
+  // and says why. Answered here, the browser would get a text it cannot read and show a generic error.
+  if (request.method === "POST" && request.headers.has("next-action")) return NextResponse.next();
   // Anything else but a page (an upload, the install API) keeps a short answer its caller reads.
   if (!READS.has(request.method)) return new NextResponse(admission.message, { status: admission.status });
 

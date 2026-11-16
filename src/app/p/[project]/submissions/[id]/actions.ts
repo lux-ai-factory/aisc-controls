@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { projectDbFor, writableProject } from "@/lib/projectDb";
+import { writableProject } from "@/lib/projectDb";
 import type { PrismaClient, SubmissionAnswer } from "@prisma/client";
 import { parseAnswers, REVISED, type ParsedAnswer } from "@/lib/checklistForm";
 import { latestVersion } from "@/lib/systemVersion";
@@ -185,19 +185,23 @@ export async function saveDraft(
   return { savedAt: new Date().toISOString() };
 }
 
-// The actions below throw when refused: they return nothing, so there is no
-// state to put the refusal in, and the page shows it as an error.
+// The actions below answer a refusal with its reason, for the form to show beside itself (and keep what was
+// typed); they answer nothing when they went through, or go to the page they lead to.
+
+/** A refusal raised inside a transaction, to be answered as the action's state. */
+class Refusal extends Error {}
 
 export async function reopenForAmendment(
   project: string,
   submissionId: string,
   amend: { reason: string; requestedBy: string },
-): Promise<void> {
+): Promise<ActionState> {
   // Refused before anything is opened or made: a correction to a closed submission says why and who asked.
   const reason = amend.reason.trim();
   const requestedBy = amend.requestedBy.trim();
-  if (!reason || !requestedBy) throw new Error("Say why the answers are amended and who asked for it.");
-  const prisma = await projectDbFor(project, { write: true });
+  if (!reason || !requestedBy) return { error: "Say why the answers are amended and who asked for it." };
+  const { prisma, refused } = await writableProject(project);
+  if (refused) return refused;
   const base = inProject(project);
 
   // Checked and made under the closed submission's lock: a second reopen (a double click, another tab)
@@ -208,12 +212,12 @@ export async function reopenForAmendment(
       where: { id: submissionId },
       include: { answers: true, nextVersion: { select: { id: true } } },
     });
-    if (!previous) throw new Error("Submission not found.");
+    if (!previous) throw new Refusal("Submission not found.");
     if (previous.status !== "Closed") {
-      throw new Error("Only final submissions can be amended.");
+      throw new Refusal("Only final submissions can be amended.");
     }
     if (previous.archivedAt) {
-      throw new Error("Restore from archive before amending.");
+      throw new Refusal("Restore from archive before amending.");
     }
     if (previous.nextVersion) return previous.nextVersion;
     // The amendment is a draft, and a draft follows the template: an answer to a question removed since stays
@@ -259,17 +263,23 @@ export async function reopenForAmendment(
 
   let next: { id: string };
   try {
-    next = await reopen();
+    try {
+      next = await reopen();
+    } catch (err) {
+      if (!isUniqueClash(err)) throw err;
+      next = await reopen();                                     // the other one won: go to its amendment
+    }
   } catch (err) {
-    if (!isUniqueClash(err)) throw err;
-    next = await reopen();                                       // the other one won: go to its amendment
+    if (err instanceof Refusal) return { error: err.message };
+    throw err;
   }
   revalidatePath(`${base}/submissions`);
   redirect(`${base}/submissions/${next.id}`);
 }
 
-export async function archiveSubmission(project: string, submissionId: string): Promise<void> {
-  const prisma = await projectDbFor(project, { write: true });
+export async function archiveSubmission(project: string, submissionId: string): Promise<ActionState> {
+  const { prisma, refused } = await writableProject(project);
+  if (refused) return refused;
   // Only a closed one not archived yet, in one statement: two clicks archive it once, with one event.
   const archived = await prisma.$transaction(async (tx) => {
     const done = await tx.submission.updateMany({
@@ -283,22 +293,24 @@ export async function archiveSubmission(project: string, submissionId: string): 
   });
   if (!archived) {
     const sub = await prisma.submission.findUnique({ where: { id: submissionId }, select: { status: true } });
-    if (!sub) throw new Error("Submission not found.");
-    if (sub.status !== "Closed") throw new Error("Only final submissions can be archived.");
-    return;                                                       // archived already
+    if (!sub) return { error: "Submission not found." };
+    if (sub.status !== "Closed") return { error: "Only final submissions can be archived." };
+    return undefined;                                             // archived already
   }
   revalidateSubmissionPages(project, submissionId);
+  return undefined;
 }
 
-export async function discardDraft(project: string, submissionId: string): Promise<void> {
-  const prisma = await projectDbFor(project, { write: true });
+export async function discardDraft(project: string, submissionId: string): Promise<ActionState> {
+  const { prisma, refused } = await writableProject(project);
+  if (refused) return refused;
   // Under the draft's lock: one closed in another tab meanwhile is refused, not deleted, and the answers that
   // go are the ones read here, which the event keeps as its `before`.
-  await prisma.$transaction(async (tx) => {
+  const notDiscarded = await prisma.$transaction(async (tx) => {
     const [now] = await tx.$queryRaw<{ label: string; status: string; checklistId: string }[]>`
       SELECT label, status::text AS status, "checklistId" FROM controls.submission WHERE id = ${submissionId} FOR UPDATE`;
-    if (!now) throw new Error("Submission not found.");
-    if (now.status !== "Draft") throw new Error("Only a draft can be discarded.");
+    if (!now) return "Submission not found.";
+    if (now.status !== "Draft") return "Only a draft can be discarded.";
     const answers = await tx.submissionAnswer.findMany({ where: { submissionId } });
     await tx.submission.delete({ where: { id: submissionId } });         // its answers go with it
     await emitEvent(tx, {
@@ -308,13 +320,16 @@ export async function discardDraft(project: string, submissionId: string): Promi
       details: { checklist: now.checklistId },
       before: submissionState(now.label, now.status, answers),
     });
+    return null;
   });
+  if (notDiscarded) return { error: notDiscarded };
   revalidatePath(`${inProject(project)}/submissions`);
   redirect(`${inProject(project)}/submissions`);
 }
 
-export async function restoreSubmission(project: string, submissionId: string): Promise<void> {
-  const prisma = await projectDbFor(project, { write: true });
+export async function restoreSubmission(project: string, submissionId: string): Promise<ActionState> {
+  const { prisma, refused } = await writableProject(project);
+  if (refused) return refused;
   const restored = await prisma.$transaction(async (tx) => {
     const done = await tx.submission.updateMany({
       where: { id: submissionId, archivedAt: { not: null } },               // only an archived one comes back
@@ -325,6 +340,7 @@ export async function restoreSubmission(project: string, submissionId: string): 
     }
     return done.count > 0 || (await tx.submission.count({ where: { id: submissionId } })) > 0;
   });
-  if (!restored) throw new Error("Submission not found.");
+  if (!restored) return { error: "Submission not found." };
   revalidateSubmissionPages(project, submissionId);
+  return undefined;
 }

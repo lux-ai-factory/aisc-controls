@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { projectDbFor } from "@/lib/projectDb";
+import { callerAccess, projectDbFor } from "@/lib/projectDb";
+import { groupByCategory } from "@/lib/questions";
 import { findCountry, findRegulation } from "@/data";
 import SourceCitation from "@/components/SourceCitation";
 import FillForm from "./FillForm";
@@ -35,6 +36,9 @@ export default async function FillPage({
     }),
   ]);
   if (!q) notFound();
+  // A person who may only read the project reads the questions; the form would only be refused.
+  const access = await callerAccess(project);
+  const mayWrite = access.ok && access.mayWrite;
 
   return (
     <main className="page">
@@ -64,7 +68,11 @@ export default async function FillPage({
           url={q.source.url}
           sourceUpdatedAt={q.sourceUpdatedAt}
         />
-        <p className="meta">This starts a new, empty submission. Nothing is copied from earlier ones.</p>
+        {mayWrite ? (
+          <p className="meta">This starts a new, empty submission. Nothing is copied from earlier ones.</p>
+        ) : (
+          <p className="info-banner">You can read this project but not change it.</p>
+        )}
         {existing.length > 0 && (
           <>
             <p className="meta">Already answered for this checklist:</p>
@@ -80,16 +88,30 @@ export default async function FillPage({
           </>
         )}
       </header>
-      <FillForm
-        project={project}
-        checklistId={q.id}
-        questions={q.questions.map((qq) => ({
-          id: qq.id,
-          text: qq.text,
-          article: qq.article,
-          category: qq.category,
-        }))}
-      />
+      {mayWrite ? (
+        <FillForm
+          project={project}
+          checklistId={q.id}
+          questions={q.questions.map((qq) => ({
+            id: qq.id,
+            text: qq.text,
+            article: qq.article,
+            category: qq.category,
+          }))}
+        />
+      ) : (
+        groupByCategory(q.questions).map((group, gi) => (
+          <section key={gi} className="qf-section">
+            {group.category && <h2>{group.category}</h2>}
+            {group.items.map((qq) => (
+              <div key={qq.id} className="answer-block">
+                {qq.article && <span className="tag tag--reg">{qq.article}</span>}
+                <p className="q-text">{qq.text}</p>
+              </div>
+            ))}
+          </section>
+        ))
+      )}
     </main>
   );
 }

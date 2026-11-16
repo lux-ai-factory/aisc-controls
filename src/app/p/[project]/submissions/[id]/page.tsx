@@ -1,14 +1,16 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { PrismaClient } from "@prisma/client";
-import { projectDbFor } from "@/lib/projectDb";
+import { callerAccess, projectDbFor } from "@/lib/projectDb";
 import {
   archiveSubmission,
   discardDraft,
   reopenForAmendment,
   restoreSubmission,
+  type ActionState,
 } from "./actions";
 import DraftEditForm from "./DraftEditForm";
+import { ActionButton, AmendForm } from "./SubmissionActions";
 import ProofFiles from "./ProofFiles";
 import { filesByQuestion } from "@/lib/proofFiles";
 import { submissionIn } from "@/lib/submissions";
@@ -102,6 +104,10 @@ export default async function SubmissionDetailPage({
   const prisma = await projectDbFor(project, { write: false });
   const sub = await submissionIn(prisma, id);
   if (!sub) notFound();
+  // A person who may only read the project is offered nothing that would change it; the actions refuse
+  // them anyway.
+  const access = await callerAccess(project);
+  const mayWrite = access.ok && access.mayWrite;
 
   const chain = await loadVersionChain(prisma, sub.id, sub.checklistId);
   const filesByQ = await filesByQuestion(prisma, sub.id);
@@ -136,9 +142,9 @@ export default async function SubmissionDetailPage({
   );
 
   // The reason and the requester come from the form; the action refuses the amendment without them.
-  async function amend(form: FormData) {
+  async function amend(_prev: ActionState, form: FormData): Promise<ActionState> {
     "use server";
-    await reopenForAmendment(project, id, {
+    return reopenForAmendment(project, id, {
       reason: String(form.get("reason") ?? ""),
       requestedBy: String(form.get("requestedBy") ?? ""),
     });
@@ -170,6 +176,7 @@ export default async function SubmissionDetailPage({
         {!isDraft && sub.questionsVersion !== null && (
           <p className="meta">Answered under checklist revision {sub.questionsVersion}</p>
         )}
+        {!mayWrite && <p className="info-banner">You can read this project but not change it.</p>}
       </header>
 
       <section className="readiness-summary" aria-label="Coverage and maturity summary">
@@ -198,14 +205,10 @@ export default async function SubmissionDetailPage({
         <a className="btn" href={`${basePath}/p/${project}/submissions/${sub.id}/report`}>
           Download report (PDF)
         </a>
-        {isArchived && (
-          <form action={restoreSubmission.bind(null, project, sub.id)}>
-            <button className="btn" type="submit">
-              Restore from archive
-            </button>
-          </form>
+        {mayWrite && isArchived && (
+          <ActionButton action={restoreSubmission.bind(null, project, sub.id)} label="Restore from archive" />
         )}
-        {isDraft && !askedToDiscard && (
+        {mayWrite && isDraft && !askedToDiscard && (
           <Link className="btn ghost" href={`/p/${project}/submissions/${sub.id}?discard=1`}>
             Discard draft
           </Link>
@@ -216,47 +219,22 @@ export default async function SubmissionDetailPage({
             <Link href={`/p/${project}/submissions/${nextVersion.id}`}>v{nextVersion.version}</Link>
           </p>
         )}
-        {!isDraft && !isArchived && !nextVersion && (
+        {mayWrite && !isDraft && !isArchived && !nextVersion && (
           <>
-            <details className="amend">
-              <summary className="btn">Amend (makes version {sub.version + 1})</summary>
-              <form action={amend} className="qf-form">
-                <div className="field">
-                  <label htmlFor="amend-reason">Why are the answers amended?</label>
-                  <textarea id="amend-reason" name="reason" rows={3} required />
-                </div>
-                <div className="field">
-                  <label htmlFor="amend-requested-by">Who asked for it?</label>
-                  <input id="amend-requested-by" name="requestedBy" required />
-                </div>
-                <div className="qf-actions">
-                  <button className="btn" type="submit">
-                    Make version {sub.version + 1}
-                  </button>
-                </div>
-              </form>
-            </details>
-            <form action={archiveSubmission.bind(null, project, sub.id)}>
-              <button className="btn ghost" type="submit">
-                Archive
-              </button>
-            </form>
+            <AmendForm action={amend} nextVersion={sub.version + 1} />
+            <ActionButton action={archiveSubmission.bind(null, project, sub.id)} label="Archive" className="btn ghost" />
           </>
         )}
       </div>
 
-      {isDraft && askedToDiscard && (
+      {mayWrite && isDraft && askedToDiscard && (
         <section className="qf-section" aria-label="Discard draft">
           <p>Discard this draft and its answers? This cannot be undone.</p>
           <div className="qf-actions">
             <Link className="btn ghost" href={`/p/${project}/submissions/${sub.id}`}>
               Keep it
             </Link>
-            <form action={discardDraft.bind(null, project, sub.id)}>
-              <button className="btn" type="submit">
-                Yes, discard it
-              </button>
-            </form>
+            <ActionButton action={discardDraft.bind(null, project, sub.id)} label="Yes, discard it" />
           </div>
         </section>
       )}
@@ -298,7 +276,7 @@ export default async function SubmissionDetailPage({
         </section>
       )}
 
-      {isDraft ? (
+      {isDraft && mayWrite ? (
         <DraftEditForm
           project={project}
           submissionId={sub.id}

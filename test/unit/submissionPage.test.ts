@@ -25,6 +25,8 @@ vi.mock("@/lib/projectDb", () => ({
       submissionAnswerFile: { findMany: async () => h.files },
     };
   },
+  // an editor: the page offers what a version may do
+  callerAccess: async (pid: string) => ({ ok: true, pid, slug: pid, role: "editor", admin: false, mayWrite: true }),
 }));
 vi.mock("@/app/p/[project]/submissions/[id]/actions", () => ({
   archiveSubmission: async () => {},

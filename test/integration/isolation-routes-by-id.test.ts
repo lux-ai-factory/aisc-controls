@@ -166,9 +166,10 @@ describe.skipIf(!hasThrowawayDb)("a controls id opened under another project's p
 
     const state = await saveDraft(mine, theirSubmission, undefined, form({ label: "hijacked" }));
     expect(state).toBeTruthy();
-    await expect(reopenForAmendment(mine, theirSubmission, { reason: "r", requestedBy: "w" })).rejects.toThrow();
-    await expect(archiveSubmission(mine, theirSubmission)).rejects.toThrow();
-    await expect(restoreSubmission(mine, theirSubmission)).rejects.toThrow();
+    const notHere = { error: "Submission not found." };
+    expect(await reopenForAmendment(mine, theirSubmission, { reason: "r", requestedBy: "w" })).toEqual(notHere);
+    expect(await archiveSubmission(mine, theirSubmission)).toEqual(notHere);
+    expect(await restoreSubmission(mine, theirSubmission)).toEqual(notHere);
 
     const after = await prisma.submission.findUnique({ where: { id: theirSubmission }, include: { answers: true } });
     expect(after?.label).toBe(before?.label);
