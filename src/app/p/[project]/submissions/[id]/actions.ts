@@ -194,12 +194,7 @@ class Refusal extends Error {}
 export async function reopenForAmendment(
   project: string,
   submissionId: string,
-  amend: { reason: string; requestedBy: string },
 ): Promise<ActionState> {
-  // Refused before anything is opened or made: a correction to a closed submission says why and who asked.
-  const reason = amend.reason.trim();
-  const requestedBy = amend.requestedBy.trim();
-  if (!reason || !requestedBy) return { error: "Say why the answers are amended and who asked for it." };
   const { prisma, refused } = await writableProject(project);
   if (refused) return refused;
   const base = inProject(project);
@@ -230,8 +225,8 @@ export async function reopenForAmendment(
       status: "Draft",
       version: previous.version + 1,
       previousVersionId: previous.id,
-      amendReason: reason,
-      amendRequestedBy: requestedBy,
+      amendReason: null,
+      amendRequestedBy: null,
     },
     select: { id: true },
     });
@@ -255,7 +250,7 @@ export async function reopenForAmendment(
       action: "controls.submission.reopened",
       itemType: "submission",
       itemId: previous.id,
-      details: { next: made.id, version: previous.version + 1, reason, requested_by: requestedBy },
+      details: { next: made.id, version: previous.version + 1, reason: null, requested_by: null },
       content: { next: submissionState(previous.label, "Draft", carried) },
     });
     return made;

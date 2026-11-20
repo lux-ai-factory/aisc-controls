@@ -38,7 +38,6 @@ import {
   restoreSubmission,
 } from "@/app/p/[project]/submissions/[id]/actions";
 
-const AMEND = { reason: "Corrected a date", requestedBy: "Test auditor" };
 
 // Integration tests need a project database, made the way the platform makes
 // one, and dropped afterwards. The SQL runs inside the throwaway Postgres
@@ -196,7 +195,7 @@ describe.skipIf(!hasDb)("submission lifecycle (integration)", () => {
       },
     });
 
-    const url = await captureRedirect(() => reopenForAmendment(project, closed.id, AMEND));
+    const url = await captureRedirect(() => reopenForAmendment(project, closed.id));
     const newId = url.split("/").pop() as string;
 
     const next = await prisma.submission.findUnique({
@@ -207,7 +206,7 @@ describe.skipIf(!hasDb)("submission lifecycle (integration)", () => {
     expect(next?.version).toBe(2);
     expect(next?.previousVersionId).toBe(closed.id);
     expect(next?.answers[0]).toMatchObject({ answer: "prev", score: 3 });
-    expect(next).toMatchObject({ amendReason: AMEND.reason, amendRequestedBy: AMEND.requestedBy });
+    expect(next).toMatchObject({ amendReason: null, amendRequestedBy: null });
   }, 30_000);
 
   it("archive then restore toggles archivedAt", async () => {

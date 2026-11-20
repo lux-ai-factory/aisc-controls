@@ -167,7 +167,7 @@ describe.skipIf(!hasThrowawayDb)("a controls id opened under another project's p
     const state = await saveDraft(mine, theirSubmission, undefined, form({ label: "hijacked" }));
     expect(state).toBeTruthy();
     const notHere = { error: "Submission not found." };
-    expect(await reopenForAmendment(mine, theirSubmission, { reason: "r", requestedBy: "w" })).toEqual(notHere);
+    expect(await reopenForAmendment(mine, theirSubmission)).toEqual(notHere);
     expect(await archiveSubmission(mine, theirSubmission)).toEqual(notHere);
     expect(await restoreSubmission(mine, theirSubmission)).toEqual(notHere);
 

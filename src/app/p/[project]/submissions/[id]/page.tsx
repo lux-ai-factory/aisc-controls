@@ -158,13 +158,10 @@ export default async function SubmissionDetailPage({
     totalQuestions,
   );
 
-  // The reason and the requester come from the form; the action refuses the amendment without them.
-  async function amend(_prev: ActionState, form: FormData): Promise<ActionState> {
+  // One button makes the next version; nothing is asked.
+  async function amend(): Promise<ActionState> {
     "use server";
-    return reopenForAmendment(project, id, {
-      reason: String(form.get("reason") ?? ""),
-      requestedBy: String(form.get("requestedBy") ?? ""),
-    });
+    return reopenForAmendment(project, id);
   }
 
   return (

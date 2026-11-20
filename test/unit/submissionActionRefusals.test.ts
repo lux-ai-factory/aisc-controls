@@ -49,15 +49,8 @@ beforeEach(() => {
 
 describe("a refused write on a submission", () => {
   it("an amendment a viewer asks for returns the platform's reason", async () => {
-    const got = await outcome(() =>
-      reopenForAmendment(P1, "s1", { reason: "Corrections", requestedBy: "The provider" }));
+    const got = await outcome(() => reopenForAmendment(P1, "s1"));
     expect(got).toEqual({ returned: { error: READ_ONLY } });
-  });
-
-  it("an amendment without its reason returns what is missing", async () => {
-    h.mayWrite = true;
-    const got = await outcome(() => reopenForAmendment(P1, "s1", { reason: " ", requestedBy: "The provider" }));
-    expect(got).toEqual({ returned: { error: "Say why the answers are amended and who asked for it." } });
   });
 
   it("archiving returns the platform's reason", async () => {
